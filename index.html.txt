@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LumaCare - AI Therapy Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Auth Modal -->
+    <div class="modal" id="auth-modal">
+        <div class="modal-content auth-modal">
+            <div class="modal-header">
+                <h2>Welcome to LumaCare</h2>
+                <button class="close-modal" id="close-auth-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Login</button>
+                    <button class="auth-tab" data-tab="signup">Sign Up</button>
+                </div>
+                
+                <form id="login-form" class="auth-form active">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn-auth">Login</button>
+                </form>
+                
+                <form id="signup-form" class="auth-form">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="signup-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="signup-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signup-password" required>
+                    </div>
+                    <button type="submit" class="btn-auth">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <h1>LumaCare</h1>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" data-tab="therapy">Therapy</button>
+                <button class="nav-btn" data-tab="techniques">Techniques</button>
+                <button class="nav-btn" data-tab="profile">Profile</button>
+                <button class="nav-btn" data-tab="settings">Settings</button>
+            </nav>
+            <div class="user-actions">
+                <button class="btn-premium" id="upgrade-btn">Go Premium</button>
+                <div class="user-avatar" id="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Therapy Tab -->
+            <div class="tab-content active" id="therapy-tab">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <h2>AI Therapist</h2>
+                        <div class="chat-actions">
+                            <button class="icon-btn" id="voice-btn">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button class="icon-btn" id="new-chat-btn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message ai-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <p>Hello! I'm your AI therapist. I'm here to help you with techniques for managing stress, anxiety, and overwhelming thoughts. How are you feeling today?</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-input-container">
+                        <div class="input-wrapper">
+                            <input type="text" id="message-input" placeholder="Describe how you're feeling...">
+                            <button id="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <div class="quick-responses">
+                            <button class="quick-response" data-text="I'm feeling overwhelmed with work">Overwhelmed</button>
+                            <button class="quick-response" data-text="I'm having anxiety">Anxious</button>
+                            <button class="quick-response" data-text="I'm having negative thoughts">Negative Thoughts</button>
+                            <button class="quick-response" data-text="I'm feeling stressed">Stressed</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Techniques Tab -->
+            <div class="tab-content" id="techniques-tab">
+                <div class="techniques-container">
+                    <h2>Therapeutic Techniques</h2>
+                    <div class="techniques-grid">
+                        <div class="technique-card" data-technique="priority-matrix">
+                            <div class="technique-icon">
+                                <i class="fas fa-th-large"></i>
+                            </div>
+                            <h3>Priority Matrix</h3>
+                            <p>Organize tasks by urgency and importance to reduce overwhelm</p>
+                            <button class="btn-learn-more">Learn More</button>
+                        </div>
+                        
+                        <div class="technique-card" data-technique="box-breathing">
+                            <div class="technique-icon">
+                                <i class="fas fa-wind"></i>
+                            </div>
+                            <h3>Box Breathing</h3>
+                            <p>4-second breathing pattern to calm anxiety quickly</p>
+                            <button class="btn-learn-more">Learn More</button>
+                        </div>
+                        
+                        <div class="technique-card" data-technique="thought-challenging">
+                            <div class="technique-icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <h3>Thought Challenging</h3>
+                            <p>Identify and reframe negative thought patterns</p>
+                            <button class="btn-learn-more">Learn More</button>
+                        </div>
+                        
+                        <div class="technique-card" data-technique="pomodoro">
+                            <div class="technique-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h3>Pomodoro Technique</h3>
+                            <p>Work in focused intervals to manage work stress</p>
+                            <button class="btn-learn-more">Learn More</button>
+                        </div>
+                        
+                        <div class="technique-card" data-technique="grounding">
+                            <div class="technique-icon">
+                                <i class="fas fa-mountain"></i>
+                            </div>
+                            <h3>5-4-3-2-1 Grounding</h3>
+                            <p>Use your senses to stay present during anxiety</p>
+                            <button class="btn-learn-more">Learn More</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Tab -->
+            <div class="tab-content" id="profile-tab">
+                <div class="profile-container">
+                    <h2>Your Profile</h2>
+                    <div class="profile-card">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user" id="profile-avatar-icon"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="profile-name">Guest User</h3>
+                            <p class="profile-email" id="profile-email">Not logged in</p>
+                            <div class="profile-stats">
+                                <div class="stat">
+                                    <span class="stat-value" id="session-count">0</span>
+                                    <span class="stat-label">Sessions</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="techniques-used">0</span>
+                                    <span class="stat-label">Techniques Used</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-value" id="days-streak">0</span>
+                                    <span class="stat-label">Days Streak</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h3>Your Progress</h3>
+                        <div class="progress-chart">
+                            <div class="chart-bar">
+                                <div class="chart-label">Stress Level</div>
+                                <div class="chart-progress">
+                                    <div class="progress-fill" style="width: 60%"></div>
+                                </div>
+                                <div class="chart-value">60%</div>
+                            </div>
+                            <div class="chart-bar">
+                                <div class="chart-label">Anxiety</div>
+                                <div class="chart-progress">
+                                    <div class="progress-fill" style="width: 45%"></div>
+                                </div>
+                                <div class="chart-value">45%</div>
+                            </div>
+                            <div class="chart-bar">
+                                <div class="chart-label">Mood</div>
+                                <div class="chart-progress">
+                                    <div class="progress-fill" style="width: 70%"></div>
+                                </div>
+                                <div class="chart-value">70%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settings-tab">
+                <div class="settings-container">
+                    <h2>Settings</h2>
+                    <div class="settings-section">
+                        <h3>Appearance</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Dark Mode</h4>
+                                <p>Switch between light and dark themes</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="dark-mode-toggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>Audio</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Voice Responses</h4>
+                                <p>Enable AI voice responses</p>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="voice-toggle" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>Support</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Report Issue</h4>
+                                <p>Found a problem with the AI?</p>
+                            </div>
+                            <button class="btn-report" id="report-issue">Report</button>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Contact Support</h4>
+                                <p>lumacare.therapy@gmail.com</p>
+                            </div>
+                            <button class="btn-contact" id="contact-support">Email</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Account</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <h4>Logout</h4>
+                                <p>Sign out of your account</p>
+                            </div>
+                            <button class="btn-logout" id="logout-btn">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Technique Modal -->
+    <div class="modal" id="technique-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Technique Title</h2>
+                <button class="close-modal" id="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Technique content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
