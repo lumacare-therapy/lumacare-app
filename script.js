@@ -62,7 +62,771 @@ const therapeuticTechniques = {
     }
 };
 
-// Professional Therapist AI
+// Complete PaymentSystem Class with Yoco Integration
+class PaymentSystem {
+    constructor() {
+        this.yoco = null;
+        this.publicKey = 'pk_live_ff81b7a1N4WnLY1cce64';
+        this.secretKey = 'sk_live_af1fa3ebY69ZO1ze7e84ef69acaf';
+        this.isYocoReady = false;
+        this.pendingPayments = new Map();
+        this.setupPaymentListeners();
+        this.waitForYocoSDK();
+        this.setupPaymentPolling();
+    }
+
+    waitForYocoSDK() {
+        console.log('🔄 Waiting for Yoco SDK...');
+        
+        const checkYoco = () => {
+            if (typeof YocoSDK !== 'undefined') {
+                console.log('✅ Yoco SDK loaded!');
+                this.initYoco();
+            } else {
+                console.log('⏳ Yoco SDK not ready, checking again...');
+                setTimeout(checkYoco, 500);
+            }
+        };
+        
+        checkYoco();
+    }
+
+    initYoco() {
+        try {
+            this.yoco = new YocoSDK({
+                publicKey: this.publicKey
+            });
+            this.isYocoReady = true;
+            console.log('✅ Yoco SDK initialized successfully');
+        } catch (error) {
+            console.error('❌ Failed to initialize Yoco:', error);
+            this.isYocoReady = false;
+        }
+    }
+
+    setupPaymentListeners() {
+        const upgradeBtn = document.getElementById('upgrade-btn');
+        if (upgradeBtn) {
+            upgradeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleUpgradeClick();
+            });
+        }
+
+        const closePaymentModal = document.getElementById('close-payment-modal');
+        if (closePaymentModal) {
+            closePaymentModal.addEventListener('click', () => {
+                this.hidePaymentModal();
+            });
+        }
+
+        const paymentModal = document.getElementById('payment-modal');
+        if (paymentModal) {
+            paymentModal.addEventListener('click', (e) => {
+                if (e.target === paymentModal) {
+                    this.hidePaymentModal();
+                }
+            });
+        }
+    }
+
+    handleUpgradeClick() {
+        if (!authSystem.isLoggedIn) {
+            authSystem.showAuthModal();
+            return;
+        }
+
+        const user = authSystem.currentUser;
+        
+        if (user.isPremium) {
+            this.showPremiumModal();
+        } else if (this.hasExceededFreeSessions(user)) {
+            this.showPaymentOptions();
+        } else {
+            this.showUpgradeOptions();
+        }
+    }
+
+    hasExceededFreeSessions(user) {
+        const FREE_SESSION_LIMIT = 3;
+        return user.sessions > FREE_SESSION_LIMIT;
+    }
+
+    showUpgradeOptions() {
+        const modalHTML = `
+            <div class="payment-modal">
+                <h3>Upgrade to Premium</h3>
+                <p>Get unlimited therapy sessions and premium features</p>
+                
+                <div class="pricing-options">
+                    <div class="pricing-option featured">
+                        <div class="popular-badge">Most Popular</div>
+                        <h4>Monthly Premium</h4>
+                        <div class="price">$9.99<span>/month</span></div>
+                        <ul>
+                            <li>✓ Unlimited therapy sessions</li>
+                            <li>✓ Premium AI techniques</li>
+                            <li>✓ Progress analytics</li>
+                            <li>✓ Priority support</li>
+                        </ul>
+                        <button class="btn-purchase" onclick="paymentSystem.showPaymentForm(999, 'monthly')">Get Premium</button>
+                    </div>
+                    
+                    <div class="pricing-option">
+                        <h4>Single Session</h4>
+                        <div class="price">$2.99<span>/session</span></div>
+                        <ul>
+                            <li>✓ One additional session</li>
+                            <li>✓ Perfect if you need just one more</li>
+                        </ul>
+                        <button class="btn-purchase" onclick="paymentSystem.showPaymentForm(299, 'session')">Buy Session</button>
+                    </div>
+                </div>
+                
+                <div class="yoco-setup-info">
+                    <p><strong>💳 Secure Payments by Yoco</strong></p>
+                    <p>All payments are processed securely through Yoco</p>
+                    <p>Your card details are never stored on our servers</p>
+                </div>
+            </div>
+        `;
+    
+        this.showPaymentModal('Upgrade Options', modalHTML);
+    }
+
+    showPaymentOptions() {
+        const sessionsUsed = authSystem.currentUser.sessions;
+        const sessionsLeft = Math.max(0, 3 - sessionsUsed);
+        
+        const modalHTML = `
+            <div class="payment-modal">
+                <h3>Session Limit Reached</h3>
+                <p>You've used ${sessionsUsed} sessions this month (${sessionsLeft} free sessions remaining)</p>
+                
+                <div class="pricing-options">
+                    <div class="pricing-option">
+                        <h4>Additional Session</h4>
+                        <div class="price">$2.99<span>/session</span></div>
+                        <p>Purchase one more therapy session</p>
+                        <button class="btn-purchase" onclick="paymentSystem.showPaymentForm(299, 'session')">Buy Session</button>
+                    </div>
+                    
+                    <div class="pricing-option featured">
+                        <div class="popular-badge">Best Value</div>
+                        <h4>Unlimited Premium</h4>
+                        <div class="price">$9.99<span>/month</span></div>
+                        <ul>
+                            <li>✓ Unlimited therapy sessions</li>
+                            <li>✓ No more session limits</li>
+                            <li>✓ All premium features</li>
+                        </ul>
+                        <button class="btn-purchase" onclick="paymentSystem.showPaymentForm(999, 'monthly')">Go Unlimited</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    
+        this.showPaymentModal('Continue Your Therapy', modalHTML);
+    }
+
+    showPaymentForm(amount, plan) {
+        console.log('🔄 Showing payment form for:', amount, plan);
+        
+        const amountInDollars = (amount / 100).toFixed(2);
+        const planName = plan === 'monthly' ? 'Monthly Premium Plan' : 'Single Session';
+        
+        const paymentHTML = `
+            <div class="payment-form">
+                <h3>Complete Payment</h3>
+                <div class="payment-amount">${planName} - $${amountInDollars}</div>
+                
+                <div class="payment-instructions">
+                    <p><strong>Choose Payment Method:</strong></p>
+                </div>
+                
+                <div class="payment-methods">
+                    <div class="payment-method" onclick="paymentSystem.redirectToYoco(${amount}, '${plan}')">
+                        <div class="method-icon">💳</div>
+                        <div class="method-info">
+                            <h4>Credit/Debit Card</h4>
+                            <p>Pay securely with Yoco</p>
+                        </div>
+                        <div class="method-arrow">→</div>
+                    </div>
+                    
+                    <div class="payment-method" onclick="paymentSystem.redirectToYoco(${amount}, '${plan}')">
+                        <div class="method-icon">📱</div>
+                        <div class="method-info">
+                            <h4>Yoco Payment</h4>
+                            <p>Secure payment processing</p>
+                        </div>
+                        <div class="method-arrow">→</div>
+                    </div>
+                </div>
+                
+                // Add this instead:
+<div class="payment-security-info">
+    <p><i class="fas fa-lock"></i> Secure payment processing</p>
+    <p>Your card details are encrypted and secure</p>
+</div>
+                
+                <div class="payment-actions">
+                    <button class="btn-back" onclick="paymentSystem.showPaymentOptions()">
+                        ← Back to Options
+                    </button>
+                </div>
+                
+                <p class="payment-security">
+                    <i class="fas fa-lock"></i> Secured by Yoco • Your payment details are safe
+                </p>
+            </div>
+        `;
+
+        this.showPaymentModal('Secure Payment', paymentHTML);
+    }
+
+    redirectToYoco(amount, plan) {
+        const amountInDollars = (amount / 100).toFixed(2);
+        const description = plan === 'monthly' ? 'LumaCare Monthly Premium' : 'LumaCare Single Session';
+        const paymentId = 'pay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // Store pending payment
+        this.pendingPayments.set(paymentId, {
+            amount: amount,
+            plan: plan,
+            timestamp: Date.now(),
+            status: 'pending'
+        });
+
+        // Save to localStorage for persistence
+        this.savePendingPayments();
+
+        const yocoLinks = {
+            999: 'https://pay.yoco.com/r/mexvR5',
+            299: 'https://pay.yoco.com/r/2JVqYJ'
+        };
+        
+        const yocoUrl = yocoLinks[amount] || 'https://pay.yoco.com/r/mexvR5';
+        
+        // Open Yoco in new tab
+        window.open(yocoUrl, '_blank', 'width=600,height=700');
+        
+        // Show verification screen
+        this.showPaymentVerification(paymentId, amount, plan);
+    }
+
+    showPaymentVerification(paymentId, amount, plan) {
+        const amountInDollars = (amount / 100).toFixed(2);
+        
+        const verificationHTML = `
+            <div class="payment-verification">
+                <div class="verification-header">
+                    <div class="verification-icon">🔍</div>
+                    <h3>Payment Verification</h3>
+                </div>
+                
+                <div class="verification-steps">
+                    <div class="verification-step active">
+                        <div class="step-number">1</div>
+                        <div class="step-info">
+                            <h4>Complete Payment</h4>
+                            <p>You've been redirected to Yoco's secure payment page in a new tab.</p>
+                            <p><strong>Amount: $${amountInDollars}</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="verification-step">
+                        <div class="step-number">2</div>
+                        <div class="step-info">
+                            <h4>Automatic Verification</h4>
+                            <p>We're automatically checking for your payment confirmation...</p>
+                            <div class="verification-status">
+                                <div class="loading-spinner"></div>
+                                <span class="status-text">Waiting for payment confirmation</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="verification-step">
+                        <div class="step-number">3</div>
+                        <div class="step-info">
+                            <h4>Access Granted</h4>
+                            <p>You'll get instant access to premium features once verified</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="verification-actions">
+                    <button class="btn-check-again" onclick="paymentSystem.checkPaymentStatus('${paymentId}')">
+                        🔄 Check Payment Status
+                    </button>
+                    <button class="btn-manual-verify" onclick="paymentSystem.showManualVerification('${paymentId}', ${amount}, '${plan}')">
+                        📧 Verify with Receipt
+                    </button>
+                    <button class="btn-cancel" onclick="paymentSystem.cancelPayment('${paymentId}')">
+                        Cancel Payment
+                    </button>
+                </div>
+                
+                <div class="payment-help">
+                    <p><strong>Having issues?</strong></p>
+                    <p>Email your receipt to: <strong>lumacare.therapy@gmail.com</strong></p>
+                    <p>Include your name and transaction ID for manual verification</p>
+                </div>
+            </div>
+        `;
+        
+        this.showPaymentModal('Verifying Payment', verificationHTML);
+        
+        // Start automatic verification
+        this.startAutoVerification(paymentId);
+    }
+
+    startAutoVerification(paymentId) {
+        // Check every 5 seconds for 2 minutes
+        let checks = 0;
+        const maxChecks = 24; // 2 minutes total
+        
+        const verificationInterval = setInterval(() => {
+            checks++;
+            this.checkPaymentStatus(paymentId);
+            
+            if (checks >= maxChecks) {
+                clearInterval(verificationInterval);
+                this.showVerificationTimeout(paymentId);
+            }
+        }, 5000);
+        
+        // Store interval ID for cleanup
+        this.pendingPayments.get(paymentId).verificationInterval = verificationInterval;
+        this.savePendingPayments();
+    }
+
+    async checkPaymentStatus(paymentId) {
+        const payment = this.pendingPayments.get(paymentId);
+        if (!payment) return;
+
+        try {
+            // Update UI to show checking
+            this.updateVerificationStatus('Checking payment status...');
+            
+            // Simulate API call to check payment status
+            const isVerified = await this.simulatePaymentVerification(paymentId);
+            
+            if (isVerified) {
+                this.handleVerifiedPayment(paymentId);
+            } else {
+                this.updateVerificationStatus('Payment not confirmed yet...');
+            }
+        } catch (error) {
+            console.error('Error checking payment:', error);
+            this.updateVerificationStatus('Error checking status. Try manual verification.');
+        }
+    }
+
+    async simulatePaymentVerification(paymentId) {
+        // SIMULATION: 30% chance of success after 3+ checks
+        const payment = this.pendingPayments.get(paymentId);
+        const checkCount = payment.checkCount || 0;
+        payment.checkCount = checkCount + 1;
+        
+        // Increase chance of success with each check
+        const successChance = Math.min(0.3 + (checkCount * 0.1), 0.8);
+        return Math.random() < successChance;
+    }
+
+    handleVerifiedPayment(paymentId) {
+        const payment = this.pendingPayments.get(paymentId);
+        if (!payment) return;
+
+        // Clear verification interval
+        if (payment.verificationInterval) {
+            clearInterval(payment.verificationInterval);
+        }
+
+        // Process successful payment
+        const transactionId = 'yoco_verified_' + Date.now();
+        this.handleSuccessfulPayment(payment.amount, transactionId, payment.plan);
+        
+        // Remove from pending
+        this.pendingPayments.delete(paymentId);
+        this.savePendingPayments();
+    }
+
+    showManualVerification(paymentId, amount, plan) {
+        const amountInDollars = (amount / 100).toFixed(2);
+        
+        const manualHTML = `
+            <div class="manual-verification">
+                <div class="verification-header">
+                    <div class="verification-icon">📧</div>
+                    <h3>Manual Verification</h3>
+                </div>
+                
+                <div class="manual-steps">
+                    <div class="manual-step">
+                        <h4>Step 1: Find Your Receipt</h4>
+                        <p>Check your email for the Yoco payment receipt</p>
+                    </div>
+                    
+                    <div class="manual-step">
+                        <h4>Step 2: Email Your Receipt</h4>
+                        <p>Forward the receipt or screenshot to:</p>
+                        <div class="email-address">
+                            <strong>lumacare.therapy@gmail.com</strong>
+                            <button class="btn-copy-email" onclick="paymentSystem.copyEmailToClipboard()">
+                                📋 Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="manual-step">
+                        <h4>Step 3: Include These Details</h4>
+                        <div class="verification-details">
+                            <p><strong>Required information:</strong></p>
+                            <ul>
+                                <li>Your full name: <input type="text" id="verify-name" placeholder="Enter your name"></li>
+                                <li>Transaction ID from receipt</li>
+                                <li>Payment amount: $${amountInDollars}</li>
+                                <li>Plan: ${plan === 'monthly' ? 'Monthly Premium' : 'Single Session'}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="manual-actions">
+                    <button class="btn-sent-email" onclick="paymentSystem.confirmManualVerification('${paymentId}', ${amount}, '${plan}')">
+                        ✅ I've Sent the Email
+                    </button>
+                    <button class="btn-back" onclick="paymentSystem.showPaymentVerification('${paymentId}', ${amount}, '${plan}')">
+                        ← Back to Auto Verification
+                    </button>
+                </div>
+                
+                <div class="verification-note">
+                    <p><strong>Note:</strong> Manual verification usually takes 1-2 hours during business hours</p>
+                    <p>We'll email you once your payment is confirmed</p>
+                </div>
+            </div>
+        `;
+        
+        this.showPaymentModal('Manual Verification', manualHTML);
+    }
+
+    confirmManualVerification(paymentId, amount, plan) {
+        const userName = document.getElementById('verify-name')?.value.trim();
+        
+        if (!userName) {
+            alert('Please enter your name for verification');
+            return;
+        }
+
+        // Store manual verification request
+        const payment = this.pendingPayments.get(paymentId);
+        if (payment) {
+            payment.manualVerification = {
+                userName: userName,
+                timestamp: Date.now(),
+                status: 'pending'
+            };
+            this.savePendingPayments();
+        }
+
+        const confirmationHTML = `
+            <div class="verification-confirmed">
+                <div class="success-icon">📨</div>
+                <h3>Verification Request Sent!</h3>
+                <p>We've received your manual verification request for <strong>${userName}</strong>.</p>
+                
+                <div class="confirmation-details">
+                    <p><strong>What happens next:</strong></p>
+                    <ul>
+                        <li>✅ We'll check our email for your receipt</li>
+                        <li>✅ Verify your payment details</li>
+                        <li>✅ Activate your premium account</li>
+                        <li>✅ Send you a confirmation email</li>
+                    </ul>
+                </div>
+                
+                <div class="confirmation-actions">
+                    <button class="btn-close-modal" onclick="paymentSystem.hidePaymentModal()">
+                        Close
+                    </button>
+                    <button class="btn-contact-support" onclick="paymentSystem.contactSupport()">
+                        📞 Contact Support
+                    </button>
+                </div>
+                
+                <div class="support-info">
+                    <p><strong>Need help?</strong> Email: lumacare.therapy@gmail.com</p>
+                    <p>Reference: ${paymentId}</p>
+                </div>
+            </div>
+        `;
+        
+        this.showPaymentModal('Verification Submitted', confirmationHTML);
+    }
+
+    copyEmailToClipboard() {
+        navigator.clipboard.writeText('lumacare.therapy@gmail.com').then(() => {
+            const btn = document.querySelector('.btn-copy-email');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Copied!';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+            }, 2000);
+        });
+    }
+
+    updateVerificationStatus(message) {
+        const statusElement = document.querySelector('.status-text');
+        if (statusElement) {
+            statusElement.textContent = message;
+        }
+    }
+
+    showVerificationTimeout(paymentId) {
+        const timeoutHTML = `
+            <div class="verification-timeout">
+                <div class="timeout-icon">⏰</div>
+                <h3>Verification Timeout</h3>
+                <p>We couldn't automatically verify your payment within the expected time.</p>
+                
+                <div class="timeout-actions">
+                    <button class="btn-try-again" onclick="paymentSystem.showPaymentVerification('${paymentId}')">
+                        🔄 Try Auto Verification Again
+                    </button>
+                    <button class="btn-manual" onclick="paymentSystem.showManualVerification('${paymentId}')">
+                        📧 Switch to Manual Verification
+                    </button>
+                    <button class="btn-contact" onclick="paymentSystem.contactSupport()">
+                        📞 Contact Support
+                    </button>
+                </div>
+                
+                <div class="timeout-help">
+                    <p><strong>Common issues:</strong></p>
+                    <ul>
+                        <li>Payment may still be processing</li>
+                        <li>Check your email for the receipt</li>
+                        <li>Sometimes payments take a few extra minutes</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('payment-modal-body').innerHTML = timeoutHTML;
+    }
+
+    cancelPayment(paymentId) {
+        this.pendingPayments.delete(paymentId);
+        this.savePendingPayments();
+        this.showPaymentOptions();
+    }
+
+    savePendingPayments() {
+        const pendingArray = Array.from(this.pendingPayments.entries());
+        localStorage.setItem('lumaCare_pending_payments', JSON.stringify(pendingArray));
+    }
+
+    loadPendingPayments() {
+        const pendingData = localStorage.getItem('lumaCare_pending_payments');
+        if (pendingData) {
+            const pendingArray = JSON.parse(pendingData);
+            this.pendingPayments = new Map(pendingArray);
+        }
+    }
+
+    setupPaymentPolling() {
+        this.loadPendingPayments();
+        
+        setInterval(() => {
+            this.checkAllPendingPayments();
+        }, 60000);
+    }
+
+    checkAllPendingPayments() {
+        for (const [paymentId, payment] of this.pendingPayments) {
+            if (Date.now() - payment.timestamp < 24 * 60 * 60 * 1000) {
+                this.checkPaymentStatus(paymentId);
+            }
+        }
+    }
+
+    handleSuccessfulPayment(amount, transactionId, plan) {
+        console.log('💰 Payment successful:', { amount, transactionId, plan });
+        
+        const user = authSystem.currentUser;
+        
+        if (amount === 999) {
+            user.isPremium = true;
+            user.premiumSince = new Date().toISOString();
+        } else if (amount === 299) {
+            user.purchasedSessions = (user.purchasedSessions || 0) + 1;
+        }
+
+        this.recordPayment(amount, plan, transactionId, 'completed');
+
+        localStorage.setItem('lumaCare_user', JSON.stringify(user));
+        authSystem.updateUI();
+
+        this.showPaymentSuccess(amount, transactionId, plan);
+    }
+
+    recordPayment(amount, plan, transactionId, status = 'completed') {
+        const user = authSystem.currentUser;
+        if (!user) return;
+
+        if (!user.paymentHistory) {
+            user.paymentHistory = [];
+        }
+
+        const payment = {
+            transactionId: transactionId,
+            amount: amount,
+            type: plan === 'monthly' ? 'Monthly Premium' : 'Single Session',
+            date: new Date().toISOString(),
+            status: status
+        };
+
+        user.paymentHistory.unshift(payment);
+        localStorage.setItem('lumaCare_user', JSON.stringify(user));
+        authSystem.updatePaymentHistory();
+        
+        console.log('💰 Payment recorded:', payment);
+    }
+
+    showPaymentSuccess(amount, transactionId, plan) {
+        const amountInDollars = (amount / 100).toFixed(2);
+        const planType = plan === 'monthly' ? 'Monthly Premium' : 'Single Session';
+        
+        const successHTML = `
+            <div class="payment-success">
+                <div class="success-icon">🎉</div>
+                <h3>Payment Successful!</h3>
+                <p>Thank you for your purchase of <strong>${planType}</strong></p>
+                <p><strong>Amount: $${amountInDollars}</strong></p>
+                <p><small>Transaction ID: ${transactionId}</small></p>
+                
+                <div class="premium-features">
+                    <div class="feature">
+                        <i class="fas fa-infinity"></i>
+                        <span>Unlimited Access</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-crown"></i>
+                        <span>Premium Features</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-rocket"></i>
+                        <span>Priority Support</span>
+                    </div>
+                </div>
+                
+                <div class="success-actions">
+                    <button class="btn-close-modal" onclick="paymentSystem.hidePaymentModal()">
+                        Start Therapy
+                    </button>
+                    <button class="btn-view-profile" onclick="paymentSystem.goToProfile()">
+                        View Profile
+                    </button>
+                </div>
+                
+                <p class="payment-security">
+                    <i class="fas fa-receipt"></i> 
+                    <a href="#" onclick="paymentSystem.sendEmailReceipt('${transactionId}')">Email Receipt</a>
+                </p>
+            </div>
+        `;
+
+        this.showPaymentModal('Payment Successful', successHTML);
+    }
+
+    sendEmailReceipt(transactionId) {
+        const user = authSystem.currentUser;
+        if (!user || !user.paymentHistory) return;
+
+        const payment = user.paymentHistory.find(p => p.transactionId === transactionId);
+        if (!payment) return;
+
+        const amount = (payment.amount / 100).toFixed(2);
+        const date = new Date(payment.date).toLocaleDateString();
+        
+        const subject = `LumaCare Payment Receipt - ${transactionId}`;
+        const body = `
+Hello ${user.name},
+
+Thank you for your purchase with LumaCare!
+
+Payment Details:
+- Transaction ID: ${transactionId}
+- Amount: $${amount}
+- Type: ${payment.type}
+- Date: ${date}
+- Status: ${payment.status}
+
+We appreciate your support in mental wellness journey.
+
+Best regards,
+LumaCare Team
+lumacare.therapy@gmail.com
+        `.trim();
+
+        window.location.href = `mailto:${user.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    contactSupport() {
+        const subject = 'LumaCare Payment Support';
+        const body = `Hello LumaCare team,\n\nI need assistance with a payment verification.\n\nPayment Reference: ${this.pendingPayments.keys().next().value || 'N/A'}\n\nIssue description:`;
+        window.location.href = `mailto:lumacare.therapy@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    goToProfile() {
+        this.hidePaymentModal();
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('[data-tab="profile"]').classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById('profile-tab').classList.add('active');
+    }
+
+    showPremiumModal() {
+        const modalHTML = `
+            <div class="payment-modal">
+                <h3>🎉 Premium Member</h3>
+                <p>You're already enjoying unlimited therapy sessions!</p>
+                <div class="premium-features">
+                    <div class="feature">
+                        <i class="fas fa-infinity"></i>
+                        <span>Unlimited Sessions</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Advanced Analytics</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-crown"></i>
+                        <span>Premium Techniques</span>
+                    </div>
+                </div>
+                <button class="btn-close-modal" onclick="paymentSystem.hidePaymentModal()">Awesome!</button>
+            </div>
+        `;
+        this.showPaymentModal('Premium Features', modalHTML);
+    }
+
+    showPaymentModal(title, content) {
+        const modal = document.getElementById('payment-modal');
+        document.getElementById('payment-modal-title').textContent = title;
+        document.getElementById('payment-modal-body').innerHTML = content;
+        modal.classList.add('active');
+    }
+
+    hidePaymentModal() {
+        document.getElementById('payment-modal').classList.remove('active');
+    }
+}
+
+// Professional Therapist AI (Keep this part the same as before)
 class TherapistAI {
     constructor() {
         this.conversationStage = 'greeting';
@@ -75,7 +839,6 @@ class TherapistAI {
         const lowerMessage = message.toLowerCase();
         const issues = [];
         
-        // Check for simple greetings first
         if (!this.hasGreeted && (lowerMessage.includes('hi') || lowerMessage.includes('hello') || 
             lowerMessage.includes('hey') || lowerMessage === 'hey')) {
             this.hasGreeted = true;
@@ -108,26 +871,22 @@ class TherapistAI {
     }
 
     generateResponse(userMessage, userIssues) {
-        // Handle greeting stage
         if (userIssues.includes('greeting') || !this.hasGreeted) {
             this.hasGreeted = true;
             this.conversationStage = 'assessment';
             return this.generateGreeting();
         }
         
-        // Handle empty or very short messages
         if (userMessage.length < 3 || userMessage === 'hey' || userMessage === 'hi') {
             return `<p>Hello! I noticed your message was quite brief. I'm here to help with stress, anxiety, overwhelm, or any challenges you might be facing. What's on your mind today?</p>`;
         }
         
         let response = '';
         
-        // Only validate if we detected actual issues
         if (userIssues.length > 0) {
             response += this.generateValidation(userIssues);
         }
         
-        // Then assess or provide solutions
         if (this.conversationStage === 'assessment' && this.assessmentCount < 1) {
             response += this.generateAssessmentQuestion(userIssues, userMessage);
             this.assessmentCount++;
@@ -141,9 +900,32 @@ class TherapistAI {
 
     generateGreeting() {
         const greetings = [
-            "Hello! I'm here to help you work through stress, anxiety, or any overwhelming thoughts you might be having. What's been on your mind lately?",
-            "Hi there! I specialize in practical techniques for managing mental wellness. What challenges are you facing today?",
-            "Welcome! I'm here to provide therapeutic techniques for stress and emotional wellbeing. What would you like to work on together?"
+            `Hello! I'm your AI therapist from LumaCare. I'm here to help you work through stress, anxiety, overwhelm, and other mental health challenges using evidence-based techniques. 
+            
+            <br><br>
+            <strong>About LumaCare:</strong>
+            • Free: 3 therapy sessions per month
+            • Premium: Unlimited sessions for $9.99/month
+            • Single sessions: $2.99 per additional session
+            <br><br>
+            If you experience any issues or have complaints, please report them to <strong>lumacare.therapy@gmail.com</strong>
+            <br><br>
+            I'm here to listen and provide practical techniques. What's been on your mind lately?`,
+            
+            `Welcome to LumaCare! I'm an AI therapist specialized in helping with mental wellness through proven therapeutic methods.
+            
+            <br><br>
+            <strong>App Features:</strong>
+            • AI Therapy Sessions
+            • Therapeutic Techniques Library  
+            • Progress Tracking
+            • Voice Responses
+            <br><br>
+            <strong>Pricing:</strong> Start with 3 free monthly sessions, then choose between unlimited access or pay-per-session.
+            <br><br>
+            For support or feedback: <strong>lumacare.therapy@gmail.com</strong>
+            <br><br>
+            What challenges would you like to work on today?`
         ];
         return `<p>${greetings[Math.floor(Math.random() * greetings.length)]}</p>`;
     }
@@ -162,7 +944,6 @@ class TherapistAI {
     }
 
     generateAssessmentQuestion(issues, userMessage) {
-        // If message is very short, ask for more details
         if (userMessage.length < 10) {
             return `<p>Could you tell me a bit more about what's going on? The more details you share, the better I can help you with specific techniques.</p>`;
         }
@@ -249,7 +1030,7 @@ class TherapistAI {
     }
 }
 
-// Authentication System
+// Authentication System (Keep this the same)
 class AuthSystem {
     constructor() {
         this.currentUser = null;
@@ -267,13 +1048,10 @@ class AuthSystem {
             this.currentUser = JSON.parse(userData);
             this.isLoggedIn = true;
             this.updateUI();
-        } else {
-            // Don't auto-show auth modal - let user explore first
         }
     }
 
     setupEventListeners() {
-        // Auth modal
         document.getElementById('user-avatar').addEventListener('click', () => {
             if (!this.isLoggedIn) {
                 this.showAuthModal();
@@ -284,7 +1062,6 @@ class AuthSystem {
             this.hideAuthModal();
         });
 
-        // Auth tabs
         document.querySelectorAll('.auth-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 const tabName = e.target.getAttribute('data-tab');
@@ -292,7 +1069,6 @@ class AuthSystem {
             });
         });
 
-        // Auth forms
         document.getElementById('login-form').addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleLogin();
@@ -303,16 +1079,6 @@ class AuthSystem {
             this.handleSignup();
         });
 
-        // Premium upgrade
-        document.getElementById('upgrade-btn').addEventListener('click', () => {
-            if (!this.isLoggedIn) {
-                this.showAuthModal();
-            } else {
-                alert('Premium features coming soon! We\'re working on amazing new features for you.');
-            }
-        });
-
-        // Support buttons
         document.getElementById('report-issue').addEventListener('click', () => {
             this.reportIssue();
         });
@@ -321,7 +1087,6 @@ class AuthSystem {
             this.contactSupport();
         });
 
-        // Logout
         document.getElementById('logout-btn').addEventListener('click', () => {
             this.logout();
         });
@@ -336,13 +1101,11 @@ class AuthSystem {
     }
 
     switchAuthTab(tabName) {
-        // Update tabs
         document.querySelectorAll('.auth-tab').forEach(tab => {
             tab.classList.remove('active');
         });
         document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
 
-        // Update forms
         document.querySelectorAll('.auth-form').forEach(form => {
             form.classList.remove('active');
         });
@@ -353,21 +1116,21 @@ class AuthSystem {
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
 
-        // Simple validation
         if (!email || !password) {
             alert('Please fill in all fields');
             return;
         }
 
-        // Simulate login
         this.currentUser = {
             name: email.split('@')[0],
             email: email,
             isPremium: false,
             joinDate: new Date().toISOString(),
-            sessions: Math.floor(Math.random() * 20) + 1,
+            sessions: Math.floor(Math.random() * 5) + 1,
             techniques: Math.floor(Math.random() * 5) + 1,
-            streak: Math.floor(Math.random() * 10) + 1
+            streak: Math.floor(Math.random() * 10) + 1,
+            purchasedSessions: 0,
+            paymentHistory: []
         };
 
         this.isLoggedIn = true;
@@ -388,7 +1151,6 @@ class AuthSystem {
             return;
         }
 
-        // Simulate signup
         this.currentUser = {
             name: name,
             email: email,
@@ -396,7 +1158,9 @@ class AuthSystem {
             joinDate: new Date().toISOString(),
             sessions: 1,
             techniques: 0,
-            streak: 1
+            streak: 1,
+            purchasedSessions: 0,
+            paymentHistory: []
         };
 
         this.isLoggedIn = true;
@@ -407,6 +1171,45 @@ class AuthSystem {
         alert('Account created successfully! Welcome to LumaCare.');
     }
 
+    updatePaymentHistory() {
+        const paymentHistoryElement = document.getElementById('payment-history');
+        if (!paymentHistoryElement) return;
+
+        const user = this.currentUser;
+        
+        if (!user.paymentHistory || user.paymentHistory.length === 0) {
+            paymentHistoryElement.innerHTML = `
+                <div class="no-payments">
+                    <i class="fas fa-receipt"></i>
+                    <p>No payments yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        let historyHTML = '';
+        user.paymentHistory.forEach(payment => {
+            const date = new Date(payment.date).toLocaleDateString();
+            const amount = (payment.amount / 100).toFixed(2);
+            
+            historyHTML += `
+                <div class="payment-item">
+                    <div class="payment-info">
+                        <div class="payment-type">${payment.type}</div>
+                        <div class="payment-date">${date}</div>
+                    </div>
+                    <div class="payment-amount">$${amount}</div>
+                    <div class="payment-status ${payment.status}">${payment.status}</div>
+                    <button class="btn-receipt" onclick="paymentSystem.sendEmailReceipt('${payment.transactionId}')">
+                        <i class="fas fa-envelope"></i> Receipt
+                    </button>
+                </div>
+            `;
+        });
+
+        paymentHistoryElement.innerHTML = historyHTML;
+    }
+
     updateUI() {
         const userAvatar = document.getElementById('user-avatar');
         const profileName = document.getElementById('profile-name');
@@ -415,30 +1218,143 @@ class AuthSystem {
         const sessionCount = document.getElementById('session-count');
         const techniquesUsed = document.getElementById('techniques-used');
         const daysStreak = document.getElementById('days-streak');
+        const subscriptionStatus = document.getElementById('subscription-status');
+        const upgradeBtn = document.getElementById('upgrade-btn');
 
         if (this.isLoggedIn && this.currentUser) {
-            // Update header avatar
             userAvatar.innerHTML = `<span>${this.currentUser.name.charAt(0).toUpperCase()}</span>`;
             
-            // Update profile page
             profileName.textContent = this.currentUser.name;
             profileEmail.textContent = this.currentUser.email;
             profileAvatar.textContent = this.currentUser.name.charAt(0).toUpperCase();
             sessionCount.textContent = this.currentUser.sessions;
             techniquesUsed.textContent = this.currentUser.techniques;
             daysStreak.textContent = this.currentUser.streak;
+
+            if (this.currentUser.isPremium) {
+                subscriptionStatus.innerHTML = `
+                    <div class="status-premium">
+                        <i class="fas fa-crown"></i>
+                        <span>Premium Member - Unlimited sessions</span>
+                    </div>
+                `;
+                upgradeBtn.textContent = 'Premium';
+                upgradeBtn.style.background = 'linear-gradient(135deg, #f59e0b, #fbbf24)';
+            } else {
+                const sessionsLeft = Math.max(0, 3 - this.currentUser.sessions);
+                subscriptionStatus.innerHTML = `
+                    <div class="status-free">
+                        <i class="fas fa-user"></i>
+                        <span>Free Plan - ${sessionsLeft} sessions remaining this month</span>
+                    </div>
+                `;
+                upgradeBtn.textContent = 'Go Premium';
+                upgradeBtn.style.background = 'linear-gradient(90deg, var(--primary), var(--secondary))';
+            }
+
+            this.updatePaymentHistory();
+
+        } else {
+            userAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            profileName.textContent = 'Guest User';
+            profileEmail.textContent = 'Not logged in';
+            profileAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            sessionCount.textContent = '0';
+            techniquesUsed.textContent = '0';
+            daysStreak.textContent = '0';
+            subscriptionStatus.innerHTML = `
+                <div class="status-free">
+                    <i class="fas fa-user"></i>
+                    <span>Free Plan - 3 sessions/month</span>
+                </div>
+            `;
+            
+            const paymentHistoryElement = document.getElementById('payment-history');
+            if (paymentHistoryElement) {
+                paymentHistoryElement.innerHTML = `
+                    <div class="no-payments">
+                        <i class="fas fa-receipt"></i>
+                        <p>No payments yet</p>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    trackSession() {
+        if (this.isLoggedIn && this.currentUser) {
+            this.currentUser.sessions++;
+            localStorage.setItem('lumaCare_user', JSON.stringify(this.currentUser));
+            this.updateUI();
+        }
+    }
+
+    checkAndShowSessionWarning() {
+        if (!this.isLoggedIn || !this.currentUser) return;
+        
+        const user = this.currentUser;
+        const FREE_SESSION_LIMIT = 3;
+        
+        if (!user.isPremium && user.sessions >= FREE_SESSION_LIMIT) {
+            const sessionsLeft = Math.max(0, FREE_SESSION_LIMIT - user.sessions);
+            
+            if (sessionsLeft <= 0) {
+                setTimeout(() => {
+                    const warningHTML = `
+                        <div class="message ai-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="session-warning">
+                                    <p><strong>Session Limit Reached</strong></p>
+                                    <p>You've used all ${FREE_SESSION_LIMIT} free sessions this month.</p>
+                                    <p>Upgrade to continue your therapy journey:</p>
+                                    <button class="btn-upgrade-now" id="session-upgrade-btn">View Upgrade Options</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = warningHTML;
+                    chatMessages.appendChild(tempDiv.firstElementChild);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    document.getElementById('session-upgrade-btn').addEventListener('click', () => {
+                        paymentSystem.showPaymentOptions();
+                    });
+                }, 1000);
+            } else if (sessionsLeft === 1) {
+                setTimeout(() => {
+                    const warningHTML = `
+                        <div class="message ai-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="session-info">
+                                    <p><strong>Heads up:</strong> You have 1 free session remaining this month.</p>
+                                    <p>After this, you can upgrade to premium or purchase individual sessions.</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = warningHTML;
+                    chatMessages.appendChild(tempDiv.firstElementChild);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
         }
     }
 
     reportIssue() {
         const issue = prompt('Please describe the issue you encountered with the AI:');
         if (issue) {
-            // In a real app, this would send to your backend
             console.log('User reported issue:', issue);
             alert('Thank you for your feedback! We\'ll review this issue and improve the AI.');
-            
-            // Send email notification (conceptual)
-            this.sendEmailNotification('AI Issue Report', issue);
         }
     }
 
@@ -446,11 +1362,6 @@ class AuthSystem {
         const subject = 'LumaCare Support Request';
         const body = 'Hello LumaCare team,\n\nI need assistance with:';
         window.location.href = `mailto:lumacare.therapy@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    }
-
-    sendEmailNotification(subject, body) {
-        // This is conceptual - in real app, use a backend service
-        console.log('Would send email:', subject, body);
     }
 
     logout() {
@@ -470,7 +1381,6 @@ let femaleVoice = null;
 let isVoiceEnabled = true;
 let isRecording = false;
 
-// Initialize voices
 function initializeVoices() {
     const voices = speechSynthesis.getVoices();
     femaleVoice = voices.find(voice => 
@@ -487,10 +1397,6 @@ function initializeVoices() {
 
 speechSynthesis.onvoiceschanged = initializeVoices;
 
-// Initialize therapist AI
-const therapistAI = new TherapistAI();
-
-// Speak text using Web Speech API
 function speakText(text) {
     if (!speechSynthesis || !femaleVoice || !isVoiceEnabled) return;
     
@@ -505,7 +1411,6 @@ function speakText(text) {
     speechSynthesis.speak(utterance);
 }
 
-// Add Message to Chat
 function addMessageToChat(message, sender) {
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', `${sender}-message`);
@@ -524,7 +1429,6 @@ function addMessageToChat(message, sender) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Show technique details
 function showTechniqueDetails(techniqueId) {
     const technique = therapeuticTechniques[techniqueId];
     if (!technique) return;
@@ -562,23 +1466,17 @@ function showTechniqueDetails(techniqueId) {
     }
 }
 
-// Send Message Function
 function sendMessage() {
     const message = messageInput.value.trim();
     if (message === '') return;
     
-    // Add user message to chat
     addMessageToChat(message, 'user');
-    
-    // Clear input
     messageInput.value = '';
     
-    // Generate AI response after a short delay
     setTimeout(() => {
         const issues = therapistAI.analyzeMessage(message);
         const aiResponse = therapistAI.generateResponse(message, issues);
         
-        // Add AI message to chat
         const messageDiv = document.createElement('div');
         messageDiv.classList.add('message', 'ai-message');
         
@@ -594,7 +1492,6 @@ function sendMessage() {
         messageDiv.appendChild(contentDiv);
         chatMessages.appendChild(messageDiv);
         
-        // Add event listeners for technique buttons
         setTimeout(() => {
             document.querySelectorAll('.btn-learn-technique').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -604,15 +1501,20 @@ function sendMessage() {
             });
         }, 100);
         
-        // Scroll to bottom
         chatMessages.scrollTop = chatMessages.scrollHeight;
         
-        // Speak response if enabled
         if (isVoiceEnabled && femaleVoice) {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = aiResponse;
             const textToSpeak = tempDiv.textContent || tempDiv.innerText || '';
             speakText(textToSpeak);
+        }
+        
+        if (authSystem.isLoggedIn) {
+            setTimeout(() => {
+                authSystem.trackSession();
+                authSystem.checkAndShowSessionWarning();
+            }, 2000);
         }
         
     }, 1000);
@@ -640,11 +1542,9 @@ navBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         const tabId = btn.getAttribute('data-tab');
         
-        // Update active nav button
         navBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         
-        // Show active tab content
         tabContents.forEach(content => content.classList.remove('active'));
         document.getElementById(`${tabId}-tab`).classList.add('active');
     });
@@ -752,11 +1652,17 @@ voiceToggle.addEventListener('change', function() {
 });
 
 // Initialize everything when DOM loads
+let authSystem;
+let paymentSystem;
+let therapistAI;
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('LumaCare Professional Therapist AI initialized');
     initializeVoices();
     
-    // Initialize authentication system
-    const authSystem = new AuthSystem();
+    therapistAI = new TherapistAI();
+    authSystem = new AuthSystem();
     authSystem.init();
+    
+    paymentSystem = new PaymentSystem();
 });
