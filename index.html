@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- iOS Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LumaCare">
+
+<!-- Theme Color -->
+<meta name="theme-color" content="#8a2be2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LumaCare - AI Therapy Assistant</title>
@@ -202,6 +213,26 @@
                     </div>
                     
                     <div class="profile-section">
+                        <h3>Subscription Status</h3>
+                        <div class="subscription-status" id="subscription-status">
+                            <div class="status-free">
+                                <i class="fas fa-user"></i>
+                                <span>Free Plan - 3 sessions/month</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
+                        <h3>Payment History</h3>
+                        <div class="payment-history" id="payment-history">
+                            <div class="no-payments">
+                                <i class="fas fa-receipt"></i>
+                                <p>No payments yet</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section">
                         <h3>Your Progress</h3>
                         <div class="progress-chart">
                             <div class="chart-bar">
@@ -295,6 +326,21 @@
         </main>
     </div>
 
+    <!-- Payment Modal -->
+    <div class="modal" id="payment-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="payment-modal-title">Payment</h2>
+                <button class="close-modal" id="close-payment-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="payment-modal-body">
+                <!-- Payment content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Technique Modal -->
     <div class="modal" id="technique-modal">
         <div class="modal-content">
@@ -310,6 +356,8 @@
         </div>
     </div>
 
+    <!-- Yoco SDK -->
+    <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
