@@ -1,3150 +1,1886 @@
-:root {
-  --primary: #8a2be2;
-  --primary-light: #9d4edd;
-  --secondary: #4a7bff;
-  --secondary-light: #6c9bff;
-  --dark: #1e1e2e;
-  --darker: #12121a;
-  --light: #f5f5f7;
-  --gray: #a1a1aa;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-body {
-  background-color: var(--darker);
-  color: var(--light);
-  min-height: 100vh;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* Header Styles */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background-color: var(--dark);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.logo i {
-  font-size: 1.8rem;
-  color: var(--primary);
-}
-
-.logo h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.nav {
-  display: flex;
-  gap: 1rem;
-}
-
-.nav-btn {
-  background: transparent;
-  border: none;
-  color: var(--gray);
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.nav-btn:hover {
-  color: var(--light);
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-.nav-btn.active {
-  color: var(--primary);
-  background-color: rgba(138, 43, 226, 0.1);
-}
-
-.user-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.btn-premium {
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  border: none;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.btn-premium:hover {
-  transform: translateY(-2px);
-}
-
-.user-avatar {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  background-color: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: white;
-  font-weight: bold;
-}
-
-/* Main Content */
-.main-content {
-  flex: 1;
-  padding: 2rem;
-  overflow-y: auto;
-}
-
-.tab-content {
-  display: none;
-}
-
-.tab-content.active {
-  display: block;
-}
-
-/* Chat Styles */
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 70vh;
-  background-color: var(--dark);
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.chat-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  background-color: rgba(138, 43, 226, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.chat-header h2 {
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.chat-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.icon-btn {
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--light);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.icon-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
-}
-
-.chat-messages {
-  flex: 1;
-  padding: 1.5rem;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.message {
-  display: flex;
-  gap: 1rem;
-  max-width: 80%;
-}
-
-.user-message {
-  align-self: flex-end;
-  flex-direction: row-reverse;
-}
-
-.ai-message {
-  align-self: flex-start;
-}
-
-.message-avatar {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.user-message .message-avatar {
-  background-color: var(--secondary);
-}
-
-.ai-message .message-avatar {
-  background-color: var(--primary);
-}
-
-.message-content {
-  background-color: rgba(255, 255, 255, 0.05);
-  padding: 1rem 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.user-message .message-content {
-  background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
-  border-top-right-radius: 0.25rem;
-}
-
-.ai-message .message-content {
-  border-top-left-radius: 0.25rem;
-}
-
-.message-content p {
-  line-height: 1.5;
-}
-
-.technique-suggestion {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: rgba(138, 43, 226, 0.1);
-  border-radius: 0.5rem;
-  border-left: 3px solid var(--primary);
-}
-
-.technique-suggestion h4 {
-  margin-bottom: 0.5rem;
-  color: var(--primary-light);
-}
-
-.technique-steps {
-  margin-left: 1rem;
-}
-
-.technique-steps li {
-  margin-bottom: 0.5rem;
-}
-
-.chat-input-container {
-  padding: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.input-wrapper {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-#message-input {
-  flex: 1;
-  padding: 1rem 1.5rem;
-  border-radius: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--light);
-  font-size: 1rem;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-#message-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
-}
-
-#send-btn {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  border: none;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-#send-btn:hover {
-  transform: scale(1.05);
-}
-
-.quick-responses {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.quick-response {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--light);
-  padding: 0.5rem 1rem;
-  border-radius: 1rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.quick-response:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-/* Techniques Tab */
-.techniques-container h2 {
-  margin-bottom: 1.5rem;
-}
-
-.techniques-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
-
-.technique-card {
-  background-color: var(--dark);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.technique-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.technique-icon {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-
-.technique-icon i {
-  font-size: 1.5rem;
-  color: white;
-}
-
-.technique-card h3 {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-}
-
-.technique-card p {
-  color: var(--gray);
-  margin-bottom: 1.5rem;
-  line-height: 1.5;
-}
-
-.btn-learn-more {
-  background: transparent;
-  border: 1px solid var(--primary);
-  color: var(--primary);
-  padding: 0.5rem 1.5rem;
-  border-radius: 2rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-learn-more:hover {
-  background-color: var(--primary);
-  color: white;
-}
-
-/* Profile Tab */
-.profile-container h2 {
-  margin-bottom: 1.5rem;
-}
-
-.profile-card {
-  background-color: var(--dark);
-  border-radius: 1rem;
-  padding: 2rem;
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.profile-avatar {
-  width: 5rem;
-  height: 5rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.profile-avatar i {
-  font-size: 2rem;
-  color: white;
-}
-
-.profile-info h3 {
-  font-size: 1.5rem;
-  margin-bottom: 0.25rem;
-}
-
-.profile-email {
-  color: var(--gray);
-  margin-bottom: 1rem;
-}
-
-.profile-stats {
-  display: flex;
-  gap: 2rem;
-}
-
-.stat {
-  text-align: center;
-}
-
-.stat-value {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary);
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  color: var(--gray);
-}
-
-.profile-section {
-  background-color: var(--dark);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.profile-section h3 {
-  margin-bottom: 1rem;
-}
-
-.subscription-status {
-  padding: 1rem;
-  border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.status-premium {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #f59e0b;
-  font-weight: 600;
-}
-
-.status-free {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--gray);
-}
-
-.progress-chart {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.chart-bar {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.chart-label {
-  width: 100px;
-  font-size: 0.9rem;
-}
-
-.chart-progress {
-  flex: 1;
-  height: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  border-radius: 1rem;
-}
-
-.chart-value {
-  width: 40px;
-  text-align: right;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-/* Settings Tab */
-.settings-container h2 {
-  margin-bottom: 1.5rem;
-}
-
-.settings-section {
-  background-color: var(--dark);
-  border-radius: 1rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.settings-section h3 {
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.setting-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 0;
-}
-
-.setting-info h4 {
-  margin-bottom: 0.25rem;
-}
-
-.setting-info p {
-  color: var(--gray);
-  font-size: 0.9rem;
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.1);
-  transition: .4s;
-  border-radius: 24px;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .toggle-slider {
-  background-color: var(--primary);
-}
-
-input:checked + .toggle-slider:before {
-  transform: translateX(26px);
-}
-
-.btn-report, .btn-contact, .btn-logout {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--light);
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-report:hover, .btn-contact:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.btn-logout {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: var(--danger);
-}
-
-.btn-logout:hover {
-  background: rgba(239, 68, 68, 0.2);
-}
-
-/* Modal */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal.active {
-  display: flex;
-}
-
-.modal-content {
-  background-color: var(--dark);
-  border-radius: 1rem;
-  width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.modal-header h2 {
-  font-size: 1.5rem;
-}
-
-.close-modal {
-  background: transparent;
-  border: none;
-  color: var(--gray);
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.close-modal:hover {
-  color: var(--light);
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
-.technique-detail {
-  line-height: 1.6;
-}
-
-.technique-detail h3 {
-  margin: 1.5rem 0 0.5rem;
-  color: var(--primary-light);
-}
-
-.technique-detail h3:first-child {
-  margin-top: 0;
-}
-
-.technique-detail ul, .technique-detail ol {
-  margin-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.technique-detail li {
-  margin-bottom: 0.5rem;
-}
-
-/* Auth Modal Styles */
-.auth-modal {
-  max-width: 400px;
-}
-
-.auth-tabs {
-  display: flex;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.auth-tab {
-  background: none;
-  border: none;
-  color: var(--gray);
-  padding: 0.75rem 1.5rem;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-}
-
-.auth-tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
-}
-
-.auth-form {
-  display: none;
-}
-
-.auth-form.active {
-  display: block;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--light);
-}
-
-.form-group input {
-  width: 100%;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--light);
-}
-
-.btn-auth {
-  width: 100%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-  border: none;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-top: 1rem;
-}
-
-/* Payment System Styles */
-.payment-modal {
-  text-align: center;
-}
-
-.pricing-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin: 1.5rem 0;
-}
-
-.pricing-option {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1.5rem;
-  border-radius: 1rem;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.pricing-option:hover {
-  border-color: var(--primary);
-  transform: translateY(-2px);
-}
-
-.pricing-option.featured {
-  border-color: var(--primary);
-  background: rgba(138, 43, 226, 0.1);
-}
-
-.popular-badge {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--primary);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.pricing-option h4 {
-  margin-bottom: 1rem;
-  color: var(--primary-light);
-}
-
-.price {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.price span {
-  font-size: 1rem;
-  color: var(--gray);
-}
-
-.pricing-option ul {
-  text-align: left;
-  margin: 1rem 0;
-  list-style: none;
-}
-
-.pricing-option li {
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.btn-purchase {
-  width: 100%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-  border: none;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.btn-purchase:hover {
-  transform: translateY(-2px);
-}
-
-/* Payment Form Styles */
-.payment-form {
-  text-align: left;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.card-input {
-  width: 100%;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--light);
-  font-size: 1rem;
-}
-
-.card-input:focus {
-  border-color: var(--primary);
-  outline: none;
-}
-
-.btn-pay-now {
-  width: 100%;
-  background: linear-gradient(135deg, var(--success), #22c55e);
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1rem;
-}
-
-.btn-pay-now:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Payment Success */
-.payment-success {
-  text-align: center;
-  padding: 2rem;
-}
-
-.success-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.premium-features {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin: 2rem 0;
-}
-
-.feature {
-  text-align: center;
-}
-
-.feature i {
-  font-size: 2rem;
-  color: var(--primary);
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-/* Test Cards */
-.test-cards {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin: 1rem 0;
-  font-size: 0.85rem;
-}
-
-.test-cards p {
-  margin: 0.25rem 0;
-}
-
-/* Session Limit Warning */
-.session-warning {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid var(--warning);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin: 1rem 0;
-  text-align: center;
-}
-
-.session-warning p {
-  margin-bottom: 0.5rem;
-}
-
-.btn-upgrade-now {
-  background: linear-gradient(135deg, var(--warning), #f59e0b);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-}
-
-/* Voice Recording States */
-#voice-btn.recording {
-  background-color: var(--danger) !important;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% {
-      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-  }
-  70% {
-      box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
-  }
-  100% {
-      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
-  }
-}
-
-/* Technique Options */
-.technique-option {
-  margin: 15px 0;
-  padding: 15px;
-  background: rgba(138, 43, 226, 0.1);
-  border-radius: 8px;
-}
-
-.technique-option h4 {
-  color: var(--primary-light);
-  margin-bottom: 8px;
-}
-
-/* Light Mode Support */
-body.light-mode {
-  --dark: #ffffff;
-  --darker: #f5f5f7;
-  --light: #1e1e2e;
-  --gray: #6b7280;
-  background-color: var(--darker);
-  color: var(--light);
-}
-
-body.light-mode .chat-container,
-body.light-mode .technique-card,
-body.light-mode .profile-card,
-body.light-mode .profile-section,
-body.light-mode .settings-section {
-  background-color: var(--dark);
-  border: 1px solid #e5e7eb;
-}
-
-body.light-mode .message-content {
-  background-color: #f9fafb;
-  color: #374151;
-}
-
-body.light-mode .user-message .message-content {
-  background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
-  color: white;
-}
-
-body.light-mode .technique-suggestion {
-  background-color: rgba(138, 43, 226, 0.05);
-  border-left: 3px solid var(--primary);
-}
-
-body.light-mode #message-input {
-  background-color: white;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-body.light-mode .quick-response {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-body.light-mode .quick-response:hover {
-  background: #e5e7eb;
-}
-
-body.light-mode .pricing-option {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-}
-
-body.light-mode .pricing-option.featured {
-  background: rgba(138, 43, 226, 0.05);
-}
-
-body.light-mode .card-input {
-  background: white;
-  border: 1px solid #d1d5db;
-  color: #374151;
-}
-
-body.light-mode .test-cards {
-  background: #f3f4f6;
-}
-
-body.light-mode .subscription-status {
-  background: #f9fafb;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .header {
-      padding: 1rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-  }
-  
-  .nav {
-      order: 3;
-      width: 100%;
-      justify-content: center;
-  }
-  
-  .main-content {
-      padding: 1rem;
-  }
-  
-  .techniques-grid {
-      grid-template-columns: 1fr;
-  }
-  
-  .profile-card {
-      flex-direction: column;
-      text-align: center;
-  }
-  
-  .profile-stats {
-      justify-content: center;
-  }
-  
-  .message {
-      max-width: 90%;
-  }
-  
-  .quick-responses {
-      justify-content: center;
-  }
-  
-  .user-actions {
-      gap: 0.5rem;
-  }
-  
-  .btn-premium {
-      padding: 0.5rem 0.75rem;
-      font-size: 0.9rem;
-  }
-  
-  .pricing-options {
-      grid-template-columns: 1fr;
-  }
-  
-  .form-row {
-      grid-template-columns: 1fr;
-  }
-  
-  .premium-features {
-      flex-direction: column;
-      gap: 1rem;
-  }
-}
-.session-info {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid var(--secondary);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin: 1rem 0;
-  text-align: center;
-}
-
-.session-info p {
-  margin-bottom: 0.5rem;
-}
-
-body.light-mode .session-info {
-  background: rgba(59, 130, 246, 0.05);
-}
-/* Yoco Card Fields */
-.yoco-card-field {
-  padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  min-height: 45px;
-  display: flex;
-  align-items: center;
-}
-
-.yoco-card-field iframe {
-  width: 100% !important;
-  border: none !important;
-  background: transparent !important;
-}
-
-body.light-mode .yoco-card-field {
-  background: white;
-  border: 1px solid #d1d5db;
-}
-
-/* Payment Amount */
-.payment-amount {
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--primary);
-  margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: rgba(138, 43, 226, 0.1);
-  border-radius: 0.5rem;
-}
-
-/* Payment Security */
-.payment-security {
-  text-align: center;
-  color: var(--gray);
-  font-size: 0.9rem;
-  margin-top: 1rem;
-}
-
-.payment-security i {
-  color: var(--success);
-  margin-right: 0.5rem;
-}
-
-/* Success Actions */
-.success-actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.success-actions button {
-  flex: 1;
-}
-
-.btn-view-profile {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--light);
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-view-profile:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-/* Payment Instructions */
-.payment-instructions {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid var(--secondary);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
-}
-
-.payment-instructions p {
-  margin: 0.5rem 0;
-}
-
-/* Payment Buttons */
-.payment-buttons {
-  display: flex;
-  gap: 1rem;
-  margin: 1.5rem 0;
-}
-
-.btn-simulate-success {
-  flex: 2;
-  background: linear-gradient(135deg, var(--success), #22c55e);
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-simulate-failure {
-  flex: 1;
-  background: linear-gradient(135deg, var(--danger), #ef4444);
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-simulate-success:hover {
-  transform: translateY(-2px);
-}
-
-.btn-simulate-failure:hover {
-  transform: translateY(-2px);
-}
-
-.btn-simulate-success:disabled,
-.btn-simulate-failure:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Light mode support */
-body.light-mode .payment-instructions {
-  background: rgba(59, 130, 246, 0.05);
-  border: 1px solid #3b82f6;
-}
-/* Payment Actions */
-.payment-actions {
-  margin: 1.5rem 0;
-  text-align: center;
-}
-
-.btn-back {
-  background: transparent;
-  border: 1px solid var(--gray);
-  color: var(--gray);
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-back:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--light);
-}
-
-/* Payment Form in Payment Modal */
-#payment-modal .modal-content {
-  max-width: 500px;
-}
-
-#payment-modal .payment-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 2rem 0;
-}
-
-#payment-modal .btn-simulate-success,
-#payment-modal .btn-simulate-failure {
-  padding: 1.5rem;
-  border: none;
-  border-radius: 0.75rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-}
-
-#payment-modal .btn-simulate-success {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  border: 2px solid #10b981;
-}
-
-#payment-modal .btn-simulate-failure {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  border: 2px solid #ef4444;
-}
-
-#payment-modal .btn-simulate-success:hover,
-#payment-modal .btn-simulate-failure:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-}
-/* Yoco Card Fields */
-.yoco-field {
-  padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  min-height: 45px;
-  margin-bottom: 1rem;
-}
-
-.yoco-field iframe {
-  width: 100% !important;
-  border: none !important;
-  background: transparent !important;
-}
-
-body.light-mode .yoco-field {
-  background: white;
-  border: 1px solid #d1d5db;
-}
-
-/* Real Pay Button */
-.btn-pay-now {
-  width: 100%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-  border: none;
-  padding: 1.2rem;
-  border-radius: 0.75rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin: 1rem 0;
-}
-
-.btn-pay-now:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(138, 43, 226, 0.3);
-}
-
-.btn-pay-now:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-/* Payment Loading */
-.payment-loading {
-  text-align: center;
-  padding: 2rem;
-  color: var(--primary);
-}
-
-/* Retry Button */
-.btn-retry {
-  background: linear-gradient(135deg, var(--warning), #f59e0b);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-retry:hover {
-  transform: translateY(-2px);
-}
-/* Yoco Setup Info */
-.yoco-setup-info {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid var(--secondary);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-  font-size: 0.9rem;
-}
-
-.yoco-setup-info p {
-  margin: 0.5rem 0;
-}
-
-body.light-mode .yoco-setup-info {
-  background: rgba(59, 130, 246, 0.05);
-  border: 1px solid #3b82f6;
-}
-/* Payment History */
-.payment-history {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.no-payments {
-  text-align: center;
-  padding: 2rem;
-  color: var(--gray);
-}
-
-.no-payments i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-.payment-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
-  margin-bottom: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.payment-info {
-  flex: 1;
-}
-
-.payment-type {
-  font-weight: 600;
-  color: var(--primary-light);
-}
-
-.payment-date {
-  font-size: 0.85rem;
-  color: var(--gray);
-}
-
-.payment-amount {
-  font-weight: 700;
-  color: var(--success);
-  margin: 0 1rem;
-}
-
-.payment-status {
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.payment-status.completed {
-  background: rgba(16, 185, 129, 0.2);
-  color: var(--success);
-  border: 1px solid var(--success);
-}
-
-.payment-status.failed {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--danger);
-  border: 1px solid var(--danger);
-}
-
-.btn-receipt {
-  background: transparent;
-  border: 1px solid var(--primary);
-  color: var(--primary);
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: all 0.3s ease;
-  margin-left: 1rem;
-}
-
-.btn-receipt:hover {
-  background: var(--primary);
-  color: white;
-}
-
-/* Light mode support */
-body.light-mode .payment-item {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-}
-
-body.light-mode .btn-receipt {
-  border: 1px solid var(--primary);
-  color: var(--primary);
-}
-
-body.light-mode .btn-receipt:hover {
-  background: var(--primary);
-  color: white;
-}
-/* Real Payment Options */
-.payment-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin: 2rem 0;
-}
-
-.payment-option-real,
-.payment-option-sim {
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  text-align: center;
-}
-
-.payment-option-real {
-  background: rgba(16, 185, 129, 0.1);
-  border: 2px solid var(--success);
-}
-
-.payment-option-sim {
-  background: rgba(59, 130, 246, 0.1);
-  border: 2px solid var(--secondary);
-}
-
-.payment-option-real h4,
-.payment-option-sim h4 {
-  margin-bottom: 0.5rem;
-  color: var(--light);
-}
-
-.payment-option-real p,
-.payment-option-sim p {
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-  color: var(--gray);
-}
-
-.btn-real-payment {
-  background: linear-gradient(135deg, var(--success), #059669);
-  color: white;
-  border: none;
-  padding: 1rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-}
-
-.btn-real-payment:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-}
-
-/* Real Test Cards */
-.test-cards-real {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid var(--warning);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-  font-size: 0.9rem;
-}
-
-/* Yoco Dashboard Button */
-.btn-yoco-dashboard {
-  background: linear-gradient(135deg, #8a2be2, #9d4edd);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-yoco-dashboard:hover {
-  transform: translateY(-2px);
-}
-
-/* Loading Spinner */
-.loading-spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top: 4px solid var(--primary);
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 1rem auto;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Payment Error */
-.payment-error {
-  text-align: center;
-  padding: 2rem;
-}
-
-.error-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  color: var(--danger);
-}
-/* Yoco Card Fields Styling */
-#card-frame {
-  margin: 1.5rem 0;
-}
-
-.yoco-field {
-  padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  min-height: 45px;
-  display: flex;
-  align-items: center;
-  transition: all 0.3s ease;
-}
-
-.yoco-field iframe {
-  width: 100% !important;
-  border: none !important;
-  background: transparent !important;
-}
-
-.yoco-field:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
-}
-
-body.light-mode .yoco-field {
-  background: white;
-  border: 1px solid #d1d5db;
-}
-
-body.light-mode .yoco-field:focus-within {
-  border-color: var(--primary);
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin: 1rem 0;
-}
-
-.form-group {
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: var(--light);
-  font-weight: 500;
-}
-
-body.light-mode .form-group label {
-  color: var(--dark);
-}
-
-/* Payment Security */
-.payment-security {
-  text-align: center;
-  color: var(--gray);
-  font-size: 0.9rem;
-  margin-top: 1rem;
-}
-
-.payment-security i {
-  color: var(--success);
-  margin-right: 0.5rem;
-}
-
-/* Yoco Setup Info */
-.yoco-setup-info {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid var(--secondary);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-  font-size: 0.9rem;
-}
-
-.yoco-setup-info p {
-  margin: 0.5rem 0;
-}
-
-body.light-mode .yoco-setup-info {
-  background: rgba(59, 130, 246, 0.05);
-  border: 1px solid #3b82f6;
-}
-
-/* Loading Spinner */
-.loading-spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top: 4px solid var(--primary);
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin: 1rem auto;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Payment Error */
-.payment-error {
-  text-align: center;
-  padding: 2rem;
-}
-
-.error-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  color: var(--danger);
-}
-
-.btn-retry {
-  background: linear-gradient(135deg, var(--warning), #f59e0b);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-retry:hover {
-  transform: translateY(-2px);
-}
-
-/* Real Pay Button */
-.btn-pay-now {
-  width: 100%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-  border: none;
-  padding: 1.2rem;
-  border-radius: 0.75rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin: 1rem 0;
-}
-
-.btn-pay-now:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(138, 43, 226, 0.3);
-}
-
-.btn-pay-now:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-/* New Payment Method Styles */
-.payment-methods {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 1.5rem 0;
-}
-
-.payment-method {
-  display: flex;
-  align-items: center;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid transparent;
-  border-radius: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.payment-method:hover {
-  border-color: var(--primary);
-  background: rgba(138, 43, 226, 0.1);
-  transform: translateY(-2px);
-}
-
-.method-icon {
-  font-size: 2rem;
-  margin-right: 1rem;
-}
-
-.method-info {
-  flex: 1;
-}
-
-.method-info h4 {
-  margin-bottom: 0.25rem;
-  color: var(--light);
-}
-
-.method-info p {
-  color: var(--gray);
-  font-size: 0.9rem;
-}
-
-.method-arrow {
-  font-size: 1.5rem;
-  color: var(--primary);
-}
-
-/* Yoco Payment Buttons */
-.yoco-payment-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 1.5rem 0;
-}
-
-.btn-yoco-payment {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-  border: none;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.btn-yoco-payment:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(138, 43, 226, 0.3);
-}
-
-.btn-simulate-payment {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid var(--secondary);
-  color: var(--light);
-  padding: 1.2rem;
-  border-radius: 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.btn-simulate-payment:hover {
-  background: rgba(59, 130, 246, 0.1);
-  transform: translateY(-2px);
-}
-
-.yoco-icon, .simulate-icon {
-  font-size: 1.2rem;
-}
-
-/* Test Card Info */
-.test-card-info {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid var(--warning);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin: 1rem 0;
-  font-size: 0.9rem;
-}
-
-.test-card-info p {
-  margin: 0.25rem 0;
-}
-
-/* Payment Processing */
-.payment-processing {
-  text-align: center;
-  padding: 2rem;
-}
-
-.processing-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.btn-complete-payment {
-  background: linear-gradient(135deg, var(--success), #059669);
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  border-radius: 0.75rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-complete-payment:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-}
-
-/* Light mode support */
-body.light-mode .payment-method {
-  background: #f9fafb;
-  border: 2px solid #e5e7eb;
-}
-
-body.light-mode .payment-method:hover {
-  border-color: var(--primary);
-  background: rgba(138, 43, 226, 0.05);
-}
-
-body.light-mode .btn-simulate-payment {
-  background: #f3f4f6;
-  border: 2px solid #3b82f6;
-  color: #1e1e2e;
-}
-
-body.light-mode .test-card-info {
-  background: rgba(245, 158, 11, 0.05);
-  border: 1px solid #f59e0b;
-}
-/* Payment Verification Styles */
-.payment-verification {
-  text-align: left;
-}
-
-.verification-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.verification-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.verification-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-
-.verification-step {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 1rem;
-  border-left: 4px solid var(--gray);
-  transition: all 0.3s ease;
-}
-
-.verification-step.active {
-  border-left-color: var(--primary);
-  background: rgba(138, 43, 226, 0.1);
-}
-
-.step-number {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  background: var(--gray);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
-.verification-step.active .step-number {
-  background: var(--primary);
-}
-
-.step-info h4 {
-  margin-bottom: 0.5rem;
-  color: var(--light);
-}
-
-.step-info p {
-  color: var(--gray);
-  margin: 0.25rem 0;
-}
-
-.verification-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 0.5rem;
-}
-
-.status-text {
-  font-size: 0.9rem;
-  color: var(--secondary);
-}
-
-.verification-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin: 1.5rem 0;
-}
-
-.btn-check-again {
-  background: linear-gradient(135deg, var(--secondary), #3b82f6);
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-check-again:hover {
-  transform: translateY(-2px);
-}
-
-.btn-manual-verify {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid var(--warning);
-  color: var(--light);
-  padding: 1rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-manual-verify:hover {
-  background: rgba(245, 158, 11, 0.1);
-  transform: translateY(-2px);
-}
-
-.btn-cancel {
-  background: transparent;
-  border: 1px solid var(--gray);
-  color: var(--gray);
-  padding: 0.75rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--light);
-}
-
-.payment-help {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid var(--secondary);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-top: 1rem;
-}
-
-.payment-help p {
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-}
-
-/* Manual Verification Styles */
-.manual-verification {
-  text-align: left;
-}
-
-.manual-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-
-.manual-step {
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 1rem;
-  border-left: 4px solid var(--secondary);
-}
-
-.manual-step h4 {
-  margin-bottom: 0.5rem;
-  color: var(--primary-light);
-}
-
-.email-address {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 1rem 0;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
-}
-
-.btn-copy-email {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-copy-email:hover {
-  background: var(--primary-light);
-}
-
-.verification-details {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-top: 1rem;
-}
-
-.verification-details ul {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-}
-
-.verification-details li {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 0.25rem;
-}
-
-.verification-details input {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--light);
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  margin-left: 0.5rem;
-  width: 200px;
-}
-
-.manual-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 1.5rem 0;
-}
-
-.btn-sent-email {
-  background: linear-gradient(135deg, var(--success), #059669);
-  color: white;
-  border: none;
-  padding: 1.2rem;
-  border-radius: 0.75rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-sent-email:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-}
-
-.verification-note {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid var(--warning);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-/* Verification Confirmed */
-.verification-confirmed {
-  text-align: center;
-}
-
-.confirmation-details {
-  text-align: left;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1.5rem;
-  border-radius: 1rem;
-  margin: 1.5rem 0;
-}
-
-.confirmation-details ul {
-  margin: 1rem 0;
-}
-
-.confirmation-details li {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 0.25rem;
-}
-
-.confirmation-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin: 1.5rem 0;
-}
-
-.btn-contact-support {
-  background: rgba(59, 130, 246, 0.1);
-  border: 2px solid var(--secondary);
-  color: var(--light);
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-contact-support:hover {
-  background: rgba(59, 130, 246, 0.2);
-}
-
-.support-info {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-/* Timeout Styles */
-.verification-timeout {
-  text-align: center;
-}
-
-.timeout-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.timeout-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 2rem 0;
-}
-
-.btn-try-again {
-  background: linear-gradient(135deg, var(--secondary), #3b82f6);
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.timeout-help {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 0.75rem;
-  margin-top: 1rem;
-  text-align: left;
-}
-
-.timeout-help ul {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
-}
-
-/* Light mode support */
-body.light-mode .verification-step,
-body.light-mode .manual-step {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-}
-
-body.light-mode .verification-details,
-body.light-mode .confirmation-details {
-  background: #f3f4f6;
-}
-
-body.light-mode .payment-help,
-body.light-mode .verification-note,
-body.light-mode .timeout-help {
-  background: rgba(59, 130, 246, 0.05);
-  border: 1px solid #3b82f6;
-}
-
-body.light-mode .email-address {
-  background: #f3f4f6;
-}
-/* Payment Verification Styles */
-.payment-verification {
-  text-align: left;
-}
-
-.verification-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.verification-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.verification-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-
-.verification-step {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 1rem;
-  border-left: 4px solid var(--gray);
-  transition: all 0.3s ease;
-}
-
-.verification-step.active {
-  border-left-color: var(--primary);
-  background: rgba(138, 43, 226, 0.1);
-}
-
-.step-number {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  background: var(--gray);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
-.verification-step.active .step-number {
-  background: var(--primary);
-}
-
-.step-info h4 {
-  margin-bottom: 0.5rem;
-  color: var(--light);
-}
-
-.step-info p {
-  color: var(--gray);
-  margin: 0.25rem 0;
-}
-
-.verification-status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 0.5rem;
-}
-
-.status-text {
-  font-size: 0.9rem;
-  color: var(--secondary);
-}
-
-.verification-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin: 1.5rem 0;
-}
-
-.btn-check-again {
-  background: linear-gradient(135deg, var(--secondary), #3b82f6);
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-check-again:hover {
-  transform: translateY(-2px);
-}
-
-.btn-manual-verify {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid var(--warning);
-  color: var(--light);
-  padding: 1rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-manual-verify:hover {
-  background: rgba(245, 158, 11, 0.1);
-  transform: translateY(-2px);
-}
-
-.btn-cancel {
-  background: transparent;
-  border: 1px solid var(--gray);
-  color: var(--gray);
-  padding: 0.75rem;
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-cancel:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--light);
-}
-
-.payment-help {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid var(--secondary);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-top: 1rem;
-}
-
-.payment-help p {
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-}
-
-/* Manual Verification Styles */
-.manual-verification {
-  text-align: left;
-}
-
-.manual-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-
-.manual-step {
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 1rem;
-  border-left: 4px solid var(--secondary);
-}
-
-.manual-step h4 {
-  margin-bottom: 0.5rem;
-  color: var(--primary-light);
-}
-
-.email-address {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 1rem 0;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
-}
-
-.btn-copy-email {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-copy-email:hover {
-  background: var(--primary-light);
-}
-
-.verification-details {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-top: 1rem;
-}
-
-.verification-details ul {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-}
-
-.verification-details li {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 0.25rem;
-}
-
-.verification-details input {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--light);
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  margin-left: 0.5rem;
-  width: 200px;
-}
-
-.manual-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 1.5rem 0;
-}
-
-.btn-sent-email {
-  background: linear-gradient(135deg, var(--success), #059669);
-  color: white;
-  border: none;
-  padding: 1.2rem;
-  border-radius: 0.75rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-sent-email:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-}
-
-.verification-note {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid var(--warning);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-/* Verification Confirmed */
-.verification-confirmed {
-  text-align: center;
-}
-
-.confirmation-details {
-  text-align: left;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1.5rem;
-  border-radius: 1rem;
-  margin: 1.5rem 0;
-}
-
-.confirmation-details ul {
-  margin: 1rem 0;
-}
-
-.confirmation-details li {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 0.25rem;
-}
-
-.confirmation-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin: 1.5rem 0;
-}
-
-.btn-contact-support {
-  background: rgba(59, 130, 246, 0.1);
-  border: 2px solid var(--secondary);
-  color: var(--light);
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.btn-contact-support:hover {
-  background: rgba(59, 130, 246, 0.2);
-}
-
-.support-info {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-/* Timeout Styles */
-.verification-timeout {
-  text-align: center;
-}
-
-.timeout-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.timeout-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 2rem 0;
-}
-
-.btn-try-again {
-  background: linear-gradient(135deg, var(--secondary), #3b82f6);
-  color: white;
-  border: none;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.timeout-help {
-  background: rgba(255, 255, 255, 0.05);
-  padding: 1rem;
-  border-radius: 0.75rem;
-  margin-top: 1rem;
-  text-align: left;
-}
-
-.timeout-help ul {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
-}
-
-/* Payment Methods */
-.payment-methods {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 1.5rem 0;
-}
-
-.payment-method {
-  display: flex;
-  align-items: center;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid transparent;
-  border-radius: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.payment-method:hover {
-  border-color: var(--primary);
-  background: rgba(138, 43, 226, 0.1);
-  transform: translateY(-2px);
-}
-
-.method-icon {
-  font-size: 2rem;
-  margin-right: 1rem;
-}
-
-.method-info {
-  flex: 1;
-}
-
-.method-info h4 {
-  margin-bottom: 0.25rem;
-  color: var(--light);
-}
-
-.method-info p {
-  color: var(--gray);
-  font-size: 0.9rem;
-}
-
-.method-arrow {
-  font-size: 1.5rem;
-  color: var(--primary);
-}
-
-.test-card-info {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid var(--warning);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin: 1rem 0;
-  font-size: 0.9rem;
-}
-
-.test-card-info p {
-  margin: 0.25rem 0;
-}
-
-/* Light mode support */
-body.light-mode .verification-step,
-body.light-mode .manual-step {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-}
-
-body.light-mode .verification-details,
-body.light-mode .confirmation-details {
-  background: #f3f4f6;
-}
-
-body.light-mode .payment-help,
-body.light-mode .verification-note,
-body.light-mode .timeout-help {
-  background: rgba(59, 130, 246, 0.05);
-  border: 1px solid #3b82f6;
-}
-
-body.light-mode .email-address {
-  background: #f3f4f6;
-}
-
-body.light-mode .payment-method {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-}
-
-body.light-mode .payment-method:hover {
-  border-color: var(--primary);
-  background: rgba(138, 43, 226, 0.05);
-}
-/* Mobile-Specific Optimizations */
-@media (max-width: 480px) {
-  .header {
-      padding: 0.5rem 1rem;
-      flex-wrap: wrap;
-  }
-  
-  .logo h1 {
-      font-size: 1.2rem;
-  }
-  
-  .nav {
-      order: 3;
-      width: 100%;
-      justify-content: space-between;
-      margin-top: 0.5rem;
-  }
-  
-  .nav-btn {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
-  }
-  
-  .user-actions {
-      gap: 0.5rem;
-  }
-  
-  .btn-premium {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
-  }
-  
-  .main-content {
-      padding: 0.5rem;
-  }
-  
-  .chat-container {
-      height: 60vh;
-  }
-  
-  .message {
-      max-width: 95%;
-  }
-  
-  .quick-responses {
-      justify-content: center;
-      gap: 0.25rem;
-  }
-  
-  .quick-response {
-      padding: 0.4rem 0.8rem;
-      font-size: 0.75rem;
-  }
-  
-  .techniques-grid {
-      grid-template-columns: 1fr;
-      gap: 1rem;
-  }
-  
-  /* Payment modal mobile fixes */
-  .modal-content {
-      width: 95%;
-      margin: 5% auto;
-  }
-  
-  .pricing-options {
-      grid-template-columns: 1fr;
-  }
-  
-  .payment-method {
-      padding: 1rem;
-  }
-}
-
-/* Mobile keyboard fixes */
-@media (max-height: 700px) {
-  .chat-container {
-      height: 55vh;
-  }
-}
-
-/* iPhone notch safe areas */
-@supports(padding: max(0px)) {
-  .header, .main-content {
-      padding-left: max(1rem, env(safe-area-inset-left));
-      padding-right: max(1rem, env(safe-area-inset-right));
-  }
-}
-/* Policy Pages Styles */
-.policy-container {
-  max-width: 800px;
-  margin: 0 auto;
-  background: var(--dark);
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.policy-header {
-  text-align: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.policy-header h2 {
-  color: var(--primary);
-  margin-bottom: 0.5rem;
-}
-
-.policy-content {
-  line-height: 1.6;
-  color: var(--light);
-  max-height: 60vh;
-  overflow-y: auto;
-  padding: 1rem;
-}
-
-.policy-content h1,
-.policy-content h2,
-.policy-content h3 {
-  color: var(--primary-light);
-  margin: 1.5rem 0 0.5rem 0;
-}
-
-.policy-content h1 {
-  font-size: 1.8rem;
-  border-bottom: 2px solid var(--primary);
-  padding-bottom: 0.5rem;
-}
-
-.policy-content h2 {
-  font-size: 1.4rem;
-}
-
-.policy-content h3 {
-  font-size: 1.2rem;
-}
-
-.policy-content p {
-  margin-bottom: 1rem;
-}
-
-.policy-content ul, 
-.policy-content ol {
-  margin: 1rem 0 1rem 2rem;
-}
-
-.policy-content li {
-  margin-bottom: 0.5rem;
-}
-
-.policy-content strong {
-  color: var(--primary-light);
-}
-
-.policy-content em {
-  color: var(--gray);
-}
-
-.policy-content a {
-  color: var(--secondary);
-  text-decoration: none;
-}
-
-.policy-content a:hover {
-  text-decoration: underline;
-}
-
-.policy-content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0;
-}
-
-.policy-content th,
-.policy-content td {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.75rem;
-  text-align: left;
-}
-
-.policy-content th {
-  background: rgba(138, 43, 226, 0.1);
-  color: var(--primary-light);
-  font-weight: 600;
-}
-
-/* Footer Styles */
-.app-footer {
-  background: var(--dark);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 1rem 2rem;
-  margin-top: auto;
-}
-
-.footer-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.footer-links {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.footer-links a {
-  color: var(--gray);
-  text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
-  cursor: pointer;
-}
-
-.footer-links a:hover {
-  color: var(--primary);
-}
-
-/* Light mode support */
-body.light-mode .policy-container {
-  background: white;
-  border: 1px solid #e5e7eb;
-}
-
-body.light-mode .policy-content {
-  color: #374151;
-}
-
-body.light-mode .policy-content th {
-  background: rgba(138, 43, 226, 0.05);
-}
-
-body.light-mode .policy-content th,
-body.light-mode .policy-content td {
-  border-color: #e5e7eb;
-}
-
-body.light-mode .app-footer {
-  background: white;
-  border-top: 1px solid #e5e7eb;
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .policy-container {
-      padding: 1rem;
-      margin: 0.5rem;
-  }
-  
-  .policy-content h1 {
-      font-size: 1.5rem;
-  }
-  
-  .policy-content h2 {
-      font-size: 1.3rem;
-  }
-  
-  .policy-content table {
-      font-size: 0.9rem;
-  }
-  
-  .policy-content th,
-  .policy-content td {
-      padding: 0.5rem;
-  }
-  
-  .footer-content {
-      flex-direction: column;
-      gap: 1rem;
-      text-align: center;
-  }
-  
-  .footer-links {
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-  }
-}
-/* Payment Security Info */
-.payment-security-info {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid var(--success);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin: 1rem 0;
-  text-align: center;
-}
-
-.payment-security-info p {
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-}
-
-.payment-security-info i {
-  color: var(--success);
-  margin-right: 0.5rem;
-}
-
-body.light-mode .payment-security-info {
-  background: rgba(16, 185, 129, 0.05);
-  border: 1px solid #10b981;
-}
-
-/* Loading Spinner for Verification */
-.loading-spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top: 4px solid var(--primary);
-  width: 30px;
-  height: 30px;
-  animation: spin 1s linear infinite;
-  margin-right: 0.5rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Policy Container Improvements */
-.policy-container {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.policy-content {
-  max-height: 60vh;
-  overflow-y: auto;
-  padding: 1rem;
-  line-height: 1.6;
-}
-
-/* Mobile improvements for payment modals */
-@media (max-width: 768px) {
-  .payment-verification .verification-steps {
-      gap: 1rem;
-  }
-  
-  .verification-step {
-      padding: 1rem;
-  }
-  
-  .manual-step {
-      padding: 1rem;
-  }
-  
-  .policy-container {
-      margin: 0.5rem;
-      padding: 1rem;
-  }
-}
+// Therapeutic techniques database
+const therapeuticTechniques = {
+    "priority-matrix": {
+        title: "Priority Matrix (Eisenhower Matrix)",
+        description: "Organize tasks by urgency and importance to reduce overwhelm and create clarity",
+        steps: [
+            "List all your tasks and projects",
+            "Categorize them: Urgent & Important (do now), Important but Not Urgent (schedule), Urgent but Not Important (delegate), Neither (eliminate)",
+            "Focus on Quadrant 2 tasks for long-term success",
+            "Set realistic time blocks for each category"
+        ],
+        whenToUse: "When feeling overwhelmed with multiple responsibilities and unclear priorities"
+    },
+    "box-breathing": {
+        title: "Box Breathing Technique",
+        description: "Regulate the nervous system through controlled breathing to reduce physical anxiety symptoms",
+        steps: [
+            "Sit comfortably and relax your shoulders",
+            "Inhale through your nose for 4 seconds",
+            "Hold your breath for 4 seconds", 
+            "Exhale through your mouth for 4 seconds",
+            "Hold empty for 4 seconds",
+            "Repeat 5-10 cycles"
+        ],
+        whenToUse: "During acute anxiety, panic symptoms, physical tension, or before stressful tasks"
+    },
+    "thought-challenging": {
+        title: "Cognitive Restructuring",
+        description: "Identify and reframe negative thought patterns that contribute to anxiety and self-doubt",
+        steps: [
+            "Identify the automatic negative thought",
+            "Examine evidence for and against the thought",
+            "Consider alternative perspectives", 
+            "Develop a balanced, realistic thought",
+            "Practice the new thought pattern"
+        ],
+        whenToUse: "When experiencing negative self-talk, imposter syndrome, or catastrophic thinking"
+    },
+    "pomodoro": {
+        title: "Pomodoro Technique",
+        description: "Break work into focused intervals with regular breaks to maintain concentration and prevent burnout",
+        steps: [
+            "Choose a specific task to focus on",
+            "Set a timer for 25 minutes of focused work",
+            "When timer rings, take a 5-minute break",
+            "After 4 cycles, take a 15-30 minute break",
+            "Repeat as needed"
+        ],
+        whenToUse: "When struggling with focus, procrastination, or work-related stress"
+    },
+    "grounding": {
+        title: "5-4-3-2-1 Grounding Technique", 
+        description: "Use sensory awareness to anchor in the present moment during anxiety or dissociation",
+        steps: [
+            "Name 5 things you can see around you",
+            "Identify 4 things you can touch or feel",
+            "Acknowledge 3 things you can hear",
+            "Notice 2 things you can smell", 
+            "Recognize 1 thing you can taste"
+        ],
+        whenToUse: "During panic attacks, dissociation, or when feeling disconnected from reality"
+    }
+};
+
+const privacyPolicyHTML = `<style>
+[data-custom-class='body'], [data-custom-class='body'] * {
+        background: transparent !important;
+      }
+[data-custom-class='title'], [data-custom-class='title'] * {
+        font-family: Arial !important;
+font-size: 26px !important;
+color: #000000 !important;
+      }
+[data-custom-class='subtitle'], [data-custom-class='subtitle'] * {
+        font-family: Arial !important;
+color: #595959 !important;
+font-size: 14px !important;
+      }
+[data-custom-class='heading_1'], [data-custom-class='heading_1'] * {
+        font-family: Arial !important;
+font-size: 19px !important;
+color: #000000 !important;
+      }
+[data-custom-class='heading_2'], [data-custom-class='heading_2'] * {
+        font-family: Arial !important;
+font-size: 17px !important;
+color: #000000 !important;
+      }
+[data-custom-class='body_text'], [data-custom-class='body_text'] * {
+        color: #595959 !important;
+font-size: 14px !important;
+font-family: Arial !important;
+      }
+[data-custom-class='link'], [data-custom-class='link'] * {
+        color: #3030F1 !important;
+font-size: 14px !important;
+font-family: Arial !important;
+word-break: break-word !important;
+      }
+</style>
+    <span style="display: block;margin: 0 auto 3.125rem;width: 11.125rem;height: 2.375rem;background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNzgiIGhlaWdodD0iMzgiIHZpZXdCb3g9IjAgMCAxNzggMzgiPgogICAgPGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8cGF0aCBmaWxsPSIjRDFEMUQxIiBkPSJNNC4yODMgMjQuMTA3Yy0uNzA1IDAtMS4yNTgtLjI1Ni0xLjY2LS43NjhoLS4wODVjLjA1Ny41MDIuMDg2Ljc5Mi4wODYuODd2Mi40MzRILjk4NXYtOC42NDhoMS4zMzJsLjIzMS43NzloLjA3NmMuMzgzLS41OTQuOTUtLjg5MiAxLjcwMi0uODkyLjcxIDAgMS4yNjQuMjc0IDEuNjY1LjgyMi40MDEuNTQ4LjYwMiAxLjMwOS42MDIgMi4yODMgMCAuNjQtLjA5NCAxLjE5OC0uMjgyIDEuNjctLjE4OC40NzMtLjQ1Ni44MzMtLjgwMyAxLjA4LS4zNDcuMjQ3LS43NTYuMzctMS4yMjUuMzd6TTMuOCAxOS4xOTNjLS40MDUgMC0uNy4xMjQtLjg4Ni4zNzMtLjE4Ny4yNDktLjI4My42Ni0uMjkgMS4yMzN2LjE3N2MwIC42NDUuMDk1IDEuMTA3LjI4NyAxLjM4Ni4xOTIuMjguNDk1LjQxOS45MS40MTkuNzM0IDAgMS4xMDEtLjYwNSAxLjEwMS0xLjgxNiAwLS41OS0uMDktMS4wMzQtLjI3LTEuMzI5LS4xODItLjI5NS0uNDY1LS40NDMtLjg1Mi0uNDQzem01LjU3IDEuNzk0YzAgLjU5NC4wOTggMS4wNDQuMjkzIDEuMzQ4LjE5Ni4zMDQuNTEzLjQ1Ny45NTQuNDU3LjQzNyAwIC43NS0uMTUyLjk0Mi0uNDU0LjE5Mi0uMzAzLjI4OC0uNzUzLjI4OC0xLjM1MSAwLS41OTUtLjA5Ny0xLjA0LS4yOS0xLjMzOC0uMTk0LS4yOTctLjUxLS40NDUtLjk1LS40NDUtLjQzOCAwLS43NTMuMTQ3LS45NDYuNDQzLS4xOTQuMjk1LS4yOS43NDItLjI5IDEuMzR6bTQuMTUzIDBjMCAuOTc3LS4yNTggMS43NDItLjc3NCAyLjI5My0uNTE1LjU1Mi0xLjIzMy44MjctMi4xNTQuODI3LS41NzYgMC0xLjA4NS0uMTI2LTEuNTI1LS4zNzhhMi41MiAyLjUyIDAgMCAxLTEuMDE1LTEuMDg4Yy0uMjM3LS40NzMtLjM1NS0xLjAyNC0uMzU1LTEuNjU0IDAtLjk4MS4yNTYtMS43NDQuNzY4LTIuMjg4LjUxMi0uNTQ1IDEuMjMyLS44MTcgMi4xNi0uODE3LjU3NiAwIDEuMDg1LjEyNiAxLjUyNS4zNzYuNDQuMjUxLjc3OS42MSAxLjAxNSAxLjA4LjIzNi40NjkuMzU1IDEuMDE5LjM1NSAxLjY0OXpNMTkuNzEgMjRsLS40NjItMi4xLS42MjMtMi42NTNoLS4wMzdMMTcuNDkzIDI0SDE1LjczbC0xLjcwOC02LjAwNWgxLjYzM2wuNjkzIDIuNjU5Yy4xMS40NzYuMjI0IDEuMTMzLjMzOCAxLjk3MWguMDMyYy4wMTUtLjI3Mi4wNzctLjcwNC4xODgtMS4yOTRsLjA4Ni0uNDU3Ljc0Mi0yLjg3OWgxLjgwNGwuNzA0IDIuODc5Yy4wMTQuMDc5LjAzNy4xOTUuMDY3LjM1YTIwLjk5OCAyMC45OTggMCAwIDEgLjE2NyAxLjAwMmMuMDIzLjE2NS4wMzYuMjk5LjA0LjM5OWguMDMyYy4wMzItLjI1OC4wOS0uNjExLjE3Mi0xLjA2LjA4Mi0uNDUuMTQxLS43NTQuMTc3LS45MTFsLjcyLTIuNjU5aDEuNjA2TDIxLjQ5NCAyNGgtMS43ODN6bTcuMDg2LTQuOTUyYy0uMzQ4IDAtLjYyLjExLS44MTcuMzMtLjE5Ny4yMi0uMzEuNTMzLS4zMzguOTM3aDIuMjk5Yy0uMDA4LS40MDQtLjExMy0uNzE3LS4zMTctLjkzNy0uMjA0LS4yMi0uNDgtLjMzLS44MjctLjMzem0uMjMgNS4wNmMtLjk2NiAwLTEuNzIyLS4yNjctMi4yNjYtLjgtLjU0NC0uNTM0LS44MTYtMS4yOS0uODE2LTIuMjY3IDAtMS4wMDcuMjUxLTEuNzg1Ljc1NC0yLjMzNC41MDMtLjU1IDEuMTk5LS44MjUgMi4wODctLjgyNS44NDggMCAxLjUxLjI0MiAxLjk4Mi43MjUuNDcyLjQ4NC43MDkgMS4xNTIuNzA5IDIuMDA0di43OTVoLTMuODczYy4wMTguNDY1LjE1Ni44MjkuNDE0IDEuMDkuMjU4LjI2MS42Mi4zOTIgMS4wODUuMzkyLjM2MSAwIC43MDMtLjAzNyAxLjAyNi0uMTEzYTUuMTMzIDUuMTMzIDAgMCAwIDEuMDEtLjM2djEuMjY4Yy0uMjg3LjE0My0uNTkzLjI1LS45Mi4zMmE1Ljc5IDUuNzkgMCAwIDEtMS4xOTEuMTA0em03LjI1My02LjIyNmMuMjIyIDAgLjQwNi4wMTYuNTUzLjA0OWwtLjEyNCAxLjUzNmExLjg3NyAxLjg3NyAwIDAgMC0uNDgzLS4wNTRjLS41MjMgMC0uOTMuMTM0LTEuMjIyLjQwMy0uMjkyLjI2OC0uNDM4LjY0NC0uNDM4IDEuMTI4VjI0aC0xLjYzOHYtNi4wMDVoMS4yNGwuMjQyIDEuMDFoLjA4Yy4xODctLjMzNy40MzktLjYwOC43NTYtLjgxNGExLjg2IDEuODYgMCAwIDEgMS4wMzQtLjMwOXptNC4wMjkgMS4xNjZjLS4zNDcgMC0uNjIuMTEtLjgxNy4zMy0uMTk3LjIyLS4zMS41MzMtLjMzOC45MzdoMi4yOTljLS4wMDctLjQwNC0uMTEzLS43MTctLjMxNy0uOTM3LS4yMDQtLjIyLS40OC0uMzMtLjgyNy0uMzN6bS4yMyA1LjA2Yy0uOTY2IDAtMS43MjItLjI2Ny0yLjI2Ni0uOC0uNTQ0LS41MzQtLjgxNi0xLjI5LS44MTYtMi4yNjcgMC0xLjAwNy4yNTEtMS43ODUuNzU0LTIuMzM0LjUwNC0uNTUgMS4yLS44MjUgMi4wODctLjgyNS44NDkgMCAxLjUxLjI0MiAxLjk4Mi43MjUuNDczLjQ4NC43MDkgMS4xNTIuNzA5IDIuMDA0di43OTVoLTMuODczYy4wMTguNDY1LjE1Ni44MjkuNDE0IDEuMDkuMjU4LjI2MS42Mi4zOTIgMS4wODUuMzkyLjM2MiAwIC43MDQtLjAzNyAxLjAyNi0uMTEzYTUuMTMzIDUuMTMzIDAgMCAwIDEuMDEtLjM2djEuMjY4Yy0uMjg3LjE0My0uNTkzLjI1LS45MTkuMzJhNS43OSA1Ljc5IDAgMCAxLTEuMTkyLjEwNHptNS44MDMgMGMtLjcwNiAwLTEuMjYtLjI3NS0xLjY2My0uODIyLS40MDMtLjU0OC0uNjA0LTEuMzA3LS42MDQtMi4yNzggMC0uOTg0LjIwNS0xLjc1Mi42MTUtMi4zMDEuNDEtLjU1Ljk3NS0uODI1IDEuNjk1LS44MjUuNzU1IDAgMS4zMzIuMjk0IDEuNzI5Ljg4MWguMDU0YTYuNjk3IDYuNjk3IDAgMCAxLS4xMjQtMS4xOTh2LTEuOTIyaDEuNjQ0VjI0SDQ2LjQzbC0uMzE3LS43NzloLS4wN2MtLjM3Mi41OTEtLjk0Ljg4Ni0xLjcwMi44ODZ6bS41NzQtMS4zMDZjLjQyIDAgLjcyNi0uMTIxLjkyMS0uMzY1LjE5Ni0uMjQzLjMwMi0uNjU3LjMyLTEuMjR2LS4xNzhjMC0uNjQ0LS4xLTEuMTA2LS4yOTgtMS4zODYtLjE5OS0uMjc5LS41MjItLjQxOS0uOTctLjQxOWEuOTYyLjk2MiAwIDAgMC0uODUuNDY1Yy0uMjAzLjMxLS4zMDQuNzYtLjMwNCAxLjM1IDAgLjU5Mi4xMDIgMS4wMzUuMzA2IDEuMzMuMjA0LjI5Ni40OTYuNDQzLjg3NS40NDN6bTEwLjkyMi00LjkyYy43MDkgMCAxLjI2NC4yNzcgMS42NjUuODMuNC41NTMuNjAxIDEuMzEyLjYwMSAyLjI3NSAwIC45OTItLjIwNiAxLjc2LS42MiAyLjMwNC0uNDE0LjU0NC0uOTc3LjgxNi0xLjY5LjgxNi0uNzA1IDAtMS4yNTgtLjI1Ni0xLjY1OS0uNzY4aC0uMTEzbC0uMjc0LjY2MWgtMS4yNTF2LTguMzU3aDEuNjM4djEuOTQ0YzAgLjI0Ny0uMDIxLjY0My0uMDY0IDEuMTg3aC4wNjRjLjM4My0uNTk0Ljk1LS44OTIgMS43MDMtLjg5MnptLS41MjcgMS4zMWMtLjQwNCAwLS43LjEyNS0uODg2LjM3NC0uMTg2LjI0OS0uMjgzLjY2LS4yOSAxLjIzM3YuMTc3YzAgLjY0NS4wOTYgMS4xMDcuMjg3IDEuMzg2LjE5Mi4yOC40OTUuNDE5LjkxLjQxOS4zMzcgMCAuNjA1LS4xNTUuODA0LS40NjUuMTk5LS4zMS4yOTgtLjc2LjI5OC0xLjM1IDAtLjU5MS0uMS0xLjAzNS0uMy0xLjMzYS45NDMuOTQzIDAgMCAwLS44MjMtLjQ0M3ptMy4xODYtMS4xOTdoMS43OTRsMS4xMzQgMy4zNzljLjA5Ni4yOTMuMTYzLjY0LjE5OCAxLjA0MmguMDMzYy4wMzktLjM3LjExNi0uNzE3LjIzLTEuMDQybDEuMTEyLTMuMzc5aDEuNzU3bC0yLjU0IDYuNzczYy0uMjM0LjYyNy0uNTY2IDEuMDk2LS45OTcgMS40MDctLjQzMi4zMTItLjkzNi40NjgtMS41MTIuNDY4LS4yODMgMC0uNTYtLjAzLS44MzMtLjA5MnYtMS4zYTIuOCAyLjggMCAwIDAgLjY0NS4wN2MuMjkgMCAuNTQzLS4wODguNzYtLjI2Ni4yMTctLjE3Ny4zODYtLjQ0NC41MDgtLjgwM2wuMDk2LS4yOTUtMi4zODUtNS45NjJ6Ii8+CiAgICAgICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzMpIj4KICAgICAgICAgICAgPGNpcmNsZSBjeD0iMTkiIGN5PSIxOSIgcj0iMTkiIGZpbGw9IiNFMEUwRTAiLz4KICAgICAgICAgICAgPHBhdGggZmlsbD0iI0ZGRiIgZD0iTTIyLjQ3NCAxNS40NDNoNS4xNjJMMTIuNDM2IDMwLjRWMTAuMzYzaDE1LjJsLTUuMTYyIDUuMDh6Ii8+CiAgICAgICAgPC9nPgogICAgICAgIDxwYXRoIGZpbGw9IiNEMkQyRDIiIGQ9Ik0xMjEuNTQ0IDE0LjU2di0xLjcyOGg4LjI3MnYxLjcyOGgtMy4wMjRWMjRoLTIuMjR2LTkuNDRoLTMuMDA4em0xMy43NDQgOS41NjhjLTEuMjkgMC0yLjM0MS0uNDE5LTMuMTUyLTEuMjU2LS44MS0uODM3LTEuMjE2LTEuOTQ0LTEuMjE2LTMuMzJzLjQwOC0yLjQ3NyAxLjIyNC0zLjMwNGMuODE2LS44MjcgMS44NzItMS4yNCAzLjE2OC0xLjI0czIuMzYuNDAzIDMuMTkyIDEuMjA4Yy44MzIuODA1IDEuMjQ4IDEuODggMS4yNDggMy4yMjQgMCAuMzEtLjAyMS41OTctLjA2NC44NjRoLTYuNDY0Yy4wNTMuNTc2LjI2NyAxLjA0LjY0IDEuMzkyLjM3My4zNTIuODQ4LjUyOCAxLjQyNC41MjguNzc5IDAgMS4zNTUtLjMyIDEuNzI4LS45NmgyLjQzMmEzLjg5MSAzLjg5MSAwIDAgMS0xLjQ4OCAyLjA2NGMtLjczNi41MzMtMS42MjcuOC0yLjY3Mi44em0xLjQ4LTYuNjg4Yy0uNC0uMzUyLS44ODMtLjUyOC0xLjQ0OC0uNTI4cy0xLjAzNy4xNzYtMS40MTYuNTI4Yy0uMzc5LjM1Mi0uNjA1LjgyMS0uNjggMS40MDhoNC4xOTJjLS4wMzItLjU4Ny0uMjQ4LTEuMDU2LS42NDgtMS40MDh6bTcuMDE2LTIuMzA0djEuNTY4Yy41OTctMS4xMyAxLjQ2MS0xLjY5NiAyLjU5Mi0xLjY5NnYyLjMwNGgtLjU2Yy0uNjcyIDAtMS4xNzkuMTY4LTEuNTIuNTA0LS4zNDEuMzM2LS41MTIuOTE1LS41MTIgMS43MzZWMjRoLTIuMjU2di04Ljg2NGgyLjI1NnptNi40NDggMHYxLjMyOGMuNTY1LS45NyAxLjQ4My0xLjQ1NiAyLjc1Mi0xLjQ1Ni42NzIgMCAxLjI3Mi4xNTUgMS44LjQ2NC41MjguMzEuOTM2Ljc1MiAxLjIyNCAxLjMyOC4zMS0uNTU1LjczMy0uOTkyIDEuMjcyLTEuMzEyYTMuNDg4IDMuNDg4IDAgMCAxIDEuODE2LS40OGMxLjA1NiAwIDEuOTA3LjMzIDIuNTUyLjk5Mi42NDUuNjYxLjk2OCAxLjU5Ljk2OCAyLjc4NFYyNGgtMi4yNHYtNC44OTZjMC0uNjkzLS4xNzYtMS4yMjQtLjUyOC0xLjU5Mi0uMzUyLS4zNjgtLjgzMi0uNTUyLTEuNDQtLjU1MnMtMS4wOS4xODQtMS40NDguNTUyYy0uMzU3LjM2OC0uNTM2Ljg5OS0uNTM2IDEuNTkyVjI0aC0yLjI0di00Ljg5NmMwLS42OTMtLjE3Ni0xLjIyNC0uNTI4LTEuNTkyLS4zNTItLjM2OC0uODMyLS41NTItMS40NC0uNTUycy0xLjA5LjE4NC0xLjQ0OC41NTJjLS4zNTcuMzY4LS41MzYuODk5LS41MzYgMS41OTJWMjRoLTIuMjU2di04Ljg2NGgyLjI1NnpNMTY0LjkzNiAyNFYxMi4xNmgyLjI1NlYyNGgtMi4yNTZ6bTcuMDQtLjE2bC0zLjQ3Mi04LjcwNGgyLjUyOGwyLjI1NiA2LjMwNCAyLjM4NC02LjMwNGgyLjM1MmwtNS41MzYgMTMuMDU2aC0yLjM1MmwxLjg0LTQuMzUyeiIvPgogICAgPC9nPgo8L3N2Zz4K) center no-repeat;"></span>
+
+    <div data-custom-class="body">
+    <div><strong><span style="font-size: 26px;"><span data-custom-class="title"><bdt class="block-component"></bdt><bdt class="question"><h1>PRIVACY POLICY</h1></bdt><bdt class="statement-end-if-in-editor"></bdt></span></span></strong></div><div><span style="color: rgb(127, 127, 127);"><strong><span style="font-size: 15px;"><span data-custom-class="subtitle">Last updated <bdt class="question">November 28, 2025</bdt></span></span></strong></span></div><div><br></div><div><br></div><div><br></div><div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">This Privacy Notice for <bdt class="question noTranslate">Munyaradzi Nyamhingura</bdt><bdt class="block-component"> (doing business as <bdt class="question noTranslate">LumaCare</bdt>)<bdt class="statement-end-if-in-editor"></bdt></bdt> (<bdt class="block-component"></bdt>"<strong>we</strong>," "<strong>us</strong>," or "<strong>our</strong>"<bdt class="statement-end-if-in-editor"></bdt></span><span data-custom-class="body_text">), describes how and why we might access, collect, store, use, and/or share (<bdt class="block-component"></bdt>"<strong>process</strong>"<bdt class="statement-end-if-in-editor"></bdt>) your personal information when you use our services (<bdt class="block-component"></bdt>"<strong>Services</strong>"<bdt class="statement-end-if-in-editor"></bdt>), including when you:</span></span></span><span style="font-size: 15px;"><span style="color: rgb(127, 127, 127);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Visit our website<bdt class="block-component"></bdt> at <span style="color: rgb(0, 58, 250);"><bdt class="question noTranslate"><a target="_blank" data-custom-class="link" href="https://lumacare.netlify.app">https://lumacare.netlify.app</a></bdt></span><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"> or any website of ours that links to this Privacy Notice</bdt></span></span></span></span></span></span></span></span></li></ul><div><bdt class="block-component"><span style="font-size: 15px;"><span style="font-size: 15px;"><span style="color: rgb(127, 127, 127);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;">Use <bdt class="question">AI Therapy Assistant</bdt>. <bdt class="question">LumaCare is an AI therapy assistant that provides mental health support conversations using evidence-based techniques like CBT and mindfulness.</bdt></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"></span></bdt></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><span style="color: rgb(127, 127, 127);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Engage with us in other related ways, including any marketing or events<span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><span style="color: rgb(127, 127, 127);"><span data-custom-class="body_text"><strong>Questions or concerns? </strong>Reading this Privacy Notice will help you understand your privacy rights and choices. We are responsible for making decisions about how your personal information is processed. If you do not agree with our policies and practices, please do not use our Services.<bdt class="block-component"></bdt> If you still have any questions or concerns, please contact us at <bdt class="question noTranslate"><a target="_blank" data-custom-class="link" href="mailto:lumacare.therapy@gmail.com">lumacare.therapy@gmail.com</a></bdt>.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><strong><span style="font-size: 15px;"><span data-custom-class="heading_1"><h2>SUMMARY OF KEY POINTS</h2></span></span></strong></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong><em>This summary provides key points from our Privacy Notice, but you can find out more details about any of these topics by clicking the link following each key point or by using our </em></strong></span></span><a data-custom-class="link" href="#toc"><span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text"><strong><em>table of contents</em></strong></span></span></a><span style="font-size: 15px;"><span data-custom-class="body_text"><strong><em> below to find the section you are looking for.</em></strong></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>What personal information do we process?</strong> When you visit, use, or navigate our Services, we may process personal information depending on how you interact with us and the Services, the choices you make, and the products and features you use. Learn more about </span></span><a data-custom-class="link" href="#personalinfo"><span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text">personal information you disclose to us</span></span></a><span data-custom-class="body_text">.</span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>Do we process any sensitive personal information? </strong>Some of the information may be considered <bdt class="block-component"></bdt>"special" or "sensitive"<bdt class="statement-end-if-in-editor"></bdt> in certain jurisdictions, for example your racial or ethnic origins, sexual orientation, and religious beliefs. <bdt class="block-component"></bdt>We may process sensitive personal information when necessary with your consent or as otherwise permitted by applicable law. Learn more about </span></span><a data-custom-class="link" href="#sensitiveinfo"><span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text">sensitive information we process</span></span></a><span data-custom-class="body_text">.</span><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>Do we collect any information from third parties?</strong> <bdt class="block-component"></bdt>We do not collect any information from third parties.<bdt class="else-block"></bdt></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>How do we process your information?</strong> We process your information to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law. We may also process your information for other purposes with your consent. We process your information only when we have a valid legal reason to do so. Learn more about </span></span><a data-custom-class="link" href="#infouse"><span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text">how we process your information</span></span></a><span data-custom-class="body_text">.</span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>In what situations and with which <bdt class="block-component"></bdt>parties do we share personal information?</strong> We may share information in specific situations and with specific <bdt class="block-component"></bdt>third parties. Learn more about </span></span><a data-custom-class="link" href="#whoshare"><span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text">when and with whom we share your personal information</span></span></a><span style="font-size: 15px;"><span data-custom-class="body_text">.<bdt class="block-component"></bdt></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>How do we keep your information safe?</strong> We have adequate <bdt class="block-component"></bdt>organizational<bdt class="statement-end-if-in-editor"></bdt> and technical processes and procedures in place to protect your personal information. However, no electronic transmission over the internet or information storage technology can be guaranteed to be 100% secure, so we cannot promise or guarantee that hackers, cybercriminals, or other <bdt class="block-component"></bdt>unauthorized<bdt class="statement-end-if-in-editor"></bdt> third parties will not be able to defeat our security and improperly collect, access, steal, or modify your information. Learn more about </span></span><a data-custom-class="link" href="#infosafe"><span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text">how we keep your information safe</span></span></a><span data-custom-class="body_text">.</span><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>What are your rights?</strong> Depending on where you are located geographically, the applicable privacy law may mean you have certain rights regarding your personal information. Learn more about </span></span><a data-custom-class="link" href="#privacyrights"><span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text">your privacy rights</span></span></a><span data-custom-class="body_text">.</span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>How do you exercise your rights?</strong> The easiest way to exercise your rights is by <bdt class="block-component"></bdt>visiting <span style="color: rgb(0, 58, 250);"><bdt class="question"><a target="_blank" data-custom-class="link" href="mailto:lumacare.therapy@gmail.com">lumacare.therapy@gmail.com</a></bdt></span><bdt class="else-block"></bdt>, or by contacting us. We will consider and act upon any request in accordance with applicable data protection laws.</span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">Want to learn more about what we do with any information we collect? </span></span><a data-custom-class="link" href="#toc"><span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text">Review the Privacy Notice in full</span></span></a><span style="font-size: 15px;"><span data-custom-class="body_text">.</span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><br></div><div id="toc" style="line-height: 1.5;"><span style="font-size: 15px;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>TABLE OF CONTENTS</h2></span></strong> </span> </span> </span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#infocollect"><span style="color: rgb(0, 58, 250);">1. WHAT INFORMATION DO WE COLLECT?</span></a></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#infouse"><span style="color: rgb(0, 58, 250);">2. HOW DO WE PROCESS YOUR INFORMATION?<bdt class="block-component"></bdt></span></a></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#legalbases"><span style="color: rgb(0, 58, 250);">3. <span style="font-size: 15px;"><span style="color: rgb(0, 58, 250);">WHAT LEGAL BASES DO WE RELY ON TO PROCESS YOUR PERSONAL INFORMATION?</span></span><bdt class="statement-end-if-in-editor"></bdt></span></a></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="#whoshare">4. WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</a></span><span data-custom-class="body_text"><bdt class="block-component"></bdt></a><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#cookies"><span style="color: rgb(0, 58, 250);">5. DO WE USE COOKIES AND OTHER TRACKING TECHNOLOGIES?</span></a><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span><bdt class="block-component"></bdt></span></div><div style="line-height: 1.5;"><a data-custom-class="link" href="#ai"><span style="color: rgb (0, 58, 250);">6. DO WE OFFER ARTIFICIAL INTELLIGENCE-BASED PRODUCTS?</span></a><span style="font-size: 15px;"><bdt class="statement-end-if-in-editor"></bdt></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><bdt class="block-component"></bdt></span></span> <bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#intltransfers"><span style="color: rgb(0, 58, 250);">7. IS YOUR INFORMATION TRANSFERRED INTERNATIONALLY?</span></a><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#inforetain"><span style="color: rgb(0, 58, 250);">8. HOW LONG DO WE KEEP YOUR INFORMATION?</span></a><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><bdt class="block-component"></bdt></span></span></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#infosafe"><span style="color: rgb(0, 58, 250);">9. HOW DO WE KEEP YOUR INFORMATION SAFE?</span></a><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#infominors"><span style="color: rgb(0, 58, 250);">10. DO WE COLLECT INFORMATION FROM MINORS?</span></a><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="#privacyrights">11. WHAT ARE YOUR PRIVACY RIGHTS?</a></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#DNT"><span style="color: rgb(0, 58, 250);">12. CONTROLS FOR DO-NOT-TRACK FEATURES<bdt class="block-component"></bdt></span></a></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#uslaws"><span style="color: rgb(0, 58, 250);">13. DO UNITED STATES RESIDENTS HAVE SPECIFIC PRIVACY RIGHTS?</span></a></span><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></bdt></span></div><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></span></bdt></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><a data-custom-class="link" href="#policyupdates"><span style="color: rgb(0, 58, 250);">14. DO WE MAKE UPDATES TO THIS NOTICE?</span></a></span></div><div style="line-height: 1.5;"><a data-custom-class="link" href="#contact"><span style="color: rgb(0, 58, 250); font-size: 15px;">15. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</span></a></div><div style="line-height: 1.5;"><a data-custom-class="link" href="#request"><span style="color: rgb(0, 58, 250);">16. HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?</span></a></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><br></div><div id="infocollect" style="line-height: 1.5;"><span style="color: rgb(0, 0, 0);"><span style="color: rgb(0, 0, 0); font-size: 15px;"><span style="font-size: 15px; color: rgb(0, 0, 0);"><span style="font-size: 15px; color: rgb(0, 0, 0);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>1. WHAT INFORMATION DO WE COLLECT?</h2></span></strong></span></span></span></span></span><span data-custom-class="heading_2" id="personalinfo" style="color: rgb(0, 0, 0);"><span style="font-size: 15px;"><strong><h3>Personal information you disclose to us</h3></strong></span></span><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short:</em></strong></span></span></span></span><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em> </em></strong><em>We collect personal information that you provide to us.</em></span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We collect personal information that you voluntarily provide to us when you <span style="font-size: 15px;"><bdt class="block-component"></bdt></span>register on the Services, </span><span style="font-size: 15px;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="statement-end-if-in-editor"></bdt></span></span><span data-custom-class="body_text">express an interest in obtaining information about us or our products and Services, when you participate in activities on the Services, or otherwise when you contact us.</span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>Personal Information Provided by You.</strong> The personal information that we collect depends on the context of your interactions with us and the Services, the choices you make, and the products and features you use. The personal information we collect may include the following:<span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt></span></span></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="question">email addresses</bdt></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt></span></span></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="question">passwords</bdt></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt></span></span></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="question">usernames</bdt></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt></span></span></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="question">debit/credit card numbers</bdt></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt></span></span></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="question">contact or authentication data</bdt></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt></span></span></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="question">billing addresses</bdt></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt></span><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></div><div id="sensitiveinfo" style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>Sensitive Information.</strong> <bdt class="block-component"></bdt>When necessary, with your consent or as otherwise permitted by applicable law, we process the following categories of sensitive information:<bdt class="forloop-component"></bdt></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="question">health data</bdt></span></span></li></ul><div><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="question">social security numbers or other government identifiers</bdt></span></span></li></ul><div><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt></span><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>Payment Data.</strong> We may collect data necessary to process your payment if you choose to make purchases, such as your payment instrument number, and the security code associated with your payment instrument. All payment data is handled and stored by<bdt class="forloop-component"></bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span> <bdt class="question">Yoco</bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></span></span></span></span></span>. You may find their privacy notice link(s) here:<span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span> <span style="color: rgb(0, 58, 250);"><bdt class="question"><a target="_blank" data-custom-class="link" href="https://www.yoco.com/za/legal/privacy-policy/">https://www.yoco.com/za/legal/privacy-policy/</a></bdt></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="forloop-component"></bdt><span style="font-size: 15px;"><span data-custom-class="body_text">.<bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"><bdt class="block-component"></bdt></bdt></span></span></span></span><bdt class="block-component"></span></span></bdt></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">All personal information that you provide to us must be true, complete, and accurate, and you must notify us of any changes to such personal information.</span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span><span data-custom-class="heading_2" style="color: rgb(0, 0, 0);"><span style="font-size: 15px;"><strong><h3>Information automatically collected</h3></strong></span></span><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short:</em></strong></span></span></span></span><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em> </em></strong><em>Some information — such as your Internet Protocol (IP) address and/or browser and device characteristics — is collected automatically when you visit our Services.</em></span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We automatically collect certain information when you visit, use, or navigate the Services. This information does not reveal your specific identity (like your name or contact information) but may include device and usage information, such as your IP address, browser and device characteristics, operating system, language preferences, referring URLs, device name, country, location, information about how and when you use our Services, and other technical information. This information is primarily needed to maintain the security and operation of our Services, and for our internal analytics and reporting purposes.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Like many businesses, we also collect information through cookies and similar technologies. <bdt class="block-component"></bdt>You can find out more about this in our Cookie Notice: <bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt><span style="color: rgb(0, 58, 250);"><bdt class="question"><a target="_blank" data-custom-class="link" href="https://app.termly.io/dashboard/website/01a08bea-640b-4d13-88dd-9616d2fe6ef1/cookie-policy">https://app.termly.io/dashboard/website/01a08bea-640b-4d13-88dd-9616d2fe6ef1/cookie-policy</a></bdt></span>.<bdt class="block-component"></bdt></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></span><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">The information we collect includes:<bdt class="block-component"></bdt></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><em>Log and Usage Data.</em> Log and usage data is service-related, diagnostic, usage, and performance information our servers automatically collect when you access or use our Services and which we record in log files. Depending on how you interact with us, this log data may include your IP address, device information, browser type, and settings and information about your activity in the Services<span style="font-size: 15px;"> </span>(such as the date/time stamps associated with your usage, pages and files viewed, searches, and other actions you take such as which features you use), device event information (such as system activity, error reports (sometimes called <bdt class="block-component"></bdt>"crash dumps"<bdt class="statement-end-if-in-editor"></bdt>), and hardware settings).<span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><em>Device Data.</em> We collect device data such as information about your computer, phone, tablet, or other device you use to access the Services. Depending on the device used, this device data may include information such as your IP address (or proxy server), device and application identification numbers, location, browser type, hardware model, Internet service provider and/or mobile carrier, operating system, and system configuration information.<span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></bdt></span></span></span></span></span></span></span></span></li></ul><div><bdt class="block-component"><span style="font-size: 15px;"></bdt></bdt><bdt class="statement-end-if-in-editor"></bdt></bdt></span></span></span><bdt class="block-component"><span style="font-size: 15px;"></span></bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"><bdt class="block-component"></bdt></bdt></span></span></span></span></bdt></span></span></span></span></span></span></span></span><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></div><div style="line-height: 1.5;"><br></div><div id="infouse" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>2. HOW DO WE PROCESS YOUR INFORMATION?</h2></span></strong></span></span></span><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short: </em></strong><em>We process your information to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law.<bdt class="block-component"></bdt> We process the personal information for the following purposes listed below.<bdt class="statement-end-if-in-editor"></bdt> We may also process your information for other purposes <bdt class="block-component"></bdt>only with your prior explicit<bdt class="else-block"></bdt> consent.</em></span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>We process your personal information for a variety of reasons, depending on how you interact with our Services, including:</strong><bdt class="block-component"></bdt></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>To facilitate account creation and authentication and otherwise manage user accounts. </strong>We may process your information so you can create and log in to your account, as well as keep your account in working order.<span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>To deliver and facilitate delivery of services to the user. </strong>We may process your information to provide you with the requested service.<span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></bdt></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>To send administrative information to you. </strong>We may process your information to send you details about our products and services, changes to our terms and policies, and other similar information.<span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></bdt></span></span></span></span></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><strong>To <bdt class="block-component"></bdt>fulfill<bdt class="statement-end-if-in-editor"></bdt> and manage your orders.</strong> We may process your information to <bdt class="block-component"></bdt>fulfill<bdt class="statement-end-if-in-editor"></bdt> and manage your orders, payments, returns, and exchanges made through the Services.</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><p style="font-size: 15px; line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></bdt></span></span></span></span></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px; line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></bdt></span></span></span></span></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px; line-height: 1.5;"><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px; line-height: 1.5;"><bdt class="block-component"></bdt></p><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>To request feedback. </strong>We may process your information when necessary to request feedback and to contact you about your use of our Services.<span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></bdt></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></bdt></span></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></bdt></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"><span data-custom-class="body_text"></bdt></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></bdt></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><strong>To protect our Services.</strong> We may process your information as part of our efforts to keep our Services safe and secure, including fraud monitoring and prevention.</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><strong>To identify usage trends.</strong> We may process information about how you use our Services to better understand how they are being used so we can improve them.</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></bdt></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></bdt></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></bdt></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><strong>To save or protect an individual's vital interest.</strong> We may process your information when necessary to save or protect an individual’s vital interest, such as to prevent harm.</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></bdt></span></span><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><div style="line-height: 1.5;"><br></div><div id="legalbases" style="line-height: 1.5;"><strong><span style="font-size: 15px;"><span data-custom-class="heading_1"><h2>3. WHAT LEGAL BASES DO WE RELY ON TO PROCESS YOUR INFORMATION?</h2></span></span></strong><em><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>In Short: </strong>We only process your personal information when we believe it is necessary and we have a valid legal reason (i.e.<bdt class="block-component"></bdt>,<bdt class="statement-end-if-in-editor"></bdt> legal basis) to do so under applicable law, like with your consent, to comply with laws, to provide you with services to enter into or <bdt class="block-component"></bdt>fulfill<bdt class="statement-end-if-in-editor"></bdt> our contractual obligations, to protect your rights, or to <bdt class="block-component"></bdt>fulfill<bdt class="statement-end-if-in-editor"></bdt> our legitimate business interests.</span></span></em></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><em><span style="font-size: 15px;"><span data-custom-class="body_text"><strong><u>If you are located in the EU or UK, this section applies to you.</u></strong></span></span></em></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">The General Data Protection Regulation (GDPR) and UK GDPR require us to explain the valid legal bases we rely on in order to process your personal information. As such, we may rely on the following legal bases to process your personal information:</span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>Consent. </strong>We may process your information if you have given us permission (i.e.<bdt class="block-component"></bdt>,<bdt class="statement-end-if-in-editor"></bdt> consent) to use your personal information for a specific purpose. You can withdraw your consent at any time. Learn more about </span></span><a data-custom-class="link" href="#withdrawconsent"><span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text">withdrawing your consent</span></span></a><span data-custom-class="body_text">.</span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><strong>Performance of a Contract.</strong> We may process your personal information when we believe it is necessary to <bdt class="block-component"></bdt>fulfill<bdt class="statement-end-if-in-editor"></bdt> our contractual obligations to you, including providing our Services or at your request prior to entering into a contract with you.</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><strong>Legitimate Interests.</strong> We may process your information when we believe it is reasonably necessary to achieve our legitimate business interests and those interests do not outweigh your interests and fundamental rights and freedoms. For example, we may process your personal information for some of the purposes described in order to:</span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></div><ul style="margin-left: 40px;"><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt>Analyze<bdt class="statement-end-if-in-editor"></bdt> how our Services are used so we can improve them to engage and retain users<bdt class="statement-end-if-in-editor"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></div><ul style="margin-left: 40px;"><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">Diagnose problems and/or prevent fraudulent activities<bdt class="statement-end-if-in-editor"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></div><ul style="margin-left: 40px;"><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">Understand how our users use our products and services so we can improve user experience<bdt class="statement-end-if-in-editor"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><strong>Legal Obligations.</strong> We may process your information where we believe it is necessary for compliance with our legal obligations, such as to cooperate with a law enforcement body or regulatory agency, exercise or defend our legal rights, or disclose your information as evidence in litigation in which we are involved.<bdt class="statement-end-if-in-editor"></bdt><br></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><strong>Vital Interests.</strong> We may process your information where we believe it is necessary to protect your vital interests or the vital interests of a third party, such as situations involving potential threats to the safety of any person.</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"><bdt class="block-component"></bdt></bdt></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><strong><u><em>If you are located in Canada, this section applies to you.</em></u></strong></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="statement-end-if-in-editor"></bdt></span></span></div><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">We may process your information if you have given us specific permission (i.e.<bdt class="block-component"></bdt>,<bdt class="statement-end-if-in-editor"></bdt> express consent) to use your personal information for a specific purpose, or in situations where your permission can be inferred (i.e.<bdt class="block-component"></bdt>,<bdt class="statement-end-if-in-editor"></bdt> implied consent). You can </span></span><a data-custom-class="link" href="#withdrawconsent"><span data-custom-class="body_text"><span style="color: rgb(0, 58, 250); font-size: 15px;">withdraw your consent</span></span></a><span data-custom-class="body_text"><span style="font-size: 15px;"> at any time.</span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">In some exceptional cases, we may be legally permitted under applicable law to process your information without your consent, including, for example:</span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">If collection is clearly in the interests of an individual and consent cannot be obtained in a timely way</span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">For investigations and fraud detection and prevention<bdt class="statement-end-if-in-editor"></bdt></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">For business transactions provided certain conditions are met</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">If it is contained in a witness statement and the collection is necessary to assess, process, or settle an insurance claim</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">For identifying injured, ill, or deceased persons and communicating with next of kin</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">If we have reasonable grounds to believe an individual has been, is, or may be victim of financial abuse<bdt class="statement-end-if-in-editor"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">If it is reasonable to expect collection and use with consent would compromise the availability or the accuracy of the information and the collection is reasonable for purposes related to investigating a breach of an agreement or a contravention of the laws of Canada or a province<bdt class="statement-end-if-in-editor"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">If disclosure is required to comply with a subpoena, warrant, court order, or rules of the court relating to the production of records<bdt class="statement-end-if-in-editor"></bdt></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">If it was produced by an individual in the course of their employment, business, or profession and the collection is consistent with the purposes for which the information was produced<bdt class="statement-end-if-in-editor"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">If the collection is solely for journalistic, artistic, or literary purposes<bdt class="statement-end-if-in-editor"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">If the information is publicly available and is specified by the regulations</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;">We may disclose de-identified information for approved research or statistics projects, subject to ethics oversight and confidentiality commitments<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><div style="line-height: 1.5;"><br></div><div id="whoshare" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>4. WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short:</em></strong><em> We may share information in specific situations described in this section and/or with the following <bdt class="block-component"></bdt>third parties.</em></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>Vendors, Consultants, and Other Third-Party Service Providers.</strong> We may share your data with third-party vendors, service providers, contractors, or agents (<bdt class="block-component"></bdt>"<strong>third parties</strong>"<bdt class="statement-end-if-in-editor"></bdt>) who perform services for us or on our behalf and require access to such information to do that work. <bdt class="block-component"></bdt>We have contracts in place with our third parties, which are designed to help safeguard your personal information. This means that they cannot do anything with your personal information unless we have instructed them to do it. They will also not share your personal information with any <bdt class="block-component"></bdt>organization<bdt class="statement-end-if-in-editor"></bdt> apart from us. They also commit to pr</span><span data-custom-class="body_text">otect the data they hold on our behalf and to retain it for the period we instruct. <bdt class="statement-end-if-in-editor"></bdt></span><bdt class="block-component"></bdt></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">The <bdt class="block-component"></bdt>third parties we may share personal information with are as follows:</span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span></span></span></span></span></bdt></span></span></span></bdt></span></span></span></span></span></span><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><span style="font-size: 15px;"><bdt class="block-component"></bdt></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>Invoice and Billing</strong></span></span></span></li></ul><div style="margin-left: 40px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="forloop-component"><span data-custom-class="body_text"></span></bdt><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="block-component"></bdt><bdt class="question">Yoco</bdt><bdt class="block-component"></bdt></span></span></span></span><bdt class="forloop-component"></bdt><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>Web and Mobile Analytics</strong></span></span></span></li></ul><div style="margin-left: 40px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="forloop-component"><span data-custom-class="body_text"></span></bdt><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="block-component"></bdt><bdt class="question">Google Analytics</bdt><bdt class="block-component"></bdt></span></span></span></span><bdt class="forloop-component"></bdt><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>Website Hosting</strong></span></span></span></li></ul><div style="margin-left: 40px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="forloop-component"><span data-custom-class="body_text"></span></bdt><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="block-component"></bdt><bdt class="question"> Netlify</bdt><bdt class="block-component"></bdt></span></span></span></span><bdt class="forloop-component"></bdt><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span><span data-custom-class="body_text"></span><span data-custom-class="body_text"></span><span data-custom-class="body_text"></span><span data-custom-class="body_text"></span><span data-custom-class="body_text"></span><span data-custom-class="body_text"></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">We <bdt class="block-component"></bdt>also <bdt class="statement-end-if-in-editor"></bdt>may need to share your personal information in the following situations:</span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><strong>Business Transfers.</strong> We may share or transfer your information in connection with, or during negotiations of, any merger, sale of company assets, financing, or acquisition of all or a portion of our business to another company.</span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"><span data-custom-class="body_text"></span></bdt></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></bdt></span></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="block-component"><span data-custom-class="heading_1"><bdt class="block-component"></bdt></span></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div id="cookies" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>5. DO WE USE COOKIES AND OTHER TRACKING TECHNOLOGIES?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short:</em></strong><em> We may use cookies and other tracking technologies to collect and store your information.</em></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We may use cookies and similar tracking technologies (like web beacons and pixels) to gather information when you interact with our Services. Some online tracking technologies help us maintain the security of our Services<bdt class="block-component"></bdt> and your account<bdt class="statement-end-if-in-editor"></bdt>, prevent crashes, fix bugs, save your preferences, and assist with basic site functions.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We also permit third parties and service providers to use online tracking technologies on our Services for analytics and advertising, including to help manage and display advertisements, to tailor advertisements to your interests, or to send abandoned shopping cart reminders (depending on your communication preferences). The third parties and service providers use their technology to provide advertising about products and services tailored to your interests which may appear either on our Services or on other websites.</span></span></span><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><br></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">To the extent these online tracking technologies are deemed to be a <bdt class="block-component"></bdt>"sale"/"sharing"<bdt class="statement-end-if-in-editor"></bdt> (which includes targeted advertising, as defined under the applicable laws) under applicable US state laws, you can opt out of these online tracking technologies by submitting a request as described below under section <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span><span data-custom-class="body_text"><a data-custom-class="link" href="#uslaws"><span style="color: rgb(0, 58, 250); font-size: 15px;">DO UNITED STATES RESIDENTS HAVE SPECIFIC PRIVACY RIGHTS?</span></a></span><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span><bdt class="statement-end-if-in-editor"></bdt></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Specific information about how we use such technologies and how you can refuse certain cookies is set out in our Cookie Notice<span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span>: <span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text"><bdt class="question"><a target="_blank" data-custom-class="link" href="https://app.termly.io/dashboard/website/01a08bea-640b-4d13-88dd-9616d2fe6ef1/cookie-policy">https://app.termly.io/dashboard/website/01a08bea-640b-4d13-88dd-9616d2fe6ef1/cookie-policy</a></bdt></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><bdt class="block-component"></bdt>.</span></span></span></span></span><bdt class="block-component"><span style="font-size: 15px;"></span></bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span></span><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><div style="line-height: 1.5;"><br></div><div id="ai" style="line-height: 1.5;"><span style="font-size: 15px;"><strong><span data-custom-class="heading_1"><h2>6. DO WE OFFER ARTIFICIAL INTELLIGENCE-BASED PRODUCTS?</h2></span></strong><strong><em><span data-custom-class="body_text">In Short:</span></em></strong><em><span data-custom-class="body_text"> We offer products, features, or tools powered by artificial intelligence, machine learning, or similar technologies.</span></em></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">As part of our Services, we offer products, features, or tools powered by artificial intelligence, machine learning, or similar technologies (collectively, <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt>AI Products<bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt>). These tools are designed to enhance your experience and provide you with innovative solutions. The terms in this Privacy Notice govern your use of the AI Products within our Services.</span><bdt class="block-component"></bdt></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><strong><span data-custom-class="body_text">Use of AI Technologies</span></strong></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">We provide the AI Products through third-party service providers (<bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt>AI Service Providers<bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt>), including <bdt class="forloop-component"></bdt><bdt class="block-component"></bdt><bdt class="question">My own AI technology</bdt><bdt class="block-component"></bdt><bdt class="forloop-component"></bdt>. As outlined in this Privacy Notice, your input, output, and personal information will be shared with and processed by these AI Service Providers to enable your use of our AI Products for purposes outlined in <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt></span></span><span data-custom-class="body_text"><a data-custom-class="link" href="#legalbases"><span style="color: rgb(0, 58, 250); font-size: 15px;">WHAT LEGAL BASES DO WE RELY ON TO PROCESS YOUR PERSONAL INFORMATION?</span></a><span style="font-size: 15px;"><bdt class="else-block"></bdt><bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt> You must not use the AI Products in any way that violates the terms or policies of any AI Service Provider.</span><bdt class="statement-end-if-in-editor"></bdt></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><br></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><strong><span data-custom-class="body_text">Our AI Products</span></strong></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><br></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">Our AI Products are designed for the following functions:</span><bdt class="forloop-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="question"><span data-custom-class="body_text">Chatbot or virtual assistant</span></bdt></span></li></ul><div><span style="font-size: 15px;"><bdt class="forloop-component"></bdt><br></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><strong><span data-custom-class="body_text">How We Process Your Data Using AI</span></strong></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><br></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">All personal information processed using our AI Products is handled in line with our Privacy Notice and our agreement with third parties. This ensures high security and safeguards your personal information throughout the process, giving you peace of mind about your data's safety.</span><bdt class="block-component"></bdt></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><strong><span data-custom-class="body_text">How to Opt Out</span></strong></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">We believe in giving you the power to decide how your data is used. To opt out, you can:</span><bdt class="forloop-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="question"><span data-custom-class="body_text">Log in to your account settings and update your user account</span></bdt></span></li></ul><div><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="question"><span data-custom-class="body_text">Contact us using the contact information provided</span></bdt></span></li></ul><div><span style="font-size: 15px;"><bdt class="forloop-component"></bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="statement-end-if-in-editor"></bdt></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span><bdt class="block-component"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></bdt></span></span></span></span></span></span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div id="intltransfers" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>7. IS YOUR INFORMATION TRANSFERRED INTERNATIONALLY?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short: </em></strong><em>We may transfer, store, and process your information in countries other than your own.</em></span></span></span></div><div style="line-height: 1.5;"><br></div><div data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Our servers are located in<span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></span> the <span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="question">United States</bdt></span></span></span></span><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></span></bdt><bdt class="block-component"></bdt></span></span></span></span></span></span></bdt><bdt class="forloop-component"></bdt></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">. Regardless of your location,</span><span data-custom-class="body_text"> please be aware that your information may be transferred to, stored by, and processed by us in our facilities and in the facilities of the third parties with whom we may share your personal information (see <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span></span><a data-custom-class="link" href="#whoshare"><span style="font-size: 15px;"><span style="color: rgb(0, 58, 250);">WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</span></span></a><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt> above), including facilities in</span></span></span><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="forloop-component"></bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt> <bdt class="question">South Africa,<span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="else-block"></bdt></span></span></span></span></span></span></bdt></span></span></span></span></span></span></span></span></span><bdt class="forloop-component"></bdt></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"> and other countries.</span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">If you are a resident in the European Economic Area (EEA), United Kingdom (UK), or Switzerland, then these countries may not necessarily have data protection laws or other similar laws as comprehensive as those in your country. However, we will take all necessary measures to protect your personal information in accordance with this Privacy Notice and applicable law.<span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">European Commission's Standard Contractual Clauses:</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We have implemented measures to protect your personal information, including by using the European Commission's Standard Contractual Clauses for transfers of personal information between our group companies and between us and our third-party providers. These clauses require all recipients to protect all personal information that they process originating from the EEA or UK in accordance with European data protection laws and regulations.<span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span> </span>Our Standard Contractual Clauses can be provided upon request.<span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span> </span>We have implemented similar appropriate safeguards with our third-party service providers and partners and further details can be provided upon request.<span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div id="inforetain" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>8. HOW LONG DO WE KEEP YOUR INFORMATION?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short: </em></strong><em>We keep your information for as long as necessary to <bdt class="block-component"></bdt>fulfill<bdt class="statement-end-if-in-editor"></bdt> the purposes outlined in this Privacy Notice unless otherwise required by law.</em></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We will only keep your personal information for as long as it is necessary for the purposes set out in this Privacy Notice, unless a longer retention period is required or permitted by law (such as tax, accounting, or other legal requirements).<bdt class="block-component"></bdt> No purpose in this notice will require us keeping your personal information for longer than <span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span><bdt class="block-component"></bdt>the period of time in which users have an account with us<bdt class="block-component"></bdt><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="else-block"></bdt></span></span></span>.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">When we have no ongoing legitimate business need to process your personal information, we will either delete or <bdt class="block-component"></bdt>anonymize<bdt class="statement-end-if-in-editor"></bdt> such information, or, if this is not possible (for example, because your personal information has been stored in backup archives), then we will securely store your personal information and isolate it from any further processing until deletion is possible.<span style="color: rgb(89, 89, 89);"><bdt class="block-component"></bdt></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div id="infosafe" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>9. HOW DO WE KEEP YOUR INFORMATION SAFE?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short: </em></strong><em>We aim to protect your personal information through a system of <bdt class="block-component"></bdt>organizational<bdt class="statement-end-if-in-editor"></bdt> and technical security measures.</em></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We have implemented appropriate and reasonable technical and <bdt class="block-component"></bdt>organizational<bdt class="statement-end-if-in-editor"></bdt> security measures designed to protect the security of any personal information we process. However, despite our safeguards and efforts to secure your information, no electronic transmission over the Internet or information storage technology can be guaranteed to be 100% secure, so we cannot promise or guarantee that hackers, cybercriminals, or other <bdt class="block-component"></bdt>unauthorized<bdt class="statement-end-if-in-editor"></bdt> third parties will not be able to defeat our security and improperly collect, access, steal, or modify your information. Although we will do our best to protect your personal information, transmission of personal information to and from our Services is at your own risk. You should only access the Services within a secure environment.<span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div id="infominors" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>10. DO WE COLLECT INFORMATION FROM MINORS?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short:</em></strong><em> We do not knowingly collect data from or market to <bdt class="block-component"></bdt>children under 18 years of age<bdt class="block-component"></bdt> or the equivalent age as specified by law in your jurisdiction<bdt class="statement-end-if-in-editor"></bdt><bdt class="else-block"></bdt>.</em><bdt class="block-component"></bdt></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We do not knowingly collect, solicit data from, or market to children under 18 years of age<bdt class="block-component"></bdt> or the equivalent age as specified by law in your jurisdiction<bdt class="statement-end-if-in-editor"></bdt>, nor do we knowingly sell such personal information. By using the Services, you represent that you are at least 18<bdt class="block-component"></bdt> or the equivalent age as specified by law in your jurisdiction<bdt class="statement-end-if-in-editor"></bdt> or that you are the parent or guardian of such a minor and consent to such minor dependent’s use of the Services. If we learn that personal information from users less than 18 years of age<bdt class="block-component"></bdt> or the equivalent age as specified by law in your jurisdiction<bdt class="statement-end-if-in-editor"></bdt> has been collected, we will deactivate the account and take reasonable measures to promptly delete such data from our records. If you become aware of any data we may have collected from children under age 18<bdt class="block-component"></bdt> or the equivalent age as specified by law in your jurisdiction<bdt class="statement-end-if-in-editor"></bdt>, please contact us at <span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt><bdt class="question"><a target="_blank" data-custom-class="link" href="mailto:lumacare.therapy@gmail.com">lumacare.therapy@gmail.com</a></bdt><bdt class="else-block"></bdt></span></span>.</span><span data-custom-class="body_text"><bdt class="else-block"><bdt class="block-component"></bdt></span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div id="privacyrights" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>11. WHAT ARE YOUR PRIVACY RIGHTS?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short:</em></strong><em> <span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span data-custom-class="body_text"><em><bdt class="block-component"></bdt></em></span></span></span><bdt class="block-component"></bdt>Depending on your state of residence in the US or in <bdt class="else-block"></bdt>some regions, such as <bdt class="block-component"></bdt>the European Economic Area (EEA), United Kingdom (UK), Switzerland, and Canada<bdt class="block-component"></bdt>, you have rights that allow you greater access to and control over your personal information.<span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span data-custom-class="body_text"><em><bdt class="statement-end-if-in-editor"></bdt></em></span></span> </span>You may review, change, or terminate your account at any time, depending on your country, province, or state of residence.</em><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">In some regions (like <bdt class="block-component"></bdt>the EEA, UK, Switzerland, and Canada<bdt class="block-component"></bdt>), you have certain rights under applicable data protection laws. These may include the right (i) to request access and obtain a copy of your personal information, (ii) to request rectification or erasure; (iii) to restrict the processing of your personal information; (iv) if applicable, to data portability; and (v) not to be subject to automated decision-making.<bdt class="block-component"></bdt> If a decision that produces legal or similarly significant effects is made solely by automated means, we will inform you, explain the main factors, and offer a simple way to request human review.<bdt class="statement-end-if-in-editor"></bdt> In certain circumstances, you may also have the right to object to the processing of your personal information. You can make such a request by contacting us by using the contact details provided in the section <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span></span><a data-custom-class="link" href="#contact"><span style="font-size: 15px; color: rgb(0, 58, 250);"><span style="font-size: 15px; color: rgb(0, 58, 250);"><span data-custom-class="body_text">HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</span></span></span></a><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt> below.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We will consider and act upon any request in accordance with applicable data protection laws.<bdt class="block-component"></bdt></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"> </span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">If you are located in the EEA or UK and you believe we are unlawfully processing your personal information, you also have the right to complain to your <span style="font-size: 15px;"><span style="color: rgb(0, 58, 250);"><span data-custom-class="body_text"><span style="color: rgb(0, 58, 250);"><span data-custom-class="body_text"><a data-custom-class="link" href="https://ec.europa.eu/justice/data-protection/bodies/authorities/index_en.htm" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">Member State data protection authority</span></a></span></span></span></span></span> or </span></span></span><a data-custom-class="link" href="https://ico.org.uk/make-a-complaint/data-protection-complaints/data-protection-complaints/" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px; color: rgb(0, 58, 250);"><span style="font-size: 15px; color: rgb(0, 58, 250);"><span data-custom-class="body_text">UK data protection authority</span></span></span></a><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">If you are located in Switzerland, you may contact the <span style="font-size: 15px;"><span style="color: rgb(0, 58, 250);"><span data-custom-class="body_text"><span style="color: rgb(0, 58, 250);"><span data-custom-class="body_text"><span style="color: rgb(0, 58, 250); font-size: 15px;"><a data-custom-class="link" href="https://www.edoeb.admin.ch/edoeb/en/home.html" rel="noopener noreferrer" target="_blank">Federal Data Protection and Information Commissioner</a></span></span></span></span></span></span>.</span></span></span></div><div style="line-height: 1.5;"><br></div><div id="withdrawconsent" style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><u>Withdrawing your consent:</u></strong> If we are relying on your consent to process your personal information,<bdt class="block-component"></bdt> which may be express and/or implied consent depending on the applicable law,<bdt class="statement-end-if-in-editor"></bdt> you have the right to withdraw your consent at any time. You can withdraw your consent at any time by contacting us by using the contact details provided in the section <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span></span><a data-custom-class="link" href="#contact"><span style="font-size: 15px; color: rgb(0, 58, 250);"><span style="font-size: 15px; color: rgb(0, 58, 250);"><span data-custom-class="body_text">HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</span></span></span></a><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt> below<bdt class="block-component"></bdt>.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">However, please note that this will not affect the lawfulness of the processing before its withdrawal nor,<bdt class="block-component"></bdt> when applicable law allows,<bdt class="statement-end-if-in-editor"></bdt> will it affect the processing of your personal information conducted in reliance on lawful processing grounds other than consent.<bdt class="block-component"></bdt></span></span><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt><span style="font-size: 15px;"><span data-custom-class="heading_2"><strong><h3>Account Information</h3></strong></span></span><span data-custom-class="body_text"><span style="font-size: 15px;">If you would at any time like to review or change the information in your account or terminate your account, you can:<bdt class="forloop-component"></bdt></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="question">Contact us using the contact information provided.</bdt></span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="question">Log in to your account settings and update your user account.</bdt></span></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">Upon your request to terminate your account, we will deactivate or delete your account and information from our active databases. However, we may retain some information in our files to prevent fraud, troubleshoot problems, assist with any investigations, enforce our legal terms and/or comply with applicable legal requirements.</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><u>Cookies and similar technologies:</u></strong> Most Web browsers are set to accept cookies by default. If you prefer, you can usually choose to set your browser to remove cookies and to reject cookies. If you choose to remove cookies or reject cookies, this could affect certain features or services of our Services. <bdt class="block-component"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span>For further information, please see our Cookie Notice: <span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(0, 58, 250);"><bdt class="question"><a target="_blank" data-custom-class="link" href="https://app.termly.io/dashboard/website/01a08bea-640b-4d13-88dd-9616d2fe6ef1/cookie-policy">https://app.termly.io/dashboard/website/01a08bea-640b-4d13-88dd-9616d2fe6ef1/cookie-policy</a></bdt></span>.<bdt class="block-component"></bdt><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span></span></span></span><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px;">If you have questions or comments about your privacy rights, you may email us at <bdt class="question noTranslate"><a target="_blank" data-custom-class="link" href="mailto:lumacare.therapy@gmail.com">lumacare.therapy@gmail.com</a></bdt>.</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt></div><div style="line-height: 1.5;"><br></div><div id="DNT" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>12. CONTROLS FOR DO-NOT-TRACK FEATURES</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Most web browsers and some mobile operating systems and mobile applications include a Do-Not-Track (<bdt class="block-component"></bdt>"DNT"<bdt class="statement-end-if-in-editor"></bdt>) feature or setting you can activate to signal your privacy preference not to have data about your online browsing activities monitored and collected. At this stage, no uniform technology standard for <bdt class="block-component"></bdt>recognizing<bdt class="statement-end-if-in-editor"></bdt> and implementing DNT signals has been <bdt class="block-component"></bdt>finalized<bdt class="statement-end-if-in-editor"></bdt>. As such, we do not currently respond to DNT browser signals or any other mechanism that automatically communicates your choice not to be tracked online. If a standard for online tracking is adopted that we must follow in the future, we will inform you about that practice in a revised version of this Privacy Notice.</span></span></span><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><br></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">California law requires us to let you know how we respond to web browser DNT signals. Because there currently is not an industry or legal standard for <bdt class="block-component"></bdt>recognizing<bdt class="statement-end-if-in-editor"></bdt> or <bdt class="block-component"></bdt>honoring<bdt class="statement-end-if-in-editor"></bdt> DNT signals, we do not respond to them at this time.</span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"></span></bdt></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></div><div style="line-height: 1.5;"><br></div><div id="uslaws" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>13. DO UNITED STATES RESIDENTS HAVE SPECIFIC PRIVACY RIGHTS?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong><em>In Short: </em></strong><em>If you are a resident of<bdt class="block-component"></bdt> California, Colorado, Connecticut, Delaware, Florida, Indiana, Iowa, Kentucky, Maryland, Minnesota, Montana, Nebraska, New Hampshire, New Jersey, Oregon, Rhode Island, Tennessee, Texas, Utah, or Virginia<bdt class="else-block"></bdt>, you may have the right to request access to and receive details about the personal information we maintain about you and how we have processed it, correct inaccuracies, get a copy of, or delete your personal information. You may also have the right to withdraw your consent to our processing of your personal information. These rights may be limited in some circumstances by applicable law. More information is provided below.</em></span><strong><span data-custom-class="heading_2"><h3>Categories of Personal Information We Collect</h3></span></strong><span data-custom-class="body_text">The table below shows the categories of personal information we have collected in the past twelve (12) months. The table includes illustrative examples of each category and does not reflect the personal information we collect from you. For a comprehensive inventory of all personal information we process, please refer to the section <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span></span><a data-custom-class="link" href="#infocollect"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(0, 58, 250);"><span data-custom-class="body_text"><span data-custom-class="link">WHAT INFORMATION DO WE COLLECT?</span></span></span></span></a><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span></span></div><div style="line-height: 1.5;"><br></div><table style="width: 100%;"><thead><tr><th style="width: 33.8274%; border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black; text-align: left;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>Category</strong></span></span></span></th><th style="width: 51.4385%; border-top: 1px solid black; border-right: 1px solid black; text-align: left;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>Examples</strong></span></span></span></th><th style="width: 14.9084%; border-right: 1px solid black; border-top: 1px solid black; text-align: center; text-align: left;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>Collected</strong></span></span></span></th></tr></thead><tbody><tr><td style="width: 33.8274%; border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">A. Identifiers</span></span></span></div></td><td style="width: 51.4385%; border-top: 1px solid black; border-right: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Contact details, such as real name, alias, postal address, telephone or mobile contact number, unique personal identifier, online identifier, Internet Protocol address, email address, and account name</span></span></span></div></td><td style="width: 14.9084%; text-align: center; vertical-align: middle; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"><bdt class="block-component"><bdt class="forloop-component"></bdt>YES<bdt class="forloop-component"></bdt><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="statement-end-if-in-editor"></bdt></bdt></bdt></bdt></span><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></div><div style="line-height: 1.5;"><br></div></td></tr></tbody></table><div style="line-height: 1.5;"><bdt class="block-component"></bdt></div><table style="width: 100%;"><tbody><tr><td style="width: 33.8274%; border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">B. Personal information as defined in the California Customer Records statute</span></span></span></div></td><td style="width: 51.4385%; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Name, contact information, education, employment, employment history, and financial information</span></span></span></div></td><td style="width: 14.9084%; text-align: center; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="forloop-component"><bdt class="block-component"><bdt class="forloop-component"></bdt><bdt class="forloop-component"></bdt>YES<bdt class="forloop-component"></bdt><bdt class="block-component"></bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="statement-end-if-in-editor"></bdt></bdt></bdt></span></span></span></div><div style="line-height: 1.5;"><br></div></td></tr></tbody></table><div style="line-height: 1.5;"><bdt class="block-component"></bdt></div><table style="width: 100%;"><tbody><tr><td style="width: 33.8274%; border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>C<bdt class="else-block"></bdt>. Protected classification characteristics under state or federal law</span></span></span></div></td><td style="width: 51.4385%; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Gender, age, date of birth, race and ethnicity, national origin, marital status, and other demographic data</span></span></span></div></td><td style="width: 14.9084%; text-align: center; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><br></div><div data-custom-class="body_text" style="line-height: 1.5;"><bdt class="forloop-component"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt>NO</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></div><div style="line-height: 1.5;"><br></div></td></tr><tr><td style="width: 33.8274%; border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>D<bdt class="else-block"></bdt>. Commercial information</span></span></span></div></td><td style="width: 51.4385%; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Transaction information, purchase history, financial details, and payment information</span></span></span></div></td><td style="width: 14.9084%; text-align: center; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><br></div><div data-custom-class="body_text" style="line-height: 1.5;"><bdt class="forloop-component"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt></span></bdt><span data-custom-class="body_text"><bdt class="block-component"></bdt>YES<bdt class="statement-end-if-in-editor"></bdt><bdt class="forloop-component"></span></bdt><span data-custom-class="body_text"><bdt class="block-component"></bdt><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></span></bdt></div><div style="line-height: 1.5;"><br></div></td></tr><tr><td style="width: 33.8274%; border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>E<bdt class="else-block"></bdt>. Biometric information</span></span></span></div></td><td style="width: 51.4385%; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Fingerprints and voiceprints</span></span></span></div></td><td style="width: 14.9084%; text-align: center; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><br></div><div data-custom-class="body_text" style="line-height: 1.5;"><bdt class="forloop-component"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt></bdt></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt>NO</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></div><div style="line-height: 1.5;"><br></div></td></tr><tr><td style="width: 33.8274%; border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>F<bdt class="else-block"></bdt>. Internet or other similar network activity</span></span></span></div></td><td style="width: 51.4385%; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Browsing history, search history, online <bdt class="block-component"></bdt>behavior<bdt class="statement-end-if-in-editor"></bdt>, interest data, and interactions with our and other websites, applications, systems, and advertisements</span></span></span></div></td><td style="width: 14.9084%; text-align: center; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><br></div><div data-custom-class="body_text" style="line-height: 1.5;"><bdt class="forloop-component"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt></span></bdt><span data-custom-class="body_text"><bdt class="block-component"></bdt>YES<bdt class="statement-end-if-in-editor"></bdt><bdt class="forloop-component"></span></bdt><span data-custom-class="body_text"><bdt class="block-component"></bdt><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></span></bdt></div><div style="line-height: 1.5;"><br></div></td></tr><tr><td style="width: 33.8274%; border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>G<bdt class="else-block"></bdt>. Geolocation data</span></span></span></div></td><td style="width: 51.4385%; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Device location</span></span></span></div></td><td style="width: 14.9084%; text-align: center; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><br></div><div data-custom-class="body_text" style="line-height: 1.5;"><bdt class="forloop-component"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt>NO</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></div><div style="line-height: 1.5;"><br></div></td></tr><tr><td style="width: 33.8274%; border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>H<bdt class="else-block"></bdt>. Audio, electronic, sensory, or similar information</span></span></span></div></td><td style="width: 51.4385%; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Images and audio, video or call recordings created in connection with our business activities</span></span></span></div></td><td style="width: 14.9084%; text-align: center; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><br></div><div data-custom-class="body_text" style="line-height: 1.5;"><bdt class="forloop-component"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt></bdt></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt>NO</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></div><div style="line-height: 1.5;"><br></div></td></tr><tr><td style="width: 33.8274%; border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>I<bdt class="else-block"></bdt>. Professional or employment-related information</span></span></span></div></td><td style="width: 51.4385%; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Business contact details in order to provide you our Services at a business level or job title, work history, and professional qualifications if you apply for a job with us</span></span></span></div></td><td style="width: 14.9084%; text-align: center; border-right: 1px solid black; border-top: 1px solid black;"><div style="line-height: 1.5;"><br></div><div data-custom-class="body_text" style="line-height: 1.5;"><bdt class="forloop-component"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt>NO</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></div><div style="line-height: 1.5;"><br></div></td></tr><tr><td style="border-left: 1px solid black; border-right: 1px solid black; border-top: 1px solid black; width: 33.8274%;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>J<bdt class="else-block"></bdt>. Education Information</span></span></span></div></td><td style="border-right: 1px solid black; border-top: 1px solid black; width: 51.4385%;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Student records and directory information</span></span></span></div></td><td style="text-align: center; border-right: 1px solid black; border-top: 1px solid black; width: 14.9084%;"><div style="line-height: 1.5;"><br></div><div data-custom-class="body_text" style="line-height: 1.5;"><bdt class="forloop-component"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt>NO</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></div><div style="line-height: 1.5;"><br></div></td></tr><tr><td style="border-width: 1px; border-color: black; border-style: solid; width: 33.8274%;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>K<bdt class="else-block"></bdt>. Inferences drawn from collected personal information</span></span></span></div></td><td style="border-bottom: 1px solid black; border-top: 1px solid black; border-right: 1px solid black; width: 51.4385%;"><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Inferences drawn from any of the collected personal information listed above to create a profile or summary about, for example, an individual’s preferences and characteristics</span></span></span></div></td><td style="text-align: center; border-right: 1px solid black; border-bottom: 1px solid black; border-top: 1px solid black; width: 14.9084%;"><div style="line-height: 1.5;"><br></div><div data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt>NO<span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div></td></tr><tr><td style="border-left: 1px solid black; border-right: 1px solid black; border-bottom: 1px solid black; line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt>L<bdt class="else-block"></bdt>. Sensitive personal Information</span></td><td style="border-right: 1px solid black; border-bottom: 1px solid black; line-height: 1.5;"><bdt class="block-component"><span data-custom-class="body_text"></span></bdt><span data-custom-class="body_text"><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt><bdt class="question">Account login information</bdt><bdt class="else-block"></bdt><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt>, <bdt class="question">debit or credit card numbers</bdt><bdt class="else-block"></bdt><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt>, <bdt class="question">financial information including account access details</bdt><bdt class="else-block"></bdt><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt> and <bdt class="question">health data</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="forloop-component"></bdt></span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></td><td style="border-right: 1px solid black; border-bottom: 1px solid black;"><div data-empty="true" style="text-align: center;"><br></div><div data-custom-class="body_text" data-empty="true" style="text-align: center; line-height: 1.5;"><bdt class="block-component"><span data-custom-class="body_text"></span></bdt><span data-custom-class="body_text">YES<bdt class="else-block"></span></bdt></div><div data-empty="true" style="text-align: center;"><br></div></td></tr></tbody></table><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">We only collect sensitive personal information, as defined by applicable privacy laws or the purposes allowed by law or with your consent. Sensitive personal information may be used, or disclosed to a service provider or contractor, for additional, specified purposes. You may have the right to limit the use or disclosure of your sensitive personal information.<bdt class="block-component"></bdt> We do not collect or process sensitive personal information for the purpose of inferring characteristics about you.<bdt class="statement-end-if-in-editor"></bdt></span><bdt class="statement-end-if-in-editor"></bdt></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">We may also collect other personal information outside of these categories through instances where you interact with us in person, online, or by phone or mail in the context of:</span><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;">Receiving help through our customer support channels;<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text"><span style="font-size: 15px;">Participation in customer surveys or contests; and<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text"><span style="font-size: 15px;">Facilitation in the delivery of our Services and to respond to your inquiries.</span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span data-custom-class="body_text"></span></bdt><span data-custom-class="body_text">We will use and retain the collected personal information as needed to provide the Services or for:<bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text">Category A - <bdt class="question">As long as the user has an account with us</bdt><bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"><bdt class="block-component"></bdt></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text">Category B - <bdt class="question">As long as the user has an account with us</bdt><bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text">Category <bdt class="block-component"></bdt>D<bdt class="else-block"></bdt> - <bdt class="question">As long as the user has an account with us</bdt><bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text">Category <bdt class="block-component"></bdt>F<bdt class="else-block"></bdt> - <bdt class="question">As long as the user has an account with us</bdt><bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text">Category <bdt class="block-component"></bdt>L<bdt class="else-block"></bdt> - <bdt class="question">As long as the user has an account with us</bdt><bdt class="statement-end-if-in-editor"></bdt></span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></li></ul><div style="line-height: 1.5;"><strong><span style="font-size: 15px;"><span data-custom-class="heading_2"><h3>Sources of Personal Information</h3></span></span></strong><span style="font-size: 15px;"><span data-custom-class="body_text">Learn more about the sources of personal information we collect in <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span><span style="color: rgb(0, 58, 250);"><span data-custom-class="body_text"><a data-custom-class="link" href="#infocollect"><span style="color: rgb (0, 58, 250); font-size: 15px;">WHAT INFORMATION DO WE COLLECT?</span></a></span></span><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt>"</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><strong><span data-custom-class="heading_2"><h3>How We Use and Share Personal Information</h3></span></strong></span></span><span data-custom-class="body_text" style="font-size: 15px;"><bdt class="block-component"></bdt>Learn more about how we use your personal information in the section, <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span><a data-custom-class="link" href="#infouse"><span style="color: rgb(0, 58, 250); font-size: 15px;">HOW DO WE PROCESS YOUR INFORMATION?</span></a><span data-custom-class="body_text" style="font-size: 15px;"><bdt class="block-component"></bdt>"</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text" style="font-size: 15px;"></span></bdt></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt><bdt class="block-component"></bdt></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></bdt></bdt></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><strong>Will your information be shared with anyone else?</strong></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We may disclose your personal information with our service providers pursuant to a written contract between us and each service provider. Learn more about how we disclose personal information to in the section, <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span></span><a data-custom-class="link" href="#whoshare"><span style="font-size: 15px; color: rgb(0, 58, 250);"><span style="font-size: 15px; color: rgb(0, 58, 250);">WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</span></span></a><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We may use your personal information for our own business purposes, such as for undertaking internal research for technological development and demonstration. This is not considered to be <bdt class="block-component"></bdt>"selling"<bdt class="statement-end-if-in-editor"></bdt> of your personal information.<span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span><bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt><span data-custom-class="body_text"><span style="font-size: 15px;">We have not sold or shared any personal information to third parties for a business or commercial purpose in the preceding twelve (12) months. </span></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"></span></span></bdt><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text">We have disclosed the following categories of personal information to third parties for a business or commercial purpose in the preceding twelve (12) months:<bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt></span></span></span><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt></span></p><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text">Category A. Identifiers<span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px; line-height: 1.5;"><bdt class="forloop-component"><bdt class="block-component"></bdt></li></ul><p style="font-size: 15px; line-height: 1.5;"><bdt class="forloop-component"></bdt></p><ul><li data-custom-class="body_text">Category B. Personal information as defined in the California Customer Records law</bdt></li></ul><p style="font-size: 15px;"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt></span></span></span><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="forloop-component"></bdt><bdt class="block-component"></bdt></span></p><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text">Category <bdt class="block-component"></bdt>D<bdt class="else-block"></bdt>. Commercial information<span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span><bdt class="block-component"><span style="font-size: 15px;"></bdt></span></span></span></span><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="forloop-component"></bdt></span><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text">Category <bdt class="block-component"></bdt>F<bdt class="else-block"></bdt>. Internet or other electronic network activity information<span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><bdt class="forloop-component"><span style="font-size: 15px;"></bdt></span></span></span></span></span></span></span></li></ul><p style="font-size: 15px;"><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></li></ul><div><span style="font-size: 15px;"><bdt class="forloop-component"></bdt></span></span></span></span></span></span></span></span></li></ul><div><bdt class="forloop-component"><span style="font-size: 15px;"></bdt></span></span></span></span></span></span></span></span></li></ul><div><bdt class="forloop-component"><span style="font-size: 15px;"></bdt></span></span></span></span></span></span></span></span></li></ul><div><bdt class="forloop-component"><span style="font-size: 15px;"></bdt></span></span></span></span></span></span></span></span></li></ul><div><bdt class="block-component"><span style="font-size: 15px;"></bdt></span></span></span></span></span></span></span></span></span></span></span></li></ul><div><bdt class="block-component"></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span data-custom-class="body_text">Category <bdt class="block-component"></bdt>L<bdt class="else-block"></bdt>. Sensitive personal information</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">The categories of third parties to whom we disclosed personal information for a business or commercial purpose can be found under <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="#whoshare">WHEN AND WITH WHOM DO WE SHARE YOUR PERSONAL INFORMATION?</a></span><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span></span></span><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></span></span></span></span></bdt></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span><span data-custom-class="body_text"><span style="color: rgb(0, 0, 0);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><strong><span data-custom-class="heading_2"><h3>Your Rights</h3></span></strong><span data-custom-class="body_text">You have rights under certain US state data protection laws. However, these rights are not absolute, and in certain cases, we may decline your request as permitted by law. These rights include:</span><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><strong>Right to know</strong> whether or not we are processing your personal data<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><strong>Right to access </strong>your personal data<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><strong>Right to correct </strong>inaccuracies in your personal data<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><strong>Right to request</strong> the deletion of your personal data<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><strong>Right to obtain a copy </strong>of the personal data you previously shared with us<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><strong>Right to non-discrimination</strong> for exercising your rights<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;"><strong>Right to opt out</strong> of the processing of your personal data if it is used for targeted advertising<bdt class="block-component"></bdt> (or sharing as defined under California’s privacy law)<bdt class="statement-end-if-in-editor"></bdt>, the sale of personal data, or profiling in furtherance of decisions that produce legal or similarly significant effects (<bdt class="block-component"></bdt>"profiling"<bdt class="statement-end-if-in-editor"></bdt>)<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">Depending upon the state where you live, you may also have the following rights:</span><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;">Right to access the categories of personal data being processed (as permitted by applicable law, including the privacy law in Minnesota)<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;">Right to obtain a list of the categories of third parties to which we have disclosed personal data (as permitted by applicable law, including the privacy law in<bdt class="block-component"></bdt> California, Delaware, and Maryland<bdt class="else-block"></bdt><bdt class="block-component"></bdt>)<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;">Right to obtain a list of specific third parties to which we have disclosed personal data (as permitted by applicable law, including the privacy law in<bdt class="block-component"></bdt> Minnesota and Oregon<bdt class="else-block"></bdt>)</span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5; font-size: 15px;">Right to obtain a list of third parties to which we have sold personal data (as permitted by applicable law, including the privacy law in Connecticut)<bdt class="statement-end-if-in-editor"></bdt></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;">Right to review, understand, question, and depending on where you live, correct how personal data has been profiled (as permitted by applicable law, including the privacy law in <bdt class="block-component"></bdt>Connecticut and Minnesota<bdt class="else-block"></bdt>)<bdt class="statement-end-if-in-editor"></bdt></span></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;">Right to limit use and disclosure of sensitive personal data (as permitted by applicable law, including the privacy law in California)</span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"></span></bdt></li></ul><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><ul><li data-custom-class="body_text" style="line-height: 1.5;"><span style="font-size: 15px;">Right to opt out of the collection of sensitive data and personal data collected through the operation of a voice or facial recognition feature (as permitted by applicable law, including the privacy law in Florida)</span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"></span></bdt></li></ul><div style="line-height: 1.5;"><span style="font-size: 15px;"><bdt class="statement-end-if-in-editor"></bdt></span><strong><span style="font-size: 15px;"><span data-custom-class="heading_2"><h3>How to Exercise Your Rights</h3></span></span></strong><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">To exercise these rights, you can contact us <bdt class="block-component"></bdt>by visiting <span style="color: rgb(0, 58, 250);"><bdt class="question"><a target="_blank" data-custom-class="link" href="mailto:lumacare.therapy@gmail.com">lumacare.therapy@gmail.com</a></bdt></span>, <bdt class="else-block"></bdt></span><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt>by emailing us at <bdt class="question"><a target="_blank" data-custom-class="link" href="mailto:lumacare.therapy@gmail.com">lumacare.therapy@gmail.com</a></bdt>, <bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt></span><span data-custom-class="body_text"><bdt class="block-component"></bdt><bdt class="block-component"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt></span></span></span></span></span></span></span></span></span></span></span></span><span data-custom-class="body_text">or by referring to the contact details at the bottom of this document.</span></span></span><bdt class="block-component"><span style="font-size: 15px;"></span></bdt><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">Under certain US state data protection laws, you can designate an <bdt class="block-component"></bdt>authorized<bdt class="statement-end-if-in-editor"></bdt> agent to make a request on your behalf. We may deny a request from an <bdt class="block-component"></bdt>authorized<bdt class="statement-end-if-in-editor"></bdt> agent that does not submit proof that they have been validly <bdt class="block-component"></bdt>authorized<bdt class="statement-end-if-in-editor"></bdt> to act on your behalf in accordance with applicable laws.</span> <br><strong><span data-custom-class="heading_2"><h3>Request Verification</h3></span></strong><span data-custom-class="body_text">Upon receiving your request, we will need to verify your identity to determine you are the same person about whom we have the information in our system. We will only use personal information provided in your request to verify your identity or authority to make the request. However, if we cannot verify your identity from the information already maintained by us, we may request that you provide additional information for the purposes of verifying your identity and for security or fraud-prevention purposes.</span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><br></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text">If you submit the request through an <bdt class="block-component"></bdt>authorized<bdt class="statement-end-if-in-editor"></bdt> agent, we may need to collect additional information to verify your identity before processing your request and the agent will need to provide a written and signed permission from you to submit such request on your behalf.</span></span><bdt class="block-component"><span style="font-size: 15px;"></span></bdt><span style="font-size: 15px;"><span data-custom-class="heading_2"><strong><h3>Appeals</h3></strong></span><span data-custom-class="body_text">Under certain US state data protection laws, if we decline to take action regarding your request, you may appeal our decision by emailing us at <bdt class="block-component"></bdt><bdt class="question noTranslate"><a target="_blank" data-custom-class="link" href="mailto:lumacare.therapy@gmail.com">lumacare.therapy@gmail.com</a></bdt><bdt class="else-block"></bdt>. We will inform you in writing of any action taken or not taken in response to the appeal, including a written explanation of the reasons for the decisions. If your appeal is denied, you may submit a complaint to your state attorney general.</span><bdt class="statement-end-if-in-editor"></bdt></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"><bdt class="block-component"></span></bdt></span></span></span></span></span></span></span></span></span></span><bdt class="block-component"><span style="font-size: 15px;"></span></bdt><span style="font-size: 15px;"><strong><span data-custom-class="heading_2"><h3>California <bdt class="block-component"></bdt>"Shine The Light"<bdt class="statement-end-if-in-editor"></bdt> Law</h3></span></strong><span data-custom-class="body_text">California Civil Code Section 1798.83, also known as the <bdt class="block-component"></bdt>"Shine The Light"<bdt class="statement-end-if-in-editor"></bdt> law, permits our users who are California residents to request and obtain from us, once a year and free of charge, information about categories of personal information (if any) we disclosed to third parties for direct marketing purposes and the names and addresses of all third parties with which we shared personal information in the immediately preceding calendar year. If you are a California resident and would like to make such a request, please submit your request in writing to us by using the contact details provided in the section <bdt class="block-component"></bdt>"<bdt class="statement-end-if-in-editor"></bdt></span></span><span data-custom-class="body_text"><a data-custom-class="link" href="#contact"><span style="color: rgb(0, 58, 250); font-size: 15px;">HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</span></a></span><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"></bdt>"</span><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"></span></bdt></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"></span></bdt><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"><bdt class="statement-end-if-in-editor"></bdt></bdt></span></span></span></span></span></span></span></span></span></span></span></bdt></span></span></span></span></span></span></span></span></span></span><bdt class="block-component"><span style="font-size: 15px;"></bdt></span><bdt class="block-component"><span style="font-size: 15px;"></span></bdt></div><div style="line-height: 1.5;"><br></div><div id="policyupdates" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>14. DO WE MAKE UPDATES TO THIS NOTICE?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><em><strong>In Short: </strong>Yes, we will update this notice as necessary to stay compliant with relevant laws.</em></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We may update this Privacy Notice from time to time. The updated version will be indicated by an updated <bdt class="block-component"></bdt>"Revised"<bdt class="statement-end-if-in-editor"></bdt> date at the top of this Privacy Notice. If we make material changes to this Privacy Notice, we may notify you either by prominently posting a notice of such changes or by directly sending you a notification. We encourage you to review this Privacy Notice frequently to be informed of how we are protecting your information.</span></span></span></div><div style="line-height: 1.5;"><br></div><div id="contact" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>15. HOW CAN YOU CONTACT US ABOUT THIS NOTICE?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">If you have questions or comments about this notice, you may <span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"><bdt class="block-component"></bdt></bdt>email us at <bdt class="question noTranslate"><a target="_blank" data-custom-class="link" href="mailto:lumacare.therapy@gmail.com">lumacare.therapy@gmail.com</a> or </bdt><bdt class="statement-end-if-in-editor"><bdt class="block-component"></bdt></bdt></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">contact us by post at:</span></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><span style="font-size: 15px;"><span style="color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="question noTranslate">Munyaradzi Nyamhingura</bdt></span></span></span></span></span><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></bdt></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="question noTranslate">Centurion, South Africa</bdt><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><bdt class="block-component"></bdt></span></span></span></bdt></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="question">Centurion</bdt><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><bdt class="block-component"></bdt>, <bdt class="question noTranslate">Gauteng</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt> <bdt class="question noTranslate">0157</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt></span></span></span></bdt></span></div><div style="line-height: 1.5;"><span style="font-size: 15px;"><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="block-component"></bdt></span></span></span><bdt class="question noTranslate">South Africa</bdt><span style="font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></bdt><bdt class="statement-end-if-in-editor"></bdt></span></span></span><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><bdt class="statement-end-if-in-editor"><bdt class="block-component"></bdt></bdt></span></span></span></bdt></span></span></span></span><span data-custom-class="body_text"><span style="font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"><span style="color: rgb(89, 89, 89);"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="block-component"><bdt class="block-component"></bdt></span></span></span></span></span></span><bdt class="block-component"><span style="font-size: 15px;"></span></bdt><span style="font-size: 15px;"><span data-custom-class="body_text"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px;"><span data-custom-class="body_text"><bdt class="statement-end-if-in-editor"><bdt class="block-component"></bdt></span></span></div><div style="line-height: 1.5;"><br></div><div id="request" style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>16. HOW CAN YOU REVIEW, UPDATE, OR DELETE THE DATA WE COLLECT FROM YOU?</h2></span></strong></span></span></span></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt>Based on the applicable laws of your country<bdt class="block-component"></bdt> or state of residence in the US<bdt class="statement-end-if-in-editor"></bdt>, you may<bdt class="else-block"><bdt class="block-component"> have the right to request access to the personal information we collect from you, details about how we have processed it, correct inaccuracies, or delete your personal information. You may also have the right to <bdt class="block-component"></bdt>withdraw your consent to our processing of your personal information. These rights may be limited in some circumstances by applicable law. To request to review, update, or delete your personal information, please <bdt class="block-component"></span></bdt><span data-custom-class="body_text">visit: <span style="color: rgb(0, 58, 250);"><bdt class="question"><a target="_blank" data-custom-class="link" href="mailto:lumacare.therapy@gmail.com">lumacare.therapy@gmail.com</a></bdt></span><bdt class="else-block"></bdt></span></span><span data-custom-class="body_text">.</span></span></span><div style="display: none;"><a class="privacy123" href="https://app.termly.io/dsar/7db79815-5140-4983-b1b9-159f8c245ff1"></a></div></div><style>
+    ul {
+      list-style-type: square;
+    }
+    ul > li > ul {
+      list-style-type: circle;
+    }
+    ul > li > ul > li > ul {
+      list-style-type: square;
+    }
+    ol li {
+      font-family: Arial ;
+    }
+  </style>
+    </div>
+    `;
+
+const cookiePolicyHTML = `<style>
+[data-custom-class='body'], [data-custom-class='body'] * {
+        background: transparent !important;
+      }
+[data-custom-class='title'], [data-custom-class='title'] * {
+        font-family: Arial !important;
+font-size: 26px !important;
+color: #000000 !important;
+      }
+[data-custom-class='subtitle'], [data-custom-class='subtitle'] * {
+        font-family: Arial !important;
+color: #595959 !important;
+font-size: 14px !important;
+      }
+[data-custom-class='heading_1'], [data-custom-class='heading_1'] * {
+        font-family: Arial !important;
+font-size: 19px !important;
+color: #000000 !important;
+      }
+[data-custom-class='heading_2'], [data-custom-class='heading_2'] * {
+        font-family: Arial !important;
+font-size: 17px !important;
+color: #000000 !important;
+      }
+[data-custom-class='body_text'], [data-custom-class='body_text'] * {
+        color: #595959 !important;
+font-size: 14px !important;
+font-family: Arial !important;
+      }
+[data-custom-class='link'], [data-custom-class='link'] * {
+        color: #3030F1 !important;
+font-size: 14px !important;
+font-family: Arial !important;
+word-break: break-word !important;
+      }
+</style>
+    <span style="display: block;margin: 0 auto 3.125rem;width: 11.125rem;height: 2.375rem;background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNzgiIGhlaWdodD0iMzgiIHZpZXdCb3g9IjAgMCAxNzggMzgiPgogICAgPGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4KICAgICAgICA8cGF0aCBmaWxsPSIjRDFEMUQxIiBkPSJNNC4yODMgMjQuMTA3Yy0uNzA1IDAtMS4yNTgtLjI1Ni0xLjY2LS43NjhoLS4wODVjLjA1Ny41MDIuMDg2Ljc5Mi4wODYuODd2Mi40MzRILjk4NXYtOC42NDhoMS4zMzJsLjIzMS43NzloLjA3NmMuMzgzLS41OTQuOTUtLjg5MiAxLjcwMi0uODkyLjcxIDAgMS4yNjQuMjc0IDEuNjY1LjgyMi40MDEuNTQ4LjYwMiAxLjMwOS42MDIgMi4yODMgMCAuNjQtLjA5NCAxLjE5OC0uMjgyIDEuNjctLjE4OC40NzMtLjQ1Ni44MzMtLjgwMyAxLjA4LS4zNDcuMjQ3LS43NTYuMzctMS4yMjUuMzd6TTMuOCAxOS4xOTNjLS40MDUgMC0uNy4xMjQtLjg4Ni4zNzMtLjE4Ny4yNDktLjI4My42Ni0uMjkgMS4yMzN2LjE3N2MwIC42NDUuMDk1IDEuMTA3LjI4NyAxLjM4Ni4xOTIuMjguNDk1LjQxOS45MS40MTkuNzM0IDAgMS4xMDEtLjYwNSAxLjEwMS0xLjgxNiAwLS41OS0uMDktMS4wMzQtLjI3LTEuMzI5LS4xODItLjI5NS0uNDY1LS40NDMtLjg1Mi0uNDQzem01LjU3IDEuNzk0YzAgLjU5NC4wOTggMS4wNDQuMjkzIDEuMzQ4LjE5Ni4zMDQuNTEzLjQ1Ny45NTQuNDU3LjQzNyAwIC43NS0uMTUyLjk0Mi0uNDU0LjE5Mi0uMzAzLjI4OC0uNzUzLjI4OC0xLjM1MSAwLS41OTUtLjA5Ny0xLjA0LS4yOS0xLjMzOC0uMTk0LS4yOTctLjUxLS40NDUtLjk1LS40NDUtLjQzOCAwLS43NTMuMTQ3LS45NDYuNDQzLS4xOTQuMjk1LS4yOS43NDItLjI5IDEuMzR6bTQuMTUzIDBjMCAuOTc3LS4yNTggMS43NDItLjc3NCAyLjI5My0uNTE1LjU1Mi0xLjIzMy44MjctMi4xNTQuODI3LS41NzYgMC0xLjA4NS0uMTI2LTEuNTI1LS4zNzhhMi41MiAyLjUyIDAgMCAxLTEuMDE1LTEuMDg4Yy0uMjM3LS40NzMtLjM1NS0xLjAyNC0uMzU1LTEuNjU0IDAtLjk4MS4yNTYtMS43NDQuNzY4LTIuMjg4LjUxMi0uNTQ1IDEuMjMyLS44MTcgMi4xNi0uODE3LjU3NiAwIDEuMDg1LjEyNiAxLjUyNS4zNzYuNDQuMjUxLjc3OS42MSAxLjAxNSAxLjA4LjIzNi40NjkuMzU1IDEuMDE5LjM1NSAxLjY0OXpNMTkuNzEgMjRsLS40NjItMi4xLS42MjMtMi42NTNoLS4wMzdMMTcuNDkzIDI0SDE1LjczbC0xLjcwOC02LjAwNWgxLjYzM2wuNjkzIDIuNjU5Yy4xMS40NzYuMjI0IDEuMTMzLjMzOCAxLjk3MWguMDMyYy4wMTUtLjI3Mi4wNzctLjcwNC4xODgtMS4yOTRsLjA4Ni0uNDU3Ljc0Mi0yLjg3OWgxLjgwNGwuNzA0IDIuODc5Yy4wMTQuMDc5LjAzNy4xOTUuMDY3LjM1YTIwLjk5OCAyMC45OTggMCAwIDEgLjE2NyAxLjAwMmMuMDIzLjE2NS4wMzYuMjk5LjA0LjM5OWguMDMyYy4wMzItLjI1OC4wOS0uNjExLjE3Mi0xLjA2LjA4Mi0uNDUuMTQxLS43NTQuMTc3LS45MTFsLjcyLTIuNjU5aDEuNjA2TDIxLjQ5NCAyNGgtMS43ODN6bTcuMDg2LTQuOTUyYy0uMzQ4IDAtLjYyLjExLS44MTcuMzMtLjE5Ny4yMi0uMzEuNTMzLS4zMzguOTM3aDIuMjk5Yy0uMDA4LS40MDQtLjExMy0uNzE3LS4zMTctLjkzNy0uMjA0LS4yMi0uNDgtLjMzLS44MjctLjMzem0uMjMgNS4wNmMtLjk2NiAwLTEuNzIyLS4yNjctMi4yNjYtLjgtLjU0NC0uNTM0LS44MTYtMS4yOS0uODE2LTIuMjY3IDAtMS4wMDcuMjUxLTEuNzg1Ljc1NC0yLjMzNC41MDMtLjU1IDEuMTk5LS44MjUgMi4wODctLjgyNS44NDggMCAxLjUxLjI0MiAxLjk4Mi43MjUuNDcyLjQ4NC43MDkgMS4xNTIuNzA5IDIuMDA0di43OTVoLTMuODczYy4wMTguNDY1LjE1Ni44MjkuNDE0IDEuMDkuMjU4LjI2MS42Mi4zOTIgMS4wODUuMzkyLjM2MSAwIC43MDMtLjAzNyAxLjAyNi0uMTEzYTUuMTMzIDUuMTMzIDAgMCAwIDEuMDEtLjM2djEuMjY4Yy0uMjg3LjE0My0uNTkzLjI1LS45Mi4zMmE1Ljc5IDUuNzkgMCAwIDEtMS4xOTEuMTA0em03LjI1My02LjIyNmMuMjIyIDAgLjQwNi4wMTYuNTUzLjA0OWwtLjEyNCAxLjUzNmExLjg3NyAxLjg3NyAwIDAgMC0uNDgzLS4wNTRjLS41MjMgMC0uOTMuMTM0LTEuMjIyLjQwMy0uMjkyLjI2OC0uNDM4LjY0NC0uNDM4IDEuMTI4VjI0aC0xLjYzOHYtNi4wMDVoMS4yNGwuMjQyIDEuMDFoLjA4Yy4xODctLjMzNy40MzktLjYwOC43NTYtLjgxNGExLjg2IDEuODYgMCAwIDEgMS4wMzQtLjMwOXptNC4wMjkgMS4xNjZjLS4zNDcgMC0uNjIuMTEtLjgxNy4zMy0uMTk3LjIyLS4zMS41MzMtLjMzOC45MzdoMi4yOTljLS4wMDctLjQwNC0uMTEzLS43MTctLjMxNy0uOTM3LS4yMDQtLjIyLS40OC0uMzMtLjgyNy0uMzN6bS4yMyA1LjA2Yy0uOTY2IDAtMS43MjItLjI2Ny0yLjI2Ni0uOC0uNTQ0LS41MzQtLjgxNi0xLjI5LS44MTYtMi4yNjcgMC0xLjAwNy4yNTEtMS43ODUuNzU0LTIuMzM0LjUwNC0uNTUgMS4yLS44MjUgMi4wODctLjgyNS44NDkgMCAxLjUxLjI0MiAxLjk4Mi43MjUuNDczLjQ4NC43MDkgMS4xNTIuNzA5IDIuMDA0di43OTVoLTMuODczYy4wMTguNDY1LjE1Ni44MjkuNDE0IDEuMDkuMjU4LjI2MS42Mi4zOTIgMS4wODUuMzkyLjM2MiAwIC43MDQtLjAzNyAxLjAyNi0uMTEzYTUuMTMzIDUuMTMzIDAgMCAwIDEuMDEtLjM2djEuMjY4Yy0uMjg3LjE0My0uNTkzLjI1LS45MTkuMzJhNS43OSA1Ljc5IDAgMCAxLTEuMTkyLjEwNHptNS44MDMgMGMtLjcwNiAwLTEuMjYtLjI3NS0xLjY2My0uODIyLS40MDMtLjU0OC0uNjA0LTEuMzA3LS42MDQtMi4yNzggMC0uOTg0LjIwNS0xLjc1Mi42MTUtMi4zMDEuNDEtLjU1Ljk3NS0uODI1IDEuNjk1LS44MjUuNzU1IDAgMS4zMzIuMjk0IDEuNzI5Ljg4MWguMDU0YTYuNjk3IDYuNjk3IDAgMCAxLS4xMjQtMS4xOTh2LTEuOTIyaDEuNjQ0VjI0SDQ2LjQzbC0uMzE3LS43NzloLS4wN2MtLjM3Mi41OTEtLjk0Ljg4Ni0xLjcwMi44ODZ6bS41NzQtMS4zMDZjLjQyIDAgLjcyNi0uMTIxLjkyMS0uMzY1LjE5Ni0uMjQzLjMwMi0uNjU3LjMyLTEuMjR2LS4xNzhjMC0uNjQ0LS4xLTEuMTA2LS4yOTgtMS4zODYtLjE5OS0uMjc5LS41MjItLjQxOS0uOTctLjQxOWEuOTYyLjk2MiAwIDAgMC0uODUuNDY1Yy0uMjAzLjMxLS4zMDQuNzYtLjMwNCAxLjM1IDAgLjU5Mi4xMDIgMS4wMzUuMzA2IDEuMzMuMjA0LjI5Ni40OTYuNDQzLjg3NS40NDN6bTEwLjkyMi00LjkyYy43MDkgMCAxLjI2NC4yNzcgMS42NjUuODMuNC41NTMuNjAxIDEuMzEyLjYwMSAyLjI3NSAwIC45OTItLjIwNiAxLjc2LS42MiAyLjMwNC0uNDE0LjU0NC0uOTc3LjgxNi0xLjY5LjgxNi0uNzA1IDAtMS4yNTgtLjI1Ni0xLjY1OS0uNzY4aC0uMTEzbC0uMjc0LjY2MWgtMS4yNTF2LTguMzU3aDEuNjM4djEuOTQ0YzAgLjI0Ny0uMDIxLjY0My0uMDY0IDEuMTg3aC4wNjRjLjM4My0uNTk0Ljk1LS44OTIgMS43MDMtLjg5MnptLS41MjcgMS4zMWMtLjQwNCAwLS43LjEyNS0uODg2LjM3NC0uMTg2LjI0OS0uMjgzLjY2LS4yOSAxLjIzM3YuMTc3YzAgLjY0NS4wOTYgMS4xMDcuMjg3IDEuMzg2LjE5Mi4yOC40OTUuNDE5LjkxLjQxOS4zMzcgMCAuNjA1LS4xNTUuODA0LS40NjUuMTk5LS4zMS4yOTgtLjc2LjI5OC0xLjM1IDAtLjU5MS0uMS0xLjAzNS0uMy0xLjMzYS45NDMuOTQzIDAgMCAwLS44MjMtLjQ0M3ptMy4xODYtMS4xOTdoMS43OTRsMS4xMzQgMy4zNzljLjA5Ni4yOTMuMTYzLjY0LjE5OCAxLjA0MmguMDMzYy4wMzktLjM3LjExNi0uNzE3LjIzLTEuMDQybDEuMTEyLTMuMzc5aDEuNzU3bC0yLjU0IDYuNzczYy0uMjM0LjYyNy0uNTY2IDEuMDk2LS45OTcgMS40MDctLjQzMi4zMTItLjkzNi40NjgtMS41MTIuNDY4LS4yODMgMC0uNTYtLjAzLS44MzMtLjA5MnYtMS4zYTIuOCAyLjggMCAwIDAgLjY0NS4wN2MuMjkgMCAuNTQzLS4wODguNzYtLjI2Ni4yMTctLjE3Ny4zODYtLjQ0NC41MDgtLjgwM2wuMDk2LS4yOTUtMi4zODUtNS45NjJ6Ii8+CiAgICAgICAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNzMpIj4KICAgICAgICAgICAgPGNpcmNsZSBjeD0iMTkiIGN5PSIxOSIgcj0iMTkiIGZpbGw9IiNFMEUwRTAiLz4KICAgICAgICAgICAgPHBhdGggZmlsbD0iI0ZGRiIgZD0iTTIyLjQ3NCAxNS40NDNoNS4xNjJMMTIuNDM2IDMwLjRWMTAuMzYzaDE1LjJsLTUuMTYyIDUuMDh6Ii8+CiAgICAgICAgPC9nPgogICAgICAgIDxwYXRoIGZpbGw9IiNEMkQyRDIiIGQ9Ik0xMjEuNTQ0IDE0LjU2di0xLjcyOGg4LjI3MnYxLjcyOGgtMy4wMjRWMjRoLTIuMjR2LTkuNDRoLTMuMDA4em0xMy43NDQgOS41NjhjLTEuMjkgMC0yLjM0MS0uNDE5LTMuMTUyLTEuMjU2LS44MS0uODM3LTEuMjE2LTEuOTQ0LTEuMjE2LTMuMzJzLjQwOC0yLjQ3NyAxLjIyNC0zLjMwNGMuODE2LS44MjcgMS44NzItMS4yNCAzLjE2OC0xLjI0czIuMzYuNDAzIDMuMTkyIDEuMjA4Yy44MzIuODA1IDEuMjQ4IDEuODggMS4yNDggMy4yMjQgMCAuMzEtLjAyMS41OTctLjA2NC44NjRoLTYuNDY0Yy4wNTMuNTc2LjI2NyAxLjA0LjY0IDEuMzkyLjM3My4zNTIuODQ4LjUyOCAxLjQyNC41MjguNzc5IDAgMS4zNTUtLjMyIDEuNzI4LS45NmgyLjQzMmEzLjg5MSAzLjg5MSAwIDAgMS0xLjQ4OCAyLjA2NGMtLjczNi41MzMtMS42MjcuOC0yLjY3Mi44em0xLjQ4LTYuNjg4Yy0uNC0uMzUyLS44ODMtLjUyOC0xLjQ0OC0uNTI4cy0xLjAzNy4xNzYtMS40MTYuNTI4Yy0uMzc5LjM1Mi0uNjA1LjgyMS0uNjggMS40MDhoNC4xOTJjLS4wMzItLjU4Ny0uMjQ4LTEuMDU2LS42NDgtMS40MDh6bTcuMDE2LTIuMzA0djEuNTY4Yy41OTctMS4xMyAxLjQ2MS0xLjY5NiAyLjU5Mi0xLjY5NnYyLjMwNGgtLjU2Yy0uNjcyIDAtMS4xNzkuMTY4LTEuNTIuNTA0LS4zNDEuMzM2LS41MTIuOTE1LS41MTIgMS43MzZWMjRoLTIuMjU2di04Ljg2NGgyLjI1NnptNi40NDggMHYxLjMyOGMuNTY1LS45NyAxLjQ4My0xLjQ1NiAyLjc1Mi0xLjQ1Ni42NzIgMCAxLjI3Mi4xNTUgMS44LjQ2NC41MjguMzEuOTM2Ljc1MiAxLjIyNCAxLjMyOC4zMS0uNTU1LjczMy0uOTkyIDEuMjcyLTEuMzEyYTMuNDg4IDMuNDg4IDAgMCAxIDEuODE2LS40OGMxLjA1NiAwIDEuOTA3LjMzIDIuNTUyLjk5Mi42NDUuNjYxLjk2OCAxLjU5Ljk2OCAyLjc4NFYyNGgtMi4yNHYtNC44OTZjMC0uNjkzLS4xNzYtMS4yMjQtLjUyOC0xLjU5Mi0uMzUyLS4zNjgtLjgzMi0uNTUyLTEuNDQtLjU1MnMtMS4wOS4xODQtMS40NDguNTUyYy0uMzU3LjM2OC0uNTM2Ljg5OS0uNTM2IDEuNTkyVjI0aC0yLjI0di00Ljg5NmMwLS42OTMtLjE3Ni0xLjIyNC0uNTI4LTEuNTkyLS4zNTItLjM2OC0uODMyLS41NTItMS40NC0uNTUycy0xLjA5LjE4NC0xLjQ0OC41NTJjLS4zNTcuMzY4LS41MzYuODk5LS41MzYgMS41OTJWMjRoLTIuMjU2di04Ljg2NGgyLjI1NnpNMTY0LjkzNiAyNFYxMi4xNmgyLjI1NlYyNGgtMi4yNTZ6bTcuMDQtLjE2bC0zLjQ3Mi04LjcwNGgyLjUyOGwyLjI1NiA2LjMwNCAyLjM4NC02LjMwNGgyLjM1MmwtNS41MzYgMTMuMDU2aC0yLjM1MmwxLjg0LTQuMzUyeiIvPgogICAgPC9nPgo8L3N2Zz4K) center no-repeat;"></span>
+
+    <div data-custom-class="body">
+    <div><strong><span style="font-size: 26px;"><span data-custom-class="title"><h1>COOKIE POLICY</h1></span></span></strong></div><div><span style="color: rgb(127, 127, 127);"><strong><span style="font-size: 15px;"><span data-custom-class="subtitle">Last updated <bdt class="question">November 28, 2025</bdt></span></span></strong></span></div><div><br></div><div><br></div><div><br></div><div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">This Cookie Policy explains how <bdt class="question">Munyaradzi Nyamhingura</bdt> ("<strong>Company</strong>," "<strong>we</strong>," "<strong>us</strong>," and "<strong>our</strong>") uses cookies and similar technologies to recognize you when you visit our website at </span></span><span style="color: rgb(0, 58, 250); font-size: 15px;"><span data-custom-class="body_text"><bdt class="question"><a target="_blank" data-custom-class="link" href="https://lumacare.netlify.app">https://lumacare.netlify.app</a></bdt></span></span><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text"> ("<strong>Website</strong>"). It explains what these technologies are and why we use them, as well as your rights to control our use of them.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">In some cases we may use cookies to collect personal information, or that becomes personal information if we combine it with other information.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(0, 0, 0); font-size: 15px;"><strong><span data-custom-class="heading_1"><h2>What are cookies?</h2></span></strong></span></span></div><div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Cookies are small data files that are placed on your computer or mobile device when you visit a website. Cookies are widely used by website owners in order to make their websites work, or to work more efficiently, as well as to provide reporting information.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">Cookies set by the website owner (in this case, <bdt class="question">Munyaradzi Nyamhingura</bdt>) are called "first-party cookies." Cookies set by parties other than the website owner are called "third-party cookies." Third-party cookies enable third-party features or functionality to be provided on or through the website (e.g., advertising, interactive content, and analytics). The parties that set these third-party cookies can recognize your computer both when it visits the website in question and also when it visits certain other websites.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(0, 0, 0); font-size: 15px;"><strong><span data-custom-class="heading_1"><h2>Why do we use cookies?</h2></span></strong></span></span></div><div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span data-custom-class="body_text">We use first-<bdt class="block-component"></bdt> and third-<bdt class="statement-end-if-in-editor"></bdt>party cookies for several reasons. Some cookies are required for technical reasons in order for our Website to operate, and we refer to these as "essential" or "strictly necessary" cookies. Other cookies also enable us to track and target the interests of our users to enhance the experience on our Online Properties. <bdt class="block-component"></bdt>Third parties serve cookies through our Website for advertising, analytics, and other purposes. <bdt class="statement-end-if-in-editor"></bdt>This is described in more detail below.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span id="control" style="color: rgb(0, 0, 0);"><strong><span data-custom-class="heading_1"><h2>How can I control cookies?</h2></span></strong></span></span></span></span></span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">You have the right to decide whether to accept or reject cookies. You can exercise your cookie rights by setting your preferences in the Cookie Consent Manager. The Cookie Consent Manager allows you to select which categories of cookies you accept or reject. Essential cookies cannot be rejected as they are strictly necessary to provide you with services.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">The Cookie Consent Manager can be found in the notification banner and on our Website. If you choose to reject cookies, you may still use our Website though your access to some functionality and areas of our Website may be restricted. You may also set or amend your web browser controls to accept or refuse cookies.</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">The specific types of first- and third-party cookies served through our Website and the purposes they perform are described in the table below (please note that the specific </span><span data-custom-class="body_text">cookies served may vary depending on the specific Online Properties you visit):</span></span></span><span style="font-size: 15px;"><span data-custom-class="heading_2" style="color: rgb(0, 0, 0);"><span style="font-size: 15px;"><strong><u><br><h3>Performance and functionality cookies:</h3></u></strong></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">These cookies are used to enhance the performance and functionality of our Website but are non-essential to their use. However, without these cookies, certain functionality (like videos) may become unavailable.</span></span></div><div style="line-height: 1.5;"><div style="line-height: 1.5;"><br></div><div><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><section data-custom-class="body_text" style="width: 100%; border: 1px solid #e6e6e6; margin: 0 0 10px; border-radius: 3px;"><div style="padding: 8px 13px; border-bottom: 1px solid #e6e6e6;"><table><tbody><tr style="font-family: Roboto, Arial; font-size: 12px; line-height: 1.67; margin: 0 0 8px; vertical-align: top;"><th style="text-align: right; color: #19243c; min-width: 80px; font-weight: normal;">Name:</th><td style="display: inline-block; margin-left: 5px;"><span style="color: #8b93a7; word-break: break-all;">_cfuvid</span></td></tr><tr style="font-family: Roboto, Arial; font-size: 12px; line-height: 1.67; margin: 0; vertical-align: top;"><th style="text-align: right; color: #19243c; min-width: 80px; font-weight: normal;">Purpose:</th><td style="display: inline-block; margin-left: 5px;"><span style="color: #8b93a7; word-break: break-all;">This cookie is set by Cloudflare to enhance security and performance. It helps identify trusted web traffic and ensures a secure browsing experience for users.</span></td></tr><tr style="font-family: Roboto, Arial; font-size: 12px; line-height: 1.67; margin: 0 0 8px; vertical-align: top;"><th style="text-align: right; color: #19243c; min-width: 80px; font-weight: normal;">Provider:</th><td style="display: inline-block; margin-left: 5px;"><span style="color: #8b93a7; word-break: break-all;">.yoco.com</span></td></tr><tr style="font-family: Roboto, Arial; font-size: 12px; line-height: 1.67; margin: 0 0 8px; vertical-align: top;"><th style="text-align: right; color: rgb(25, 36, 60); min-width: 80px; font-weight: normal;">Service:</th><td style="display: inline-block; margin-left: 5px;"><span style="color: #8b93a7; word-break: break-all;">Cloudflare  <a data-custom-class="link" href="https://developers.cloudflare.com/fundamentals/reference/policies-compliances/cloudflare-cookies/" style="color: rgb(0, 58, 250);" target="_blank"><span data-custom-class="link">View Service Privacy Policy</span></a></span></td></tr><tr style="font-family: Roboto, Arial; font-size: 12px; line-height: 1.67; margin: 0 0 8px; vertical-align: top;"><th style="text-align: right; color: #19243c; min-width: 80px; font-weight: normal;">Type:</th><td style="display: inline-block; margin-left: 5px;"><span style="color: #8b93a7; word-break: break-all;">server_cookie</span></td></tr><tr style="font-family: Roboto, Arial; font-size: 12px; line-height: 1.67; margin: 0 0 8px; vertical-align: top;"><th style="text-align: right; color: #19243c; min-width: 80px; font-weight: normal;">Expires in:</th><td style="display: inline-block; margin-left: 5px;"><span style="color: #8b93a7; word-break: break-all;">session</span></td></tr></tbody></table></div></section></span></span></span></div><div><br></div><div><span style="color: rgb(127, 127, 127);"><span style="color: rgb(0, 0, 0); font-size: 15px;"><strong><span data-custom-class="heading_1"><h2>How can I control cookies on my browser?</h2></span></strong></span></span></div><div style="line-height: 1.5;"><span data-custom-class="body_text">As the means by which you can refuse cookies through your web browser controls vary from browser to browser, you should visit your browser's help menu for more information. The following is information about how to manage cookies on the most popular browsers:</span><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="https://support.google.com/chrome/answer/95647#zippy=%2Callow-or-block-cookies" rel="noopener noreferrer" target="_blank"></a></span></div><ul><li style="line-height: 1.5;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="https://support.google.com/chrome/answer/95647#zippy=%2Callow-or-block-cookies" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">Chrome</span></a></span></li><li style="line-height: 1.5;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="https://support.microsoft.com/en-us/windows/delete-and-manage-cookies-168dab11-0753-043d-7c16-ede5947fc64d" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">Internet Explorer</span></a></span></li><li style="line-height: 1.5;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="https://support.mozilla.org/en-US/kb/enhanced-tracking-protection-firefox-desktop?redirectslug=enable-and-disable-cookies-website-preferences&redirectlocale=en-US" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">Firefox</span></a></span></li><li style="line-height: 1.5;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="https://support.apple.com/en-ie/guide/safari/sfri11471/mac" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">Safari</span></a></span></li><li style="line-height: 1.5;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="https://support.microsoft.com/en-us/windows/microsoft-edge-browsing-data-and-privacy-bb8174ba-9d73-dcf2-9b4a-c582b4e640dd" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">Edge</span></a></span></li><li style="line-height: 1.5;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="https://help.opera.com/en/latest/web-preferences/" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">Opera</span></a></span></li></ul><div style="line-height: 1.5;"><span data-custom-class="body_text">In addition, most advertising networks offer you a way to opt out of targeted advertising. If you would like to find out more information, please visit:</span><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="http://www.aboutads.info/choices/" rel="noopener noreferrer" target="_blank"></a></span></div><ul><li style="line-height: 1.5;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="http://www.aboutads.info/choices/" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">Digital Advertising Alliance</span></a></span><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="https://youradchoices.ca/" rel="noopener noreferrer" target="_blank"></a></span></li><li style="line-height: 1.5;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="https://youradchoices.ca/" rel="noopener noreferrer" target="_blank"><span style="color: rgb(0, 58, 250); font-size: 15px;">Digital Advertising Alliance of Canada</span></a></span><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="http://www.youronlinechoices.com/" rel="noopener noreferrer" target="_blank"></a></span></li><li style="line-height: 1.5;"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="http://www.youronlinechoices.com/" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">European Interactive Digital Advertising Alliance</span></a></span></li></ul><div><br></div><div><strong><span data-custom-class="heading_1"><h2>What about other tracking technologies, like web beacons?</h2></span></strong></div><div style="line-height: 1.5;"><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Cookies are not the only way to recognize or track visitors to a website. We may use other, similar technologies from time to time, like web beacons (sometimes called "tracking pixels" or "clear gifs"). These are tiny graphics files that contain a unique identifier that enables us to recognize when someone has visited our Website<bdt class="block-component"></bdt> or opened an email including them<bdt class="statement-end-if-in-editor"></bdt>. This allows us, for example, to monitor </span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><span data-custom-class="body_text">the traffic patterns of users from one page within a website to another, to deliver or communicate with cookies, to understand whether you have come to the website from an online advertisement displayed on a third-party website, to improve site performance, and to measure the success of email marketing campaigns. In many instances, these technologies are reliant on cookies to function properly, and so declining cookies will impair their functioning.</span><bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span data-custom-class="heading_1"><strong><h2>Do you use Flash cookies or Local Shared Objects?</h2></strong></span></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Websites may also use so-called "Flash Cookies" (also known as Local Shared Objects or "LSOs") to, among other things, collect and store information about your use of our services, fraud prevention, and for other site operations.</span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">If you do not want Flash Cookies stored on your computer, you can adjust the settings of your Flash player to block Flash Cookies storage using the tools contained in the </span></span><span data-custom-class="body_text"><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager07.html" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">Website Storage Settings Panel</span></a></span><span style="font-size: 15px; color: rgb(89, 89, 89);">. You can also control Flash Cookies by going to the </span><span style="color: rgb(0, 58, 250);"><a data-custom-class="link" href="http://www.macromedia.com/support/documentation/en/flashplayer/help/settings_manager03.html" rel="noopener noreferrer" target="_blank"><span style="font-size: 15px;">Global Storage Settings Panel</span></a></span></span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"> and </span><span style="font-size:15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">following the instructions (which may include instructions that explain, for example, how to delete existing Flash Cookies (referred to "information" on the Macromedia site), how to prevent Flash LSOs from being placed on your computer without your being asked, and (for Flash Player 8 and later) how to block Flash Cookies that are not being delivered by the operator of the page you are on at the time).</span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Please note that setting the Flash Player to restrict or limit acceptance of Flash Cookies may reduce or impede the functionality of some Flash applications, including, potentially, Flash applications used in connection with our services or online content.</span></span></span><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><strong><span data-custom-class="heading_1"><h2>Do you serve targeted advertising?</h2></span></strong></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">Third parties may serve cookies on your computer or mobile device to serve advertising through our Website. These companies may use information about your visits to this and other websites in order to provide relevant advertisements about goods and services that you may be interested in. They may also employ technology that is used to measure the effectiveness of advertisements. They can accomplish this by using cookies or web beacons to collect information about your visits to this and other sites in order to provide relevant advertisements about goods and services of potential interest to you. The information collected through this process does not enable us or them to identify your name, contact details, or other details that directly identify you unless you choose to provide these.</span></span><span style="color: rgb(127, 127, 127);"><span style="color: rgb(89, 89, 89); font-size: 15px;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"></bdt></span></span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><strong><span data-custom-class="heading_1"><h2>How often will you update this Cookie Policy?</h2></span></strong></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">We may update </span><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">this Cookie Policy from time to time in order to reflect, for example, changes to the cookies we use or for other operational, legal, or regulatory reasons. Please therefore revisit this Cookie Policy regularly to stay informed about our use of cookies and related technologies.</span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">The date at the top of this Cookie Policy indicates when it was last updated.</span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><strong><span data-custom-class="heading_1"><h2>Where can I get further information?</h2></span></strong></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text">If you have any questions about our use of cookies or other technologies, please<bdt class="block-component"></bdt> email us at <bdt class="question"><a target="_blank" data-custom-class="link" href="mailto:NYAMHINGURAMUNYA@GMAIL.COM">NYAMHINGURAMUNYA@GMAIL.COM</a></bdt> or by post to<bdt class="else-block"></bdt>:</span></span></span></span></div><div style="line-height: 1.5;"><br></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="question">Munyaradzi Nyamhingura</bdt></span></span></span></div><div style="line-height: 1.5;"><bdt class="block-component"><span style="font-size: 15px;"></span></bdt><span style="font-size: 15px;"><bdt class="question"><span data-custom-class="body_text">Centurion, South Africa</span></bdt></span><bdt class="statement-end-if-in-editor"><span style="font-size: 15px;"></span></bdt></div><div style="line-height: 1.5;"><span style="font-size: 15px; color: rgb(89, 89, 89);"><span data-custom-class="body_text"><bdt class="block-component"></bdt></span></span></div><div style="line-height: 1.5;"><bdt class="block-component"></bdt><bdt class="question"><span data-custom-class="body_text">Centurion,</span></bdt><bdt class="statement-end-if-in-editor"></bdt><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><bdt class="block-component"></bdt> <bdt class="question">Gauteng</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt> <bdt class="question">0157</bdt><bdt class="statement-end-if-in-editor"></bdt><bdt class="block-component"></bdt><bdt class="block-component"></bdt></span></span></div><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><bdt class="question">South Africa</bdt><bdt class="statement-end-if-in-editor"></bdt></span></span><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor"><bdt class="block-component"></bdt></bdt></span></span></div><div style="line-height: 1.5;"><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><bdt class="statement-end-if-in-editor">Phone: <bdt class="question">(+27)0622335471</bdt></bdt></span></span><span data-custom-class="body_text"><span style="font-size: 15px; color: rgb(89, 89, 89);"><bdt class="block-component"></bdt></span></span></div><div style="display: none;"><a class="cookie123" href="https://app.termly.io/dsar/736689b6-2e6c-4b00-87d6-da90687e5641"></a></div></div><style>
+    ul {
+      list-style-type: square;
+    }
+    ul > li > ul {
+      list-style-type: circle;
+    }
+    ul > li > ul > li > ul {
+      list-style-type: square;
+    }
+    ol li {
+      font-family: Arial ;
+    }
+  </style>
+    </div>
+    `;
+
+// Complete PaymentSystem Class with Yoco Integration
+class PaymentSystem {
+    constructor() {
+        this.yoco = null;
+        this.publicKey = 'pk_live_ff81b7a1N4WnLY1cce64';
+        this.secretKey = 'sk_live_af1fa3ebY69ZO1ze7e84ef69acaf';
+        this.isYocoReady = false;
+        this.pendingPayments = new Map();
+        this.setupPaymentListeners();
+        this.waitForYocoSDK();
+        this.setupPaymentPolling();
+    }
+
+    waitForYocoSDK() {
+        console.log('🔄 Waiting for Yoco SDK...');
+        
+        const checkYoco = () => {
+            if (typeof YocoSDK !== 'undefined') {
+                console.log('✅ Yoco SDK loaded!');
+                this.initYoco();
+            } else {
+                console.log('⏳ Yoco SDK not ready, checking again...');
+                setTimeout(checkYoco, 500);
+            }
+        };
+        
+        checkYoco();
+    }
+
+    initYoco() {
+        try {
+            this.yoco = new YocoSDK({
+                publicKey: this.publicKey
+            });
+            this.isYocoReady = true;
+            console.log('✅ Yoco SDK initialized successfully');
+        } catch (error) {
+            console.error('❌ Failed to initialize Yoco:', error);
+            this.isYocoReady = false;
+        }
+    }
+
+    setupPaymentListeners() {
+        const upgradeBtn = document.getElementById('upgrade-btn');
+        if (upgradeBtn) {
+            upgradeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleUpgradeClick();
+            });
+        }
+
+        const closePaymentModal = document.getElementById('close-payment-modal');
+        if (closePaymentModal) {
+            closePaymentModal.addEventListener('click', () => {
+                this.hidePaymentModal();
+            });
+        }
+
+        const paymentModal = document.getElementById('payment-modal');
+        if (paymentModal) {
+            paymentModal.addEventListener('click', (e) => {
+                if (e.target === paymentModal) {
+                    this.hidePaymentModal();
+                }
+            });
+        }
+    }
+
+    handleUpgradeClick() {
+        if (!authSystem.isLoggedIn) {
+            authSystem.showAuthModal();
+            return;
+        }
+
+        const user = authSystem.currentUser;
+        
+        if (user.isPremium) {
+            this.showPremiumModal();
+        } else if (this.hasExceededFreeSessions(user)) {
+            this.showPaymentOptions();
+        } else {
+            this.showUpgradeOptions();
+        }
+    }
+
+    hasExceededFreeSessions(user) {
+        const FREE_SESSION_LIMIT = 3;
+        return user.sessions > FREE_SESSION_LIMIT;
+    }
+
+    showUpgradeOptions() {
+        const modalHTML = `
+            <div class="payment-modal">
+                <h3>Upgrade to Premium</h3>
+                <p>Get unlimited therapy sessions and premium features</p>
+                
+                <div class="pricing-options">
+                    <div class="pricing-option featured">
+                        <div class="popular-badge">Most Popular</div>
+                        <h4>Monthly Premium</h4>
+                        <div class="price">$9.99<span>/month</span></div>
+                        <ul>
+                            <li>✓ Unlimited therapy sessions</li>
+                            <li>✓ Premium AI techniques</li>
+                            <li>✓ Progress analytics</li>
+                            <li>✓ Priority support</li>
+                        </ul>
+                        <button class="btn-purchase" onclick="paymentSystem.showPaymentForm(999, 'monthly')">Get Premium</button>
+                    </div>
+                    
+                    <div class="pricing-option">
+                        <h4>Single Session</h4>
+                        <div class="price">$2.99<span>/session</span></div>
+                        <ul>
+                            <li>✓ One additional session</li>
+                            <li>✓ Perfect if you need just one more</li>
+                        </ul>
+                        <button class="btn-purchase" onclick="paymentSystem.showPaymentForm(299, 'session')">Buy Session</button>
+                    </div>
+                </div>
+                
+                <div class="yoco-setup-info">
+                    <p><strong>💳 Secure Payments by Yoco</strong></p>
+                    <p>All payments are processed securely through Yoco</p>
+                    <p>Your card details are never stored on our servers</p>
+                </div>
+            </div>
+        `;
+    
+        this.showPaymentModal('Upgrade Options', modalHTML);
+    }
+
+    showPaymentOptions() {
+        const sessionsUsed = authSystem.currentUser.sessions;
+        const sessionsLeft = Math.max(0, 3 - sessionsUsed);
+        
+        const modalHTML = `
+            <div class="payment-modal">
+                <h3>Session Limit Reached</h3>
+                <p>You've used ${sessionsUsed} sessions this month (${sessionsLeft} free sessions remaining)</p>
+                
+                <div class="pricing-options">
+                    <div class="pricing-option">
+                        <h4>Additional Session</h4>
+                        <div class="price">$2.99<span>/session</span></div>
+                        <p>Purchase one more therapy session</p>
+                        <button class="btn-purchase" onclick="paymentSystem.showPaymentForm(299, 'session')">Buy Session</button>
+                    </div>
+                    
+                    <div class="pricing-option featured">
+                        <div class="popular-badge">Best Value</div>
+                        <h4>Unlimited Premium</h4>
+                        <div class="price">$9.99<span>/month</span></div>
+                        <ul>
+                            <li>✓ Unlimited therapy sessions</li>
+                            <li>✓ No more session limits</li>
+                            <li>✓ All premium features</li>
+                        </ul>
+                        <button class="btn-purchase" onclick="paymentSystem.showPaymentForm(999, 'monthly')">Go Unlimited</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    
+        this.showPaymentModal('Continue Your Therapy', modalHTML);
+    }
+
+    showPaymentForm(amount, plan) {
+        console.log('🔄 Showing payment form for:', amount, plan);
+        
+        const amountInDollars = (amount / 100).toFixed(2);
+        const planName = plan === 'monthly' ? 'Monthly Premium Plan' : 'Single Session';
+        
+        const paymentHTML = `
+            <div class="payment-form">
+                <h3>Complete Payment</h3>
+                <div class="payment-amount">${planName} - $${amountInDollars}</div>
+                
+                <div class="payment-instructions">
+                    <p><strong>Choose Payment Method:</strong></p>
+                </div>
+                
+                <div class="payment-methods">
+                    <div class="payment-method" onclick="paymentSystem.redirectToYoco(${amount}, '${plan}')">
+                        <div class="method-icon">💳</div>
+                        <div class="method-info">
+                            <h4>Credit/Debit Card</h4>
+                            <p>Pay securely with Yoco</p>
+                        </div>
+                        <div class="method-arrow">→</div>
+                    </div>
+                    
+                    <div class="payment-method" onclick="paymentSystem.redirectToYoco(${amount}, '${plan}')">
+                        <div class="method-icon">📱</div>
+                        <div class="method-info">
+                            <h4>Yoco Payment</h4>
+                            <p>Secure payment processing</p>
+                        </div>
+                        <div class="method-arrow">→</div>
+                    </div>
+                </div>
+                
+                <div class="payment-security-info">
+                    <p><i class="fas fa-lock"></i> Secure payment processing</p>
+                    <p>Your card details are encrypted and secure</p>
+                </div>
+                
+                <div class="payment-actions">
+                    <button class="btn-back" onclick="paymentSystem.showPaymentOptions()">
+                        ← Back to Options
+                    </button>
+                </div>
+                
+                <p class="payment-security">
+                    <i class="fas fa-lock"></i> Secured by Yoco • Your payment details are safe
+                </p>
+            </div>
+        `;
+
+        this.showPaymentModal('Secure Payment', paymentHTML);
+    }
+
+    redirectToYoco(amount, plan) {
+        const amountInDollars = (amount / 100).toFixed(2);
+        const description = plan === 'monthly' ? 'LumaCare Monthly Premium' : 'LumaCare Single Session';
+        const paymentId = 'pay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // Store pending payment
+        this.pendingPayments.set(paymentId, {
+            amount: amount,
+            plan: plan,
+            timestamp: Date.now(),
+            status: 'pending'
+        });
+
+        // Save to localStorage for persistence
+        this.savePendingPayments();
+
+        const yocoLinks = {
+            999: 'https://pay.yoco.com/r/mexvR5',
+            299: 'https://pay.yoco.com/r/2JVqYJ'
+        };
+        
+        const yocoUrl = yocoLinks[amount] || 'https://pay.yoco.com/r/mexvR5';
+        
+        // Open Yoco in new tab
+        window.open(yocoUrl, '_blank', 'width=600,height=700');
+        
+        // Show verification screen
+        this.showPaymentVerification(paymentId, amount, plan);
+    }
+
+    showPaymentVerification(paymentId, amount, plan) {
+        const amountInDollars = (amount / 100).toFixed(2);
+        
+        const verificationHTML = `
+            <div class="payment-verification">
+                <div class="verification-header">
+                    <div class="verification-icon">🔍</div>
+                    <h3>Payment Verification</h3>
+                </div>
+                
+                <div class="verification-steps">
+                    <div class="verification-step active">
+                        <div class="step-number">1</div>
+                        <div class="step-info">
+                            <h4>Complete Payment</h4>
+                            <p>You've been redirected to Yoco's secure payment page in a new tab.</p>
+                            <p><strong>Amount: $${amountInDollars}</strong></p>
+                        </div>
+                    </div>
+                    
+                    <div class="verification-step">
+                        <div class="step-number">2</div>
+                        <div class="step-info">
+                            <h4>Automatic Verification</h4>
+                            <p>We're automatically checking for your payment confirmation...</p>
+                            <div class="verification-status">
+                                <div class="loading-spinner"></div>
+                                <span class="status-text">Waiting for payment confirmation</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="verification-step">
+                        <div class="step-number">3</div>
+                        <div class="step-info">
+                            <h4>Access Granted</h4>
+                            <p>You'll get instant access to premium features once verified</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="verification-actions">
+                    <button class="btn-check-again" onclick="paymentSystem.checkPaymentStatus('${paymentId}')">
+                        🔄 Check Payment Status
+                    </button>
+                    <button class="btn-manual-verify" onclick="paymentSystem.showManualVerification('${paymentId}', ${amount}, '${plan}')">
+                        📧 Verify with Receipt
+                    </button>
+                    <button class="btn-cancel" onclick="paymentSystem.cancelPayment('${paymentId}')">
+                        Cancel Payment
+                    </button>
+                </div>
+                
+                <div class="payment-help">
+                    <p><strong>Having issues?</strong></p>
+                    <p>Email your receipt to: <strong>lumacare.therapy@gmail.com</strong></p>
+                    <p>Include your name and transaction ID for manual verification</p>
+                </div>
+            </div>
+        `;
+        
+        this.showPaymentModal('Verifying Payment', verificationHTML);
+        
+        // Start automatic verification
+        this.startAutoVerification(paymentId);
+    }
+
+    startAutoVerification(paymentId) {
+        // Check every 5 seconds for 2 minutes
+        let checks = 0;
+        const maxChecks = 24; // 2 minutes total
+        
+        const verificationInterval = setInterval(() => {
+            checks++;
+            this.checkPaymentStatus(paymentId);
+            
+            if (checks >= maxChecks) {
+                clearInterval(verificationInterval);
+                this.showVerificationTimeout(paymentId);
+            }
+        }, 5000);
+        
+        // Store interval ID for cleanup
+        this.pendingPayments.get(paymentId).verificationInterval = verificationInterval;
+        this.savePendingPayments();
+    }
+
+    async checkPaymentStatus(paymentId) {
+        const payment = this.pendingPayments.get(paymentId);
+        if (!payment) return;
+
+        try {
+            // Update UI to show checking
+            this.updateVerificationStatus('Checking payment status...');
+            
+            // Simulate API call to check payment status
+            const isVerified = await this.simulatePaymentVerification(paymentId);
+            
+            if (isVerified) {
+                this.handleVerifiedPayment(paymentId);
+            } else {
+                this.updateVerificationStatus('Payment not confirmed yet...');
+            }
+        } catch (error) {
+            console.error('Error checking payment:', error);
+            this.updateVerificationStatus('Error checking status. Try manual verification.');
+        }
+    }
+
+    async simulatePaymentVerification(paymentId) {
+        // SIMULATION: 30% chance of success after 3+ checks
+        const payment = this.pendingPayments.get(paymentId);
+        const checkCount = payment.checkCount || 0;
+        payment.checkCount = checkCount + 1;
+        
+        // Increase chance of success with each check
+        const successChance = Math.min(0.3 + (checkCount * 0.1), 0.8);
+        return Math.random() < successChance;
+    }
+
+    handleVerifiedPayment(paymentId) {
+        const payment = this.pendingPayments.get(paymentId);
+        if (!payment) return;
+
+        // Clear verification interval
+        if (payment.verificationInterval) {
+            clearInterval(payment.verificationInterval);
+        }
+
+        // Process successful payment
+        const transactionId = 'yoco_verified_' + Date.now();
+        this.handleSuccessfulPayment(payment.amount, transactionId, payment.plan);
+        
+        // Remove from pending
+        this.pendingPayments.delete(paymentId);
+        this.savePendingPayments();
+    }
+
+    showManualVerification(paymentId, amount, plan) {
+        const amountInDollars = (amount / 100).toFixed(2);
+        
+        const manualHTML = `
+            <div class="manual-verification">
+                <div class="verification-header">
+                    <div class="verification-icon">📧</div>
+                    <h3>Manual Verification</h3>
+                </div>
+                
+                <div class="manual-steps">
+                    <div class="manual-step">
+                        <h4>Step 1: Find Your Receipt</h4>
+                        <p>Check your email for the Yoco payment receipt</p>
+                    </div>
+                    
+                    <div class="manual-step">
+                        <h4>Step 2: Email Your Receipt</h4>
+                        <p>Forward the receipt or screenshot to:</p>
+                        <div class="email-address">
+                            <strong>lumacare.therapy@gmail.com</strong>
+                            <button class="btn-copy-email" onclick="paymentSystem.copyEmailToClipboard()">
+                                📋 Copy
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="manual-step">
+                        <h4>Step 3: Include These Details</h4>
+                        <div class="verification-details">
+                            <p><strong>Required information:</strong></p>
+                            <ul>
+                                <li>Your full name: <input type="text" id="verify-name" placeholder="Enter your name"></li>
+                                <li>Transaction ID from receipt</li>
+                                <li>Payment amount: $${amountInDollars}</li>
+                                <li>Plan: ${plan === 'monthly' ? 'Monthly Premium' : 'Single Session'}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="manual-actions">
+                    <button class="btn-sent-email" onclick="paymentSystem.confirmManualVerification('${paymentId}', ${amount}, '${plan}')">
+                        ✅ I've Sent the Email
+                    </button>
+                    <button class="btn-back" onclick="paymentSystem.showPaymentVerification('${paymentId}', ${amount}, '${plan}')">
+                        ← Back to Auto Verification
+                    </button>
+                </div>
+                
+                <div class="verification-note">
+                    <p><strong>Note:</strong> Manual verification usually takes 1-2 hours during business hours</p>
+                    <p>We'll email you once your payment is confirmed</p>
+                </div>
+            </div>
+        `;
+        
+        this.showPaymentModal('Manual Verification', manualHTML);
+    }
+
+    confirmManualVerification(paymentId, amount, plan) {
+        const userName = document.getElementById('verify-name')?.value.trim();
+        
+        if (!userName) {
+            alert('Please enter your name for verification');
+            return;
+        }
+
+        // Store manual verification request
+        const payment = this.pendingPayments.get(paymentId);
+        if (payment) {
+            payment.manualVerification = {
+                userName: userName,
+                timestamp: Date.now(),
+                status: 'pending'
+            };
+            this.savePendingPayments();
+        }
+
+        const confirmationHTML = `
+            <div class="verification-confirmed">
+                <div class="success-icon">📨</div>
+                <h3>Verification Request Sent!</h3>
+                <p>We've received your manual verification request for <strong>${userName}</strong>.</p>
+                
+                <div class="confirmation-details">
+                    <p><strong>What happens next:</strong></p>
+                    <ul>
+                        <li>✅ We'll check our email for your receipt</li>
+                        <li>✅ Verify your payment details</li>
+                        <li>✅ Activate your premium account</li>
+                        <li>✅ Send you a confirmation email</li>
+                    </ul>
+                </div>
+                
+                <div class="confirmation-actions">
+                    <button class="btn-close-modal" onclick="paymentSystem.hidePaymentModal()">
+                        Close
+                    </button>
+                    <button class="btn-contact-support" onclick="paymentSystem.contactSupport()">
+                        📞 Contact Support
+                    </button>
+                </div>
+                
+                <div class="support-info">
+                    <p><strong>Need help?</strong> Email: lumacare.therapy@gmail.com</p>
+                    <p>Reference: ${paymentId}</p>
+                </div>
+            </div>
+        `;
+        
+        this.showPaymentModal('Verification Submitted', confirmationHTML);
+    }
+
+    copyEmailToClipboard() {
+        navigator.clipboard.writeText('lumacare.therapy@gmail.com').then(() => {
+            const btn = document.querySelector('.btn-copy-email');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Copied!';
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+            }, 2000);
+        });
+    }
+
+    updateVerificationStatus(message) {
+        const statusElement = document.querySelector('.status-text');
+        if (statusElement) {
+            statusElement.textContent = message;
+        }
+    }
+
+    showVerificationTimeout(paymentId) {
+        const timeoutHTML = `
+            <div class="verification-timeout">
+                <div class="timeout-icon">⏰</div>
+                <h3>Verification Timeout</h3>
+                <p>We couldn't automatically verify your payment within the expected time.</p>
+                
+                <div class="timeout-actions">
+                    <button class="btn-try-again" onclick="paymentSystem.showPaymentVerification('${paymentId}')">
+                        🔄 Try Auto Verification Again
+                    </button>
+                    <button class="btn-manual" onclick="paymentSystem.showManualVerification('${paymentId}')">
+                        📧 Switch to Manual Verification
+                    </button>
+                    <button class="btn-contact" onclick="paymentSystem.contactSupport()">
+                        📞 Contact Support
+                    </button>
+                </div>
+                
+                <div class="timeout-help">
+                    <p><strong>Common issues:</strong></p>
+                    <ul>
+                        <li>Payment may still be processing</li>
+                        <li>Check your email for the receipt</li>
+                        <li>Sometimes payments take a few extra minutes</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('payment-modal-body').innerHTML = timeoutHTML;
+    }
+
+    cancelPayment(paymentId) {
+        this.pendingPayments.delete(paymentId);
+        this.savePendingPayments();
+        this.showPaymentOptions();
+    }
+
+    savePendingPayments() {
+        const pendingArray = Array.from(this.pendingPayments.entries());
+        localStorage.setItem('lumaCare_pending_payments', JSON.stringify(pendingArray));
+    }
+
+    loadPendingPayments() {
+        const pendingData = localStorage.getItem('lumaCare_pending_payments');
+        if (pendingData) {
+            const pendingArray = JSON.parse(pendingData);
+            this.pendingPayments = new Map(pendingArray);
+        }
+    }
+
+    setupPaymentPolling() {
+        this.loadPendingPayments();
+        
+        setInterval(() => {
+            this.checkAllPendingPayments();
+        }, 60000);
+    }
+
+    checkAllPendingPayments() {
+        for (const [paymentId, payment] of this.pendingPayments) {
+            if (Date.now() - payment.timestamp < 24 * 60 * 60 * 1000) {
+                this.checkPaymentStatus(paymentId);
+            }
+        }
+    }
+
+    handleSuccessfulPayment(amount, transactionId, plan) {
+        console.log('💰 Payment successful:', { amount, transactionId, plan });
+        
+        const user = authSystem.currentUser;
+        
+        if (amount === 999) {
+            user.isPremium = true;
+            user.premiumSince = new Date().toISOString();
+        } else if (amount === 299) {
+            user.purchasedSessions = (user.purchasedSessions || 0) + 1;
+        }
+
+        this.recordPayment(amount, plan, transactionId, 'completed');
+
+        localStorage.setItem('lumaCare_user', JSON.stringify(user));
+        authSystem.updateUI();
+
+        this.showPaymentSuccess(amount, transactionId, plan);
+    }
+
+    recordPayment(amount, plan, transactionId, status = 'completed') {
+        const user = authSystem.currentUser;
+        if (!user) return;
+
+        if (!user.paymentHistory) {
+            user.paymentHistory = [];
+        }
+
+        const payment = {
+            transactionId: transactionId,
+            amount: amount,
+            type: plan === 'monthly' ? 'Monthly Premium' : 'Single Session',
+            date: new Date().toISOString(),
+            status: status
+        };
+
+        user.paymentHistory.unshift(payment);
+        localStorage.setItem('lumaCare_user', JSON.stringify(user));
+        authSystem.updatePaymentHistory();
+        
+        console.log('💰 Payment recorded:', payment);
+    }
+
+    showPaymentSuccess(amount, transactionId, plan) {
+        const amountInDollars = (amount / 100).toFixed(2);
+        const planType = plan === 'monthly' ? 'Monthly Premium' : 'Single Session';
+        
+        const successHTML = `
+            <div class="payment-success">
+                <div class="success-icon">🎉</div>
+                <h3>Payment Successful!</h3>
+                <p>Thank you for your purchase of <strong>${planType}</strong></p>
+                <p><strong>Amount: $${amountInDollars}</strong></p>
+                <p><small>Transaction ID: ${transactionId}</small></p>
+                
+                <div class="premium-features">
+                    <div class="feature">
+                        <i class="fas fa-infinity"></i>
+                        <span>Unlimited Access</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-crown"></i>
+                        <span>Premium Features</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-rocket"></i>
+                        <span>Priority Support</span>
+                    </div>
+                </div>
+                
+                <div class="success-actions">
+                    <button class="btn-close-modal" onclick="paymentSystem.hidePaymentModal()">
+                        Start Therapy
+                    </button>
+                    <button class="btn-view-profile" onclick="paymentSystem.goToProfile()">
+                        View Profile
+                    </button>
+                </div>
+                
+                <p class="payment-security">
+                    <i class="fas fa-receipt"></i> 
+                    <a href="#" onclick="paymentSystem.sendEmailReceipt('${transactionId}')">Email Receipt</a>
+                </p>
+            </div>
+        `;
+
+        this.showPaymentModal('Payment Successful', successHTML);
+    }
+
+    sendEmailReceipt(transactionId) {
+        const user = authSystem.currentUser;
+        if (!user || !user.paymentHistory) return;
+
+        const payment = user.paymentHistory.find(p => p.transactionId === transactionId);
+        if (!payment) return;
+
+        const amount = (payment.amount / 100).toFixed(2);
+        const date = new Date(payment.date).toLocaleDateString();
+        
+        const subject = `LumaCare Payment Receipt - ${transactionId}`;
+        const body = `
+Hello ${user.name},
+
+Thank you for your purchase with LumaCare!
+
+Payment Details:
+- Transaction ID: ${transactionId}
+- Amount: $${amount}
+- Type: ${payment.type}
+- Date: ${date}
+- Status: ${payment.status}
+
+We appreciate your support in mental wellness journey.
+
+Best regards,
+LumaCare Team
+lumacare.therapy@gmail.com
+        `.trim();
+
+        window.location.href = `mailto:${user.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    contactSupport() {
+        const subject = 'LumaCare Payment Support';
+        const body = `Hello LumaCare team,\n\nI need assistance with a payment verification.\n\nPayment Reference: ${this.pendingPayments.keys().next().value || 'N/A'}\n\nIssue description:`;
+        window.location.href = `mailto:lumacare.therapy@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    goToProfile() {
+        this.hidePaymentModal();
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('[data-tab="profile"]').classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById('profile-tab').classList.add('active');
+    }
+
+    showPremiumModal() {
+        const modalHTML = `
+            <div class="payment-modal">
+                <h3>🎉 Premium Member</h3>
+                <p>You're already enjoying unlimited therapy sessions!</p>
+                <div class="premium-features">
+                    <div class="feature">
+                        <i class="fas fa-infinity"></i>
+                        <span>Unlimited Sessions</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Advanced Analytics</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-crown"></i>
+                        <span>Premium Techniques</span>
+                    </div>
+                </div>
+                <button class="btn-close-modal" onclick="paymentSystem.hidePaymentModal()">Awesome!</button>
+            </div>
+        `;
+        this.showPaymentModal('Premium Features', modalHTML);
+    }
+
+    showPaymentModal(title, content) {
+        const modal = document.getElementById('payment-modal');
+        document.getElementById('payment-modal-title').textContent = title;
+        document.getElementById('payment-modal-body').innerHTML = content;
+        modal.classList.add('active');
+    }
+
+    hidePaymentModal() {
+        document.getElementById('payment-modal').classList.remove('active');
+    }
+}
+
+// Professional Therapist AI
+class TherapistAI {
+    constructor() {
+        this.conversationStage = 'greeting';
+        this.identifiedIssues = [];
+        this.assessmentCount = 0;
+        this.hasGreeted = false;
+    }
+
+    analyzeMessage(message) {
+        const lowerMessage = message.toLowerCase();
+        const issues = [];
+        
+        if (!this.hasGreeted && (lowerMessage.includes('hi') || lowerMessage.includes('hello') || 
+            lowerMessage.includes('hey') || lowerMessage === 'hey')) {
+            this.hasGreeted = true;
+            return ['greeting'];
+        }
+        
+        if (lowerMessage.includes('overwhelm') || lowerMessage.includes('too much') || 
+            lowerMessage.includes('workload') || lowerMessage.includes('projects') || 
+            lowerMessage.includes('deadlines')) {
+            issues.push('overwhelm');
+        }
+        
+        if (lowerMessage.includes('anxious') || lowerMessage.includes('anxiety') || 
+            lowerMessage.includes('panic') || lowerMessage.includes('chest') || 
+            lowerMessage.includes('tight') || lowerMessage.includes('heart')) {
+            issues.push('anxiety');
+        }
+        
+        if (lowerMessage.includes('negative') || lowerMessage.includes('not good enough') || 
+            lowerMessage.includes('can\'t do') || lowerMessage.includes('failure')) {
+            issues.push('negative-thoughts');
+        }
+        
+        if (lowerMessage.includes('stress') || lowerMessage.includes('pressure') || 
+            lowerMessage.includes('burnout') || lowerMessage.includes('exhaust')) {
+            issues.push('stress');
+        }
+        
+        return issues;
+    }
+
+    generateResponse(userMessage, userIssues) {
+        if (userIssues.includes('greeting') || !this.hasGreeted) {
+            this.hasGreeted = true;
+            this.conversationStage = 'assessment';
+            return this.generateGreeting();
+        }
+        
+        if (userMessage.length < 3 || userMessage === 'hey' || userMessage === 'hi') {
+            return `<p>Hello! I noticed your message was quite brief. I'm here to help with stress, anxiety, overwhelm, or any challenges you might be facing. What's on your mind today?</p>`;
+        }
+        
+        let response = '';
+        
+        if (userIssues.length > 0) {
+            response += this.generateValidation(userIssues);
+        }
+        
+        if (this.conversationStage === 'assessment' && this.assessmentCount < 1) {
+            response += this.generateAssessmentQuestion(userIssues, userMessage);
+            this.assessmentCount++;
+        } else {
+            response += this.generateSolutionRecommendation(userIssues);
+            this.conversationStage = 'solution';
+        }
+        
+        return response || `<p>Thanks for sharing. Could you tell me a bit more about what you're experiencing right now?</p>`;
+    }
+
+    generateGreeting() {
+        const greetings = [
+            `Hello! I'm your AI therapist from LumaCare. I'm here to help you work through stress, anxiety, overwhelm, and other mental health challenges using evidence-based techniques. 
+            
+            <br><br>
+            <strong>About LumaCare:</strong>
+            • Free: 3 therapy sessions per month
+            • Premium: Unlimited sessions for $9.99/month
+            • Single sessions: $2.99 per additional session
+            <br><br>
+            If you experience any issues or have complaints, please report them to <strong>lumacare.therapy@gmail.com</strong>
+            <br><br>
+            I'm here to listen and provide practical techniques. What's been on your mind lately?`,
+            
+            `Welcome to LumaCare! I'm an AI therapist specialized in helping with mental wellness through proven therapeutic methods.
+            
+            <br><br>
+            <strong>App Features:</strong>
+            • AI Therapy Sessions
+            • Therapeutic Techniques Library  
+            • Progress Tracking
+            • Voice Responses
+            <br><br>
+            <strong>Pricing:</strong> Start with 3 free monthly sessions, then choose between unlimited access or pay-per-session.
+            <br><br>
+            For support or feedback: <strong>lumacare.therapy@gmail.com</strong>
+            <br><br>
+            What challenges would you like to work on today?`
+        ];
+        return `<p>${greetings[Math.floor(Math.random() * greetings.length)]}</p>`;
+    }
+
+    generateValidation(issues) {
+        if (issues.includes('overwhelm')) {
+            return `<p>I can hear how overwhelmed you're feeling with these competing demands. That sense of being buried under responsibilities is incredibly stressful and can trigger both mental and physical symptoms.</p>`;
+        }
+        if (issues.includes('anxiety')) {
+            return `<p>The chest tightness and difficulty focusing you described are clear signs your nervous system is in overdrive. This is a common physiological response to perceived threats.</p>`;
+        }
+        if (issues.includes('stress')) {
+            return `<p>It sounds like you're under significant pressure right now. That constant stress can really take a toll on both your mental and physical wellbeing.</p>`;
+        }
+        return `<p>Thanks for sharing what you're going through. I want to make sure I understand your experience correctly.</p>`;
+    }
+
+    generateAssessmentQuestion(issues, userMessage) {
+        if (userMessage.length < 10) {
+            return `<p>Could you tell me a bit more about what's going on? The more details you share, the better I can help you with specific techniques.</p>`;
+        }
+
+        const questions = {
+            'overwhelm': [
+                "When you look at everything on your plate, what feels most urgent versus what's actually most important for your long-term goals?",
+                "Are there any tasks that could be delegated, postponed, or simplified?",
+                "How much of this overwhelm is about the volume of work versus the time constraints?"
+            ],
+            'anxiety': [
+                "On a scale of 1-10, how intense is the physical sensation of anxiety you're experiencing?",
+                "What specific thoughts tend to run through your mind when you feel that physical tension starting?",
+                "How is this anxiety impacting your ability to make clear decisions?"
+            ],
+            'stress': [
+                "What aspects of your situation are contributing most to your stress levels?",
+                "How is this stress affecting your sleep, appetite, or personal relationships?",
+                "What would need to change for you to feel more in control?"
+            ]
+        };
+
+        for (let issue of issues) {
+            if (questions[issue]) {
+                const question = questions[issue][Math.floor(Math.random() * questions[issue].length)];
+                return `<p>${question}</p>`;
+            }
+        }
+
+        return `<p>Could you tell me more about what specifically feels most challenging in this situation?</p>`;
+    }
+
+    generateSolutionRecommendation(issues) {
+        let techniques = [];
+        
+        if (issues.includes('overwhelm')) {
+            techniques.push('priority-matrix', 'pomodoro');
+        }
+        if (issues.includes('anxiety')) {
+            techniques.push('box-breathing', 'grounding');
+        }
+        if (issues.includes('negative-thoughts')) {
+            techniques.push('thought-challenging');
+        }
+        if (issues.includes('stress')) {
+            techniques.push('pomodoro', 'box-breathing');
+        }
+        
+        techniques = [...new Set(techniques)];
+        
+        if (techniques.length === 0) {
+            return `<p>Based on what you've shared, I have several techniques that could help. Could you tell me a bit more about the specific challenges you're facing?</p>`;
+        }
+        
+        let recommendation = `<p>Based on what you've shared, I recommend focusing on these evidence-based techniques that address your specific challenges:</p>`;
+        
+        recommendation += `<div class="technique-suggestion">`;
+        
+        techniques.forEach(techId => {
+            const technique = therapeuticTechniques[techId];
+            if (technique) {
+                recommendation += `
+                    <div class="technique-option">
+                        <h4>${technique.title}</h4>
+                        <p>${technique.description}</p>
+                        <p><em>Best for:</em> ${technique.whenToUse}</p>
+                        <button class="btn-learn-technique" data-technique="${techId}">Learn This Technique</button>
+                    </div>
+                `;
+            }
+        });
+        
+        recommendation += `</div>`;
+        recommendation += `<p>Which of these approaches resonates most with your current situation?</p>`;
+        
+        return recommendation;
+    }
+
+    reset() {
+        this.conversationStage = 'greeting';
+        this.identifiedIssues = [];
+        this.assessmentCount = 0;
+        this.hasGreeted = false;
+    }
+}
+
+// Authentication System
+class AuthSystem {
+    constructor() {
+        this.currentUser = null;
+        this.isLoggedIn = false;
+    }
+
+    init() {
+        this.checkExistingSession();
+        this.setupEventListeners();
+    }
+
+    checkExistingSession() {
+        const userData = localStorage.getItem('lumaCare_user');
+        if (userData) {
+            this.currentUser = JSON.parse(userData);
+            this.isLoggedIn = true;
+            this.updateUI();
+        }
+    }
+
+    setupEventListeners() {
+        document.getElementById('user-avatar').addEventListener('click', () => {
+            if (!this.isLoggedIn) {
+                this.showAuthModal();
+            }
+        });
+
+        document.getElementById('close-auth-modal').addEventListener('click', () => {
+            this.hideAuthModal();
+        });
+
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const tabName = e.target.getAttribute('data-tab');
+                this.switchAuthTab(tabName);
+            });
+        });
+
+        document.getElementById('login-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleLogin();
+        });
+
+        document.getElementById('signup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleSignup();
+        });
+
+        document.getElementById('report-issue').addEventListener('click', () => {
+            this.reportIssue();
+        });
+
+        document.getElementById('contact-support').addEventListener('click', () => {
+            this.contactSupport();
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            this.logout();
+        });
+    }
+
+    showAuthModal() {
+        document.getElementById('auth-modal').classList.add('active');
+    }
+
+    hideAuthModal() {
+        document.getElementById('auth-modal').classList.remove('active');
+    }
+
+    switchAuthTab(tabName) {
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+        document.querySelectorAll('.auth-form').forEach(form => {
+            form.classList.remove('active');
+        });
+        document.getElementById(`${tabName}-form`).classList.add('active');
+    }
+
+    handleLogin() {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        if (!email || !password) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        this.currentUser = {
+            name: email.split('@')[0],
+            email: email,
+            isPremium: false,
+            joinDate: new Date().toISOString(),
+            sessions: Math.floor(Math.random() * 5) + 1,
+            techniques: Math.floor(Math.random() * 5) + 1,
+            streak: Math.floor(Math.random() * 10) + 1,
+            purchasedSessions: 0,
+            paymentHistory: []
+        };
+
+        this.isLoggedIn = true;
+        localStorage.setItem('lumaCare_user', JSON.stringify(this.currentUser));
+        this.updateUI();
+        this.hideAuthModal();
+
+        alert('Successfully logged in! Welcome to LumaCare.');
+    }
+
+    handleSignup() {
+        const name = document.getElementById('signup-name').value;
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+
+        if (!name || !email || !password) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        this.currentUser = {
+            name: name,
+            email: email,
+            isPremium: false,
+            joinDate: new Date().toISOString(),
+            sessions: 1,
+            techniques: 0,
+            streak: 1,
+            purchasedSessions: 0,
+            paymentHistory: []
+        };
+
+        this.isLoggedIn = true;
+        localStorage.setItem('lumaCare_user', JSON.stringify(this.currentUser));
+        this.updateUI();
+        this.hideAuthModal();
+
+        alert('Account created successfully! Welcome to LumaCare.');
+    }
+
+    updatePaymentHistory() {
+        const paymentHistoryElement = document.getElementById('payment-history');
+        if (!paymentHistoryElement) return;
+
+        const user = this.currentUser;
+        
+        if (!user.paymentHistory || user.paymentHistory.length === 0) {
+            paymentHistoryElement.innerHTML = `
+                <div class="no-payments">
+                    <i class="fas fa-receipt"></i>
+                    <p>No payments yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        let historyHTML = '';
+        user.paymentHistory.forEach(payment => {
+            const date = new Date(payment.date).toLocaleDateString();
+            const amount = (payment.amount / 100).toFixed(2);
+            
+            historyHTML += `
+                <div class="payment-item">
+                    <div class="payment-info">
+                        <div class="payment-type">${payment.type}</div>
+                        <div class="payment-date">${date}</div>
+                    </div>
+                    <div class="payment-amount">$${amount}</div>
+                    <div class="payment-status ${payment.status}">${payment.status}</div>
+                    <button class="btn-receipt" onclick="paymentSystem.sendEmailReceipt('${payment.transactionId}')">
+                        <i class="fas fa-envelope"></i> Receipt
+                    </button>
+                </div>
+            `;
+        });
+
+        paymentHistoryElement.innerHTML = historyHTML;
+    }
+
+    updateUI() {
+        const userAvatar = document.getElementById('user-avatar');
+        const profileName = document.getElementById('profile-name');
+        const profileEmail = document.getElementById('profile-email');
+        const profileAvatar = document.getElementById('profile-avatar-icon');
+        const sessionCount = document.getElementById('session-count');
+        const techniquesUsed = document.getElementById('techniques-used');
+        const daysStreak = document.getElementById('days-streak');
+        const subscriptionStatus = document.getElementById('subscription-status');
+        const upgradeBtn = document.getElementById('upgrade-btn');
+
+        if (this.isLoggedIn && this.currentUser) {
+            userAvatar.innerHTML = `<span>${this.currentUser.name.charAt(0).toUpperCase()}</span>`;
+            
+            profileName.textContent = this.currentUser.name;
+            profileEmail.textContent = this.currentUser.email;
+            profileAvatar.textContent = this.currentUser.name.charAt(0).toUpperCase();
+            sessionCount.textContent = this.currentUser.sessions;
+            techniquesUsed.textContent = this.currentUser.techniques;
+            daysStreak.textContent = this.currentUser.streak;
+
+            if (this.currentUser.isPremium) {
+                subscriptionStatus.innerHTML = `
+                    <div class="status-premium">
+                        <i class="fas fa-crown"></i>
+                        <span>Premium Member - Unlimited sessions</span>
+                    </div>
+                `;
+                upgradeBtn.textContent = 'Premium';
+                upgradeBtn.style.background = 'linear-gradient(135deg, #f59e0b, #fbbf24)';
+            } else {
+                const sessionsLeft = Math.max(0, 3 - this.currentUser.sessions);
+                subscriptionStatus.innerHTML = `
+                    <div class="status-free">
+                        <i class="fas fa-user"></i>
+                        <span>Free Plan - ${sessionsLeft} sessions remaining this month</span>
+                    </div>
+                `;
+                upgradeBtn.textContent = 'Go Premium';
+                upgradeBtn.style.background = 'linear-gradient(90deg, var(--primary), var(--secondary))';
+            }
+
+            this.updatePaymentHistory();
+
+        } else {
+            userAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            profileName.textContent = 'Guest User';
+            profileEmail.textContent = 'Not logged in';
+            profileAvatar.innerHTML = '<i class="fas fa-user"></i>';
+            sessionCount.textContent = '0';
+            techniquesUsed.textContent = '0';
+            daysStreak.textContent = '0';
+            subscriptionStatus.innerHTML = `
+                <div class="status-free">
+                    <i class="fas fa-user"></i>
+                    <span>Free Plan - 3 sessions/month</span>
+                </div>
+            `;
+            
+            const paymentHistoryElement = document.getElementById('payment-history');
+            if (paymentHistoryElement) {
+                paymentHistoryElement.innerHTML = `
+                    <div class="no-payments">
+                        <i class="fas fa-receipt"></i>
+                        <p>No payments yet</p>
+                    </div>
+                `;
+            }
+        }
+    }
+
+  // In AuthSystem class - this should work
+trackSession() {
+    if (this.isLoggedIn && this.currentUser) {
+        const FREE_SESSION_LIMIT = 3;
+        const currentSessions = this.currentUser.sessions || 0;
+        
+        // Check if user can proceed
+        const canProceed = this.currentUser.isPremium || 
+                          currentSessions < FREE_SESSION_LIMIT || 
+                          (this.currentUser.purchasedSessions || 0) > 0;
+        
+        if (canProceed) {
+            this.currentUser.sessions = currentSessions + 1;
+            localStorage.setItem('lumaCare_user', JSON.stringify(this.currentUser));
+            this.updateUI();
+            return true;
+        } else {
+            this.showSessionLimitWarning();
+            return false;
+        }
+    }
+    return false;
+}
+
+    showSessionLimitWarning() {
+        setTimeout(() => {
+            const warningHTML = `
+                <div class="message ai-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="session-warning">
+                            <p><strong>Session Limit Reached</strong></p>
+                            <p>You've used all your available sessions this month.</p>
+                            <p>Upgrade to premium or purchase additional sessions to continue.</p>
+                            <button class="btn-upgrade-now" id="session-limit-upgrade-btn">View Upgrade Options</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = warningHTML;
+            chatMessages.appendChild(tempDiv.firstElementChild);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            document.getElementById('session-limit-upgrade-btn').addEventListener('click', () => {
+                paymentSystem.showPaymentOptions();
+            });
+        }, 1000);
+    }
+
+    checkAndShowSessionWarning() {
+        if (!this.isLoggedIn || !this.currentUser) return;
+        
+        const user = this.currentUser;
+        const FREE_SESSION_LIMIT = 3;
+        
+        if (!user.isPremium && user.sessions >= FREE_SESSION_LIMIT) {
+            const sessionsLeft = Math.max(0, FREE_SESSION_LIMIT - user.sessions);
+            
+            if (sessionsLeft <= 0) {
+                setTimeout(() => {
+                    const warningHTML = `
+                        <div class="message ai-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="session-warning">
+                                    <p><strong>Session Limit Reached</strong></p>
+                                    <p>You've used all ${FREE_SESSION_LIMIT} free sessions this month.</p>
+                                    <p>Upgrade to continue your therapy journey:</p>
+                                    <button class="btn-upgrade-now" id="session-upgrade-btn">View Upgrade Options</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = warningHTML;
+                    chatMessages.appendChild(tempDiv.firstElementChild);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    
+                    document.getElementById('session-upgrade-btn').addEventListener('click', () => {
+                        paymentSystem.showPaymentOptions();
+                    });
+                }, 1000);
+            } else if (sessionsLeft === 1) {
+                setTimeout(() => {
+                    const warningHTML = `
+                        <div class="message ai-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <div class="session-info">
+                                    <p><strong>Heads up:</strong> You have 1 free session remaining this month.</p>
+                                    <p>After this, you can upgrade to premium or purchase individual sessions.</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = warningHTML;
+                    chatMessages.appendChild(tempDiv.firstElementChild);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+            }
+        }
+    }
+
+    reportIssue() {
+        const issue = prompt('Please describe the issue you encountered with the AI:');
+        if (issue) {
+            console.log('User reported issue:', issue);
+            alert('Thank you for your feedback! We\'ll review this issue and improve the AI.');
+        }
+    }
+
+    contactSupport() {
+        const subject = 'LumaCare Support Request';
+        const body = 'Hello LumaCare team,\n\nI need assistance with:';
+        window.location.href = `mailto:lumacare.therapy@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    logout() {
+        if (confirm('Are you sure you want to logout?')) {
+            this.currentUser = null;
+            this.isLoggedIn = false;
+            localStorage.removeItem('lumaCare_user');
+            this.updateUI();
+            alert('You have been logged out successfully.');
+        }
+    }
+}
+
+// Voice synthesis setup
+let speechSynthesis = window.speechSynthesis;
+let femaleVoice = null;
+let isVoiceEnabled = true;
+let isRecording = false;
+
+function initializeVoices() {
+    const voices = speechSynthesis.getVoices();
+    femaleVoice = voices.find(voice => 
+        voice.name.includes('Female') || 
+        voice.name.includes('woman') || 
+        voice.name.includes('Samantha') ||
+        (voice.lang.includes('en') && voice.gender === 'female')
+    );
+    
+    if (!femaleVoice) {
+        femaleVoice = voices.find(voice => voice.lang.includes('en'));
+    }
+}
+
+speechSynthesis.onvoiceschanged = initializeVoices;
+
+function speakText(text) {
+    if (!speechSynthesis || !femaleVoice || !isVoiceEnabled) return;
+    
+    speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = femaleVoice;
+    utterance.rate = 0.9;
+    utterance.pitch = 1.1;
+    utterance.volume = 0.8;
+    
+    speechSynthesis.speak(utterance);
+}
+
+function addMessageToChat(message, sender) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', `${sender}-message`);
+    
+    const avatarDiv = document.createElement('div');
+    avatarDiv.classList.add('message-avatar');
+    avatarDiv.innerHTML = `<i class="fas fa-${sender === 'user' ? 'user' : 'robot'}"></i>`;
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.classList.add('message-content');
+    contentDiv.innerHTML = `<p>${message}</p>`;
+    
+    messageDiv.appendChild(avatarDiv);
+    messageDiv.appendChild(contentDiv);
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showTechniqueDetails(techniqueId) {
+    const technique = therapeuticTechniques[techniqueId];
+    if (!technique) return;
+    
+    const techniqueHTML = `
+        <div class="technique-detail">
+            <h4>${technique.title} - Step by Step</h4>
+            <p><strong>Description:</strong> ${technique.description}</p>
+            <p><strong>When to use:</strong> ${technique.whenToUse}</p>
+            <h5>Steps:</h5>
+            <ol>
+                ${technique.steps.map(step => `<li>${step}</li>`).join('')}
+            </ol>
+            <p><em>Would you like to practice this technique together now?</em></p>
+        </div>
+    `;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', 'ai-message');
+    messageDiv.innerHTML = `
+        <div class="message-avatar"><i class="fas fa-robot"></i></div>
+        <div class="message-content">
+            <p>Let me walk you through the ${technique.title} technique:</p>
+            ${techniqueHTML}
+        </div>
+    `;
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    if (isVoiceEnabled && femaleVoice) {
+        const stepsText = technique.steps.map((step, index) => `Step ${index + 1}: ${step}`).join('. ');
+        const speechText = `Let me walk you through the ${technique.title}. ${technique.description}. Here are the steps: ${stepsText}`;
+        speakText(speechText);
+    }
+}
+
+function sendMessage() {
+    const message = messageInput.value.trim();
+    if (message === '') return;
+    
+    // Check if user can send message (has sessions available)
+    if (authSystem.isLoggedIn && !authSystem.trackSession()) {
+        // Session limit reached, don't send message
+        return;
+    }
+    
+    addMessageToChat(message, 'user');
+    messageInput.value = '';
+    
+    setTimeout(() => {
+        const issues = therapistAI.analyzeMessage(message);
+        const aiResponse = therapistAI.generateResponse(message, issues);
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', 'ai-message');
+        
+        const avatarDiv = document.createElement('div');
+        avatarDiv.classList.add('message-avatar');
+        avatarDiv.innerHTML = '<i class="fas fa-robot"></i>';
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.classList.add('message-content');
+        contentDiv.innerHTML = aiResponse;
+        
+        messageDiv.appendChild(avatarDiv);
+        messageDiv.appendChild(contentDiv);
+        chatMessages.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            document.querySelectorAll('.btn-learn-technique').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const techniqueId = this.getAttribute('data-technique');
+                    showTechniqueDetails(techniqueId);
+                });
+            });
+        }, 100);
+        
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        if (isVoiceEnabled && femaleVoice) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = aiResponse;
+            const textToSpeak = tempDiv.textContent || tempDiv.innerText || '';
+            speakText(textToSpeak);
+        }
+        
+    }, 1000);
+}
+
+// Policy loading functions
+function loadPrivacyPolicy() {
+    const privacyContent = document.getElementById('privacy-content');
+    if (privacyContent && (!privacyContent.innerHTML || privacyContent.innerHTML.trim() === '')) {
+        privacyContent.innerHTML = privacyPolicyHTML;
+    }
+}
+
+function loadCookiePolicy() {
+    const cookiesContent = document.getElementById('cookies-content');
+    if (cookiesContent && (!cookiesContent.innerHTML || cookiesContent.innerHTML.trim() === '')) {
+        cookiesContent.innerHTML = cookiePolicyHTML;
+    }
+}
+
+// Footer navigation function
+function showPolicyTab(tabName) {
+    // Update navigation
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    document.getElementById(`${tabName}-tab`).classList.add('active');
+    
+    // Load policy content
+    if (tabName === 'privacy') {
+        loadPrivacyPolicy();
+    } else if (tabName === 'cookies') {
+        loadCookiePolicy();
+    }
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
+}
+
+// DOM Elements
+const messageInput = document.getElementById('message-input');
+const sendBtn = document.getElementById('send-btn');
+const chatMessages = document.getElementById('chat-messages');
+const quickResponses = document.querySelectorAll('.quick-response');
+const voiceBtn = document.getElementById('voice-btn');
+const newChatBtn = document.getElementById('new-chat-btn');
+const navBtns = document.querySelectorAll('.nav-btn');
+const tabContents = document.querySelectorAll('.tab-content');
+const techniqueCards = document.querySelectorAll('.technique-card');
+const techniqueModal = document.getElementById('technique-modal');
+const closeModal = document.getElementById('close-modal');
+const modalTitle = document.getElementById('modal-title');
+const modalBody = document.getElementById('modal-body');
+const darkModeToggle = document.getElementById('dark-mode-toggle');
+const voiceToggle = document.getElementById('voice-toggle');
+
+// Event Listeners
+sendBtn.addEventListener('click', sendMessage);
+
+messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+});
+
+quickResponses.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const text = btn.getAttribute('data-text');
+        messageInput.value = text;
+        sendMessage();
+    });
+});
+
+voiceBtn.addEventListener('click', () => {
+    if (!isRecording) {
+        voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+        voiceBtn.style.backgroundColor = 'var(--danger)';
+        isRecording = true;
+        
+        setTimeout(() => {
+            const responses = [
+                "I'm feeling really anxious today",
+                "I'm overwhelmed with work",
+                "I'm having negative thoughts",
+                "I'm feeling stressed out"
+            ];
+            
+            const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+            messageInput.value = randomResponse;
+            
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            voiceBtn.style.backgroundColor = '';
+            isRecording = false;
+            
+            sendMessage();
+        }, 2000);
+    } else {
+        voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+        voiceBtn.style.backgroundColor = '';
+        isRecording = false;
+    }
+});
+
+newChatBtn.addEventListener('click', () => {
+    if (chatMessages.children.length > 1) {
+        if (confirm('Start a new conversation? Your current chat will be cleared.')) {
+            while (chatMessages.children.length > 1) {
+                chatMessages.removeChild(chatMessages.lastChild);
+            }
+            therapistAI.reset();
+        }
+    }
+});
+
+// Navigation
+navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tabId = btn.getAttribute('data-tab');
+        
+        navBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        tabContents.forEach(content => content.classList.remove('active'));
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+        
+        // Load policy content when those tabs are clicked
+        if (tabId === 'privacy') {
+            loadPrivacyPolicy();
+        } else if (tabId === 'cookies') {
+            loadCookiePolicy();
+        }
+    });
+});
+
+// Technique Cards
+techniqueCards.forEach(card => {
+    card.addEventListener('click', () => {
+        const techniqueId = card.getAttribute('data-technique');
+        const technique = therapeuticTechniques[techniqueId];
+        
+        if (technique) {
+            modalTitle.textContent = technique.title;
+            modalBody.innerHTML = `
+                <div class="technique-detail">
+                    <p>${technique.description}</p>
+                    <h3>When to Use</h3>
+                    <p>${technique.whenToUse}</p>
+                    <h3>Steps</h3>
+                    <ol>
+                        ${technique.steps.map(step => `<li>${step}</li>`).join('')}
+                    </ol>
+                </div>
+            `;
+            techniqueModal.classList.add('active');
+        }
+    });
+});
+
+closeModal.addEventListener('click', () => {
+    techniqueModal.classList.remove('active');
+});
+
+techniqueModal.addEventListener('click', (e) => {
+    if (e.target === techniqueModal) {
+        techniqueModal.classList.remove('active');
+    }
+});
+
+// Settings
+darkModeToggle.addEventListener('change', function() {
+    document.body.classList.toggle('light-mode', !this.checked);
+});
+
+voiceToggle.addEventListener('change', function() {
+    isVoiceEnabled = this.checked;
+});
+
+// Initialize everything when DOM loads
+let authSystem;
+let paymentSystem;
+let therapistAI;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('LumaCare Professional Therapist AI initialized');
+    initializeVoices();
+    
+    therapistAI = new TherapistAI();
+    authSystem = new AuthSystem();
+    authSystem.init();
+    
+    paymentSystem = new PaymentSystem();
+    
+    // Load policies if needed
+    const privacyTab = document.querySelector('[data-tab="privacy"]');
+    const cookiesTab = document.querySelector('[data-tab="cookies"]');
+    
+    if (privacyTab) {
+        privacyTab.addEventListener('click', loadPrivacyPolicy);
+    }
+    
+    if (cookiesTab) {
+        cookiesTab.addEventListener('click', loadCookiePolicy);
+    }
+    
+    // Load policies if those tabs are active on page load
+    if (document.getElementById('privacy-tab').classList.contains('active')) {
+        loadPrivacyPolicy();
+    }
+    if (document.getElementById('cookies-tab').classList.contains('active')) {
+        loadCookiePolicy();
+    }
+});
