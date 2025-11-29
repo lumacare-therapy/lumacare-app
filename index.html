@@ -8,8 +8,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LumaCare">
+
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
-    
 <!-- Theme Color -->
 <meta name="theme-color" content="#8a2be2">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
@@ -78,6 +78,9 @@
                 <button class="nav-btn" data-tab="techniques">Techniques</button>
                 <button class="nav-btn" data-tab="profile">Profile</button>
                 <button class="nav-btn" data-tab="settings">Settings</button>
+                <!-- In the nav section, add these after Settings button -->
+                <button class="nav-btn" data-tab="privacy">Privacy</button>
+                <button class="nav-btn" data-tab="cookies">Cookies</button>
             </nav>
             <div class="user-actions">
                 <button class="btn-premium" id="upgrade-btn">Go Premium</button>
@@ -327,6 +330,44 @@
         </main>
     </div>
 
+    <!-- Privacy Policy Tab -->
+<div class="tab-content" id="privacy-tab">
+<div class="policy-container">
+    <div class="policy-header">
+        <h2>Privacy Policy</h2>
+        <p>Last updated: November 28, 2025</p>
+    </div>
+    <div class="policy-content" id="privacy-content">
+        <!-- Privacy policy will be loaded here -->
+    </div>
+</div>
+</div>
+
+<!-- Cookie Policy Tab -->
+<div class="tab-content" id="cookies-tab">
+<div class="policy-container">
+    <div class="policy-header">
+        <h2>Cookie Policy</h2>
+        <p>Last updated: November 28, 2025</p>
+    </div>
+    <div class="policy-content" id="cookies-content">
+        <!-- Cookie policy will be loaded here -->
+    </div>
+</div>
+</div>
+
+<!-- Footer -->
+<footer class="app-footer">
+<div class="footer-content">
+    <p>&copy; 2025 LumaCare. All rights reserved.</p>
+    <div class="footer-links">
+        <a href="#" onclick="showPolicyTab('privacy')">Privacy Policy</a>
+        <a href="#" onclick="showPolicyTab('cookies')">Cookie Policy</a>
+        <a href="mailto:lumacare.therapy@gmail.com">Contact Support</a>
+    </div>
+</div>
+</footer>
+
     <!-- Payment Modal -->
     <div class="modal" id="payment-modal">
         <div class="modal-content">
@@ -362,5 +403,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
-
