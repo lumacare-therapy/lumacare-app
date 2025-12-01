@@ -1,3 +1,73 @@
+function onLoginSuccess() {
+    // Hide landing page
+    const landingHero = document.getElementById('landing-hero');
+    if (landingHero) {
+        landingHero.style.display = 'none';
+    }
+    
+    // Show main app
+    const appContainer = document.querySelector('.container');
+    if (appContainer) {
+        appContainer.style.display = 'block';
+    }
+    
+    // Hide auth modal
+    const authModal = document.getElementById('auth-modal');
+    if (authModal) {
+        authModal.classList.remove('active');
+    }
+}
+// Landing Page Logic
+function checkAuthAndShowLanding() {
+    const user = JSON.parse(localStorage.getItem('lumaCare_user'));
+    const landingHero = document.getElementById('landing-hero');
+    
+    if (!user && landingHero) {
+        // No user logged in - show landing page
+        landingHero.classList.add('show');
+        
+        // Hide the main app container
+        const appContainer = document.querySelector('.container');
+        if (appContainer) {
+            appContainer.style.display = 'none';
+        }
+    } else if (landingHero) {
+        // User is logged in - hide landing page
+        landingHero.style.display = 'none';
+    }
+}
+
+// Call this when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    checkAuthAndShowLanding();
+    
+    // Start Therapy button click
+    const startBtn = document.getElementById('start-therapy-btn');
+    if (startBtn) {
+        startBtn.addEventListener('click', function() {
+            // Show auth modal
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) {
+                authModal.style.display = 'flex';
+            }
+        });
+    }
+});
+
+// Also call this after login/signup
+function onLoginSuccess() {
+    // Hide landing page
+    const landingHero = document.getElementById('landing-hero');
+    if (landingHero) {
+        landingHero.style.display = 'none';
+    }
+    
+    // Show main app
+    const appContainer = document.querySelector('.container');
+    if (appContainer) {
+        appContainer.style.display = 'block';
+    }
+}
 // Therapeutic techniques database
 const therapeuticTechniques = {
     "priority-matrix": {
@@ -1248,7 +1318,8 @@ class AuthSystem {
         localStorage.setItem('lumaCare_user', JSON.stringify(this.currentUser));
         this.updateUI();
         this.hideAuthModal();
-
+        
+        onLoginSuccess();
         alert('Successfully logged in! Welcome to LumaCare.');
     }
 
@@ -1278,7 +1349,8 @@ class AuthSystem {
         localStorage.setItem('lumaCare_user', JSON.stringify(this.currentUser));
         this.updateUI();
         this.hideAuthModal();
-
+        
+        onLoginSuccess();
         alert('Account created successfully! Welcome to LumaCare.');
     }
 
