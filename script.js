@@ -249,7 +249,7 @@ class PaymentSystem {
     constructor() {
         this.yoco = null;
         this.publicKey = 'pk_live_ff81b7a1N4WnLY1cce64';
-        this.secretKey = 'sk_live_af1fa3ebY69ZO1ze7e84ef69acaf';
+        
         this.isYocoReady = false;
         this.pendingPayments = new Map();
         this.setupPaymentListeners();
@@ -1956,3 +1956,4 @@ document.addEventListener('DOMContentLoaded', function() {
         loadCookiePolicy();
     }
 });
+
