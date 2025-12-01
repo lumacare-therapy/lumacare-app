@@ -3148,3 +3148,100 @@ body.light-mode .payment-security-info {
       padding: 1rem;
   }
 }
+/* Landing Hero Styles */
+.landing-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 60px 20px;
+    text-align: center;
+    display: none; /* Hidden by default, shown to non-logged in users */
+}
+
+.landing-hero.show {
+    display: block;
+}
+
+.hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.landing-hero h1 {
+    font-size: 2.8rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+.hero-features {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 40px 0;
+    flex-wrap: wrap;
+}
+
+.feature {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 15px;
+    min-width: 200px;
+    text-align: center;
+}
+
+.feature i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.hero-pricing {
+    font-size: 1.3rem;
+    margin: 30px 0;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.hero-cta {
+    background: white;
+    color: #667eea;
+    border: none;
+    padding: 18px 40px;
+    font-size: 1.2rem;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 20px 0;
+    transition: transform 0.3s;
+}
+
+.hero-cta:hover {
+    transform: translateY(-3px);
+}
+
+.hero-cta i {
+    margin-right: 10px;
+}
+
+.hero-disclaimer {
+    font-size: 0.85rem;
+    margin-top: 30px;
+    opacity: 0.8;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+}
+
+.hero-disclaimer i {
+    margin-right: 8px;
+}
