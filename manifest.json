@@ -1,0 +1,51 @@
+{
+  "name": "LumaCare",
+  "short_name": "LumaCare",
+  "description": "Your Compassionate AI Therapy Assistant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#12121a",
+  "theme_color": "#8a2be2",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "lifestyle", "productivity"],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "LumaCare Therapy Chat"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Therapy",
+      "short_name": "Therapy",
+      "description": "Start a therapy session",
+      "url": "/?tab=therapy",
+      "icons": [{ "src": "icon-therapy.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Daily Check-in",
+      "short_name": "Check-in",
+      "description": "Log your daily mood",
+      "url": "/?tab=mood",
+      "icons": [{ "src": "icon-mood.png", "sizes": "96x96" }]
+    }
+  ],
+  "prefer_related_applications": false
+}
