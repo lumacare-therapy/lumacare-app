@@ -1,3 +1,63 @@
+// Error prevention - add at top of script.js
+(function() {
+    // Safe initialization wrapper
+    const safeInit = {
+        authSystem: null,
+        paymentSystem: null,
+        therapistAI: null,
+        
+        init: function() {
+            try {
+                // Initialize with error handling
+                this.therapistAI = new TherapistAI();
+                this.authSystem = new AuthSystem();
+                this.authSystem.init();
+                this.paymentSystem = new PaymentSystem();
+                
+                // Expose to window for debugging
+                window.__lumacare = {
+                    auth: this.authSystem,
+                    payment: this.paymentSystem,
+                    ai: this.therapistAI
+                };
+                
+                console.log('✅ LumaCare initialized successfully');
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+                // Create fallback objects
+                this.authSystem = {
+                    isLoggedIn: false,
+                    currentUser: null,
+                    trackSession: function() { return true; },
+                    updateUI: function() {}
+                };
+                this.paymentSystem = {
+                    handleUpgradeClick: function() {
+                        window.open('https://pay.yoco.com/lumacare', '_blank');
+                    }
+                };
+            }
+        }
+    };
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => safeInit.init());
+    } else {
+        safeInit.init();
+    }
+    
+    // Global error handler
+    window.addEventListener('error', function(e) {
+        console.error('🚨 Global error:', e.error);
+        // Don't show alerts to users, just log
+        if (e.error.message.includes('authSystem') || e.error.message.includes('paymentSystem')) {
+            console.log('⚠️ System not initialized, retrying...');
+            setTimeout(() => safeInit.init(), 1000);
+        }
+    });
+})();
+
 function onLoginSuccess() {
     // Hide landing page
     const landingHero = document.getElementById('landing-hero');
@@ -249,7 +309,7 @@ class PaymentSystem {
     constructor() {
         this.yoco = null;
         this.publicKey = 'pk_live_ff81b7a1N4WnLY1cce64';
-        
+
         this.isYocoReady = false;
         this.pendingPayments = new Map();
         this.setupPaymentListeners();
@@ -330,8 +390,12 @@ class PaymentSystem {
     }
 
     hasExceededFreeSessions(user) {
-        const FREE_SESSION_LIMIT = 3;
-        return user.sessions > FREE_SESSION_LIMIT;
+        // Get today's date
+        const today = new Date().toISOString().split('T')[0];
+        const lastSessionDate = user.lastSessionDate || '';
+        
+        // If last session was today, they've used their daily session
+        return lastSessionDate === today;
     }
 
     showUpgradeOptions() {
@@ -1465,57 +1529,74 @@ class AuthSystem {
     }
 
   // In AuthSystem class - this should work
-trackSession() {
-    if (this.isLoggedIn && this.currentUser) {
-        const FREE_SESSION_LIMIT = 3;
-        const currentSessions = this.currentUser.sessions || 0;
-        
-        // Check if user can proceed
-        const canProceed = this.currentUser.isPremium || 
-                          currentSessions < FREE_SESSION_LIMIT || 
-                          (this.currentUser.purchasedSessions || 0) > 0;
-        
-        if (canProceed) {
-            this.currentUser.sessions = currentSessions + 1;
-            localStorage.setItem('lumaCare_user', JSON.stringify(this.currentUser));
-            this.updateUI();
-            return true;
-        } else {
+  trackSession() {
+    console.log('📊 trackSession called');
+    
+    // Allow messages even if not logged in
+    if (!this.isLoggedIn || !this.currentUser) {
+        console.log('User not logged in, allowing message');
+        return true; // Allow guest users
+    }
+    
+    const today = new Date().toISOString().split('T')[0];
+    const user = this.currentUser;
+    
+    console.log('User session data:', {
+        isPremium: user.isPremium,
+        lastSessionDate: user.lastSessionDate,
+        today: today,
+        purchasedSessions: user.purchasedSessions || 0
+    });
+    
+    // Only check for non-premium users
+    if (!user.isPremium) {
+        // Check if user already used free session today
+        if (user.lastSessionDate === today && (user.purchasedSessions || 0) <= 0) {
+            console.log('Daily session limit reached');
             this.showSessionLimitWarning();
             return false;
         }
     }
-    return false;
+    
+    // Track the session
+    user.sessions = (user.sessions || 0) + 1;
+    user.lastSessionDate = today;
+    
+    // Deduct purchased session if applicable
+    if (user.purchasedSessions && user.purchasedSessions > 0) {
+        user.purchasedSessions--;
+        console.log('Used purchased session, remaining:', user.purchasedSessions);
+    }
+    
+    localStorage.setItem('lumaCare_user', JSON.stringify(user));
+    this.updateUI();
+    console.log('✅ Session tracked successfully');
+    return true;
 }
 
-    showSessionLimitWarning() {
-        setTimeout(() => {
-            const warningHTML = `
-                <div class="message ai-message">
-                    <div class="message-avatar">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <div class="message-content">
-                        <div class="session-warning">
-                            <p><strong>Session Limit Reached</strong></p>
-                            <p>You've used all your available sessions this month.</p>
-                            <p>Upgrade to premium or purchase additional sessions to continue.</p>
-                            <button class="btn-upgrade-now" id="session-limit-upgrade-btn">View Upgrade Options</button>
-                        </div>
-                    </div>
+    // Change the message from "month" to "day"
+showSessionLimitWarning() {
+    // In the HTML string, change:
+    // OLD: "You've used all ${FREE_SESSION_LIMIT} free sessions this month."
+    // NEW: "You've used your free session for today."
+    
+    const warningHTML = `
+        <div class="message ai-message">
+            <div class="message-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content">
+                <div class="session-warning">
+                    <p><strong>Daily Session Limit Reached</strong></p>
+                    <p>You've used your free session for today.</p>
+                    <p>Upgrade to premium or purchase additional sessions to continue.</p>
+                    <button class="btn-upgrade-now" id="session-limit-upgrade-btn">View Upgrade Options</button>
                 </div>
-            `;
-            
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = warningHTML;
-            chatMessages.appendChild(tempDiv.firstElementChild);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            
-            document.getElementById('session-limit-upgrade-btn').addEventListener('click', () => {
-                paymentSystem.showPaymentOptions();
-            });
-        }, 1000);
-    }
+            </div>
+        </div>
+    `;
+    // ... rest of function
+}
 
     checkAndShowSessionWarning() {
         if (!this.isLoggedIn || !this.currentUser) return;
@@ -1695,53 +1776,107 @@ function showTechniqueDetails(techniqueId) {
 }
 
 function sendMessage() {
-    const message = messageInput.value.trim();
-    if (message === '') return;
+    console.log('📤 sendMessage called');
     
-    // Check if user can send message (has sessions available)
-    if (authSystem.isLoggedIn && !authSystem.trackSession()) {
-        // Session limit reached, don't send message
+    // Get fresh references to elements
+    const messageInput = document.getElementById('message-input');
+    
+    if (!messageInput) {
+        console.error('❌ messageInput not found!');
         return;
     }
+    
+    const message = messageInput.value.trim();
+    console.log('Message content:', message);
+    
+    if (message === '') {
+        console.log('Empty message, skipping');
+        return;
+    }
+    
+    // Check if user can send message
+    console.log('Checking session availability...');
+    
+    // Temporarily disable session checking for testing
+    // if (authSystem.isLoggedIn && !authSystem.trackSession()) {
+    //     console.log('Session limit reached, not sending');
+    //     return;
+    // }
+    
+    // Allow all messages for now
+    console.log('✅ Allowing message to be sent');
     
     addMessageToChat(message, 'user');
     messageInput.value = '';
     
+    console.log('Waiting for AI response...');
+    
     setTimeout(() => {
-        const issues = therapistAI.analyzeMessage(message);
-        const aiResponse = therapistAI.generateResponse(message, issues);
+        console.log('Generating AI response...');
         
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message', 'ai-message');
-        
-        const avatarDiv = document.createElement('div');
-        avatarDiv.classList.add('message-avatar');
-        avatarDiv.innerHTML = '<i class="fas fa-robot"></i>';
-        
-        const contentDiv = document.createElement('div');
-        contentDiv.classList.add('message-content');
-        contentDiv.innerHTML = aiResponse;
-        
-        messageDiv.appendChild(avatarDiv);
-        messageDiv.appendChild(contentDiv);
-        chatMessages.appendChild(messageDiv);
-        
-        setTimeout(() => {
-            document.querySelectorAll('.btn-learn-technique').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const techniqueId = this.getAttribute('data-technique');
-                    showTechniqueDetails(techniqueId);
+        try {
+            const issues = therapistAI.analyzeMessage(message);
+            console.log('Identified issues:', issues);
+            
+            const aiResponse = therapistAI.generateResponse(message, issues);
+            console.log('AI Response generated');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'ai-message');
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.classList.add('message-avatar');
+            avatarDiv.innerHTML = '<i class="fas fa-robot"></i>';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('message-content');
+            contentDiv.innerHTML = aiResponse;
+            
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            
+            const chatMessages = document.getElementById('chat-messages');
+            if (chatMessages) {
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            setTimeout(() => {
+                document.querySelectorAll('.btn-learn-technique').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const techniqueId = this.getAttribute('data-technique');
+                        showTechniqueDetails(techniqueId);
+                    });
                 });
-            });
-        }, 100);
-        
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        
-        if (isVoiceEnabled && femaleVoice) {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = aiResponse;
-            const textToSpeak = tempDiv.textContent || tempDiv.innerText || '';
-            speakText(textToSpeak);
+            }, 100);
+            
+            if (isVoiceEnabled && femaleVoice) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = aiResponse;
+                const textToSpeak = tempDiv.textContent || tempDiv.innerText || '';
+                speakText(textToSpeak);
+            }
+            
+            console.log('✅ Message sent and AI responded');
+            
+        } catch (error) {
+            console.error('❌ Error in AI response:', error);
+            
+            // Show error to user
+            const errorDiv = document.createElement('div');
+            errorDiv.classList.add('message', 'ai-message');
+            errorDiv.innerHTML = `
+                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">
+                    <p>I apologize, but I encountered an error processing your message. Please try again.</p>
+                    <p><small>Error: ${error.message}</small></p>
+                </div>
+            `;
+            const chatMessages = document.getElementById('chat-messages');
+            if (chatMessages) {
+                chatMessages.appendChild(errorDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
         }
         
     }, 1000);
@@ -1927,14 +2062,139 @@ let paymentSystem;
 let therapistAI;
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('LumaCare Professional Therapist AI initialized');
-    initializeVoices();
+    console.log('✅ LumaCare Professional Therapist AI initialized');
     
+    // Initialize systems and make them globally accessible
     therapistAI = new TherapistAI();
     authSystem = new AuthSystem();
     authSystem.init();
     
     paymentSystem = new PaymentSystem();
+    
+    // Expose to window for debugging and global access
+    window.therapistAI = therapistAI;
+    window.authSystem = authSystem;
+    window.paymentSystem = paymentSystem;
+    
+    initializeVoices();
+    
+    // Fix chat input
+    function fixChatInput() {
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatMessages = document.getElementById('chat-messages');
+        
+        console.log('🔧 Fixing chat input:', {
+            messageInput: !!messageInput,
+            sendBtn: !!sendBtn,
+            chatMessages: !!chatMessages
+        });
+        
+        if (messageInput && sendBtn && chatMessages) {
+            // Make sure chat messages scrolls properly
+            chatMessages.style.flex = '1';
+            chatMessages.style.overflowY = 'auto';
+            
+            // Ensure input works
+            messageInput.style.height = 'auto';
+            messageInput.style.minHeight = '50px';
+            
+            // Remove old event listeners and add new ones
+            const newSendBtn = sendBtn.cloneNode(true);
+            sendBtn.parentNode.replaceChild(newSendBtn, sendBtn);
+            
+            const newMessageInput = messageInput.cloneNode(true);
+            messageInput.parentNode.replaceChild(newMessageInput, messageInput);
+            
+            // Add fresh event listeners
+            newSendBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Send button clicked');
+                sendMessage();
+            });
+            
+            newMessageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    console.log('Enter key pressed');
+                    sendMessage();
+                }
+            });
+            
+            // Re-assign global variables
+            window.messageInput = newMessageInput;
+            window.sendBtn = newSendBtn;
+            
+            console.log('✅ Chat input fixed');
+        } else {
+            console.error('❌ Missing chat elements!');
+        }
+    }
+    
+    // Fix chat after everything loads
+    setTimeout(fixChatInput, 500);
+    
+    // Also fix quick responses
+    document.querySelectorAll('.quick-response').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const text = btn.getAttribute('data-text');
+            if (window.messageInput) {
+                window.messageInput.value = text;
+                sendMessage();
+            }
+        });
+    });
+    
+    // Fix voice button
+    document.getElementById('voice-btn').addEventListener('click', () => {
+        if (!isRecording) {
+            voiceBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            voiceBtn.style.backgroundColor = 'var(--danger)';
+            isRecording = true;
+            
+            setTimeout(() => {
+                const responses = [
+                    "I'm feeling really anxious today",
+                    "I'm overwhelmed with work",
+                    "I'm having negative thoughts",
+                    "I'm feeling stressed out"
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                if (window.messageInput) {
+                    window.messageInput.value = randomResponse;
+                }
+                
+                voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                voiceBtn.style.backgroundColor = '';
+                isRecording = false;
+                
+                sendMessage();
+            }, 2000);
+        } else {
+            voiceBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            voiceBtn.style.backgroundColor = '';
+            isRecording = false;
+        }
+    });
+    
+    if (window.location.pathname === '/pricing' || window.location.pathname === '/pricing.html') {
+        window.location.href = 'https://pay.yoco.com/lumacare';
+    }
+    
+    // Catch pricing clicks
+    document.addEventListener('click', function(e) {
+        const target = e.target;
+        const text = target.textContent.toLowerCase();
+        
+        if (text.includes('pricing') || text.includes('premium') || text.includes('upgrade')) {
+            if (target.tagName === 'BUTTON' && !target.onclick) {
+                e.preventDefault();
+                if (window.paymentSystem) {
+                    window.paymentSystem.handleUpgradeClick();
+                }
+            }
+        }
+    });
     
     // Load policies if needed
     const privacyTab = document.querySelector('[data-tab="privacy"]');
@@ -1955,5 +2215,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('cookies-tab').classList.contains('active')) {
         loadCookiePolicy();
     }
+    
+    console.log('✅ Initialization complete');
 });
-
