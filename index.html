@@ -438,12 +438,259 @@
         </div>
     </div>
 
+    <!-- Add these just before the closing </body> tag, before the Yoco SDK -->
+
+<!-- Update the mood modal structure -->
+<div class="modal" id="mood-modal">
+<div class="modal-content mood-modal">
+    <div class="modal-header">
+        <h2>How are you feeling today?</h2>
+        <p class="mood-subtitle">Select your mood to personalize your session</p>
+        <button class="close-modal" id="close-mood-modal">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="mood-selector">
+            <div class="mood-option" data-mood="great" data-color="#FFD700">
+                <div class="mood-emoji">🌟</div>
+                <div class="mood-label">Great</div>
+            </div>
+            <div class="mood-option" data-mood="good" data-color="#FF9800">
+                <div class="mood-emoji">😊</div>
+                <div class="mood-label">Good</div>
+            </div>
+            <div class="mood-option" data-mood="okay" data-color="#009688">
+                <div class="mood-emoji">🙂</div>
+                <div class="mood-label">Okay</div>
+            </div>
+            <div class="mood-option" data-mood="neutral" data-color="#2196F3">
+                <div class="mood-emoji">😐</div>
+                <div class="mood-label">Neutral</div>
+            </div>
+            <div class="mood-option" data-mood="heavy" data-color="#673AB7">
+                <div class="mood-emoji">😔</div>
+                <div class="mood-label">Heavy</div>
+            </div>
+        </div>
+        
+        <!-- Auto-progress indicator -->
+        <div class="auto-progress-indicator">
+            <div class="auto-progress-bar"></div>
+        </div>
+        
+        <div class="mood-description" id="mood-description">
+            <p>Your mood helps tailor today's therapy session</p>
+        </div>
+        
+        <button class="btn-continue" id="continue-session" disabled>
+            Continue to Therapy
+        </button>
+        
+        <p class="mood-note">
+            <i class="fas fa-lock"></i> Your mood data stays private
+        </p>
+        
+        <div class="mood-tip">
+            <i class="fas fa-lightbulb"></i>
+            <span>Tip: Select a mood to auto-continue in 1.5 seconds</span>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Daily Growth Garden Section (Add to profile tab) -->
+<div class="tab-content" id="garden-tab">
+<div class="garden-container">
+    <div class="garden-header">
+        <h2>Your Mental Wellness Garden</h2>
+        <div class="garden-stats">
+            <div class="garden-stat">
+                <span class="stat-value" id="streak-count">0</span>
+                <span class="stat-label">Day Streak</span>
+            </div>
+            <div class="garden-stat">
+                <span class="stat-value" id="plant-count">0</span>
+                <span class="stat-label">Plants Grown</span>
+            </div>
+            <div class="garden-stat">
+                <span class="stat-value" id="session-count-garden">0</span>
+                <span class="stat-label">Sessions</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="garden-canvas" id="garden-canvas">
+        <!-- Plants will be dynamically added here -->
+        <div class="empty-garden">
+            <div class="empty-garden-icon">🌱</div>
+            <h3>Your garden is waiting</h3>
+            <p>Complete your daily check-in to plant your first seed</p>
+            <button class="btn-check-in" id="check-in-today">
+                <i class="fas fa-seedling"></i> Start Growing
+            </button>
+        </div>
+    </div>
+    
+    <div class="garden-legend">
+        <h3>Your Garden Legend</h3>
+        <div class="legend-items">
+            <div class="legend-item">
+                <div class="legend-icon">🌸</div>
+                <span>Daily Check-in</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon">🌿</div>
+                <span>Therapy Session</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon">🌻</div>
+                <span>Journal Entry</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-icon">🍃</div>
+                <span>Breathing Exercise</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="garden-achievements">
+        <h3>Recent Growth</h3>
+        <div class="achievements-list" id="achievements-list">
+            <!-- Achievements will be added here -->
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Emotional Weather Widget (Add to dashboard/techniques tab) -->
+<div class="weather-widget" id="weather-widget">
+<div class="weather-header">
+    <h3><i class="fas fa-cloud-sun"></i> Emotional Weather</h3>
+    <button class="weather-info-btn" id="weather-info">
+        <i class="fas fa-info-circle"></i>
+    </button>
+</div>
+<div class="weather-content">
+    <div class="weather-icon" id="weather-icon">☀️</div>
+    <div class="weather-details">
+        <div class="weather-condition" id="weather-condition">Sunny & Clear</div>
+        <div class="weather-temperature" id="weather-temperature">72°</div>
+        <div class="weather-description" id="weather-description">
+            Positive and energetic outlook
+        </div>
+    </div>
+    <div class="weather-animation">
+        <!-- Animation elements will be added here -->
+    </div>
+</div>
+<div class="weather-forecast">
+    <div class="forecast-day">
+        <span>Mon</span>
+        <div class="forecast-icon">⛅</div>
+    </div>
+    <div class="forecast-day">
+        <span>Tue</span>
+        <div class="forecast-icon">🌧️</div>
+    </div>
+    <div class="forecast-day">
+        <span>Wed</span>
+        <div class="forecast-icon">🌈</div>
+    </div>
+    <div class="forecast-day">
+        <span>Thu</span>
+        <div class="forecast-icon">☀️</div>
+    </div>
+    <div class="forecast-day">
+        <span>Fri</span>
+        <div class="forecast-icon">⛅</div>
+    </div>
+</div>
+</div>
+
+<!-- Navigation updates - Add Garden to nav -->
+<!-- In the nav section, add this button after Settings -->
+<button class="nav-btn" data-tab="garden">
+<i class="fas fa-seedling"></i> Garden
+</button>
+
+<script>
+// Quick fix for mood modal
+document.addEventListener('DOMContentLoaded', function() {
+    // Fix mood modal scrolling
+    const moodModal = document.getElementById('mood-modal');
+    if (moodModal) {
+        // Make modal scrollable
+        moodModal.style.overflow = 'auto';
+        
+        // Add close button if missing
+        if (!moodModal.querySelector('#close-mood-modal')) {
+            const closeBtn = document.createElement('button');
+            closeBtn.id = 'close-mood-modal';
+            closeBtn.className = 'close-modal';
+            closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            closeBtn.style.cssText = 'position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.1); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;';
+            
+            const modalHeader = moodModal.querySelector('.modal-header');
+            if (modalHeader) {
+                modalHeader.style.position = 'relative';
+                modalHeader.appendChild(closeBtn);
+            }
+            
+            closeBtn.addEventListener('click', function() {
+                moodModal.style.display = 'none';
+                moodModal.classList.remove('active');
+            });
+        }
+        
+        // Close on backdrop click
+        moodModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+                this.classList.remove('active');
+            }
+        });
+    }
+    
+    // Auto-close mood selection
+    const moodOptions = document.querySelectorAll('.mood-option');
+    moodOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            const mood = this.dataset.mood;
+            
+            // Show auto-closing notice
+            const notice = document.createElement('div');
+            notice.className = 'auto-close-notice';
+            notice.textContent = 'Continuing in 1.5 seconds...';
+            this.appendChild(notice);
+            
+            // Auto-close after 1.5 seconds
+            setTimeout(() => {
+                const moodModal = document.getElementById('mood-modal');
+                if (moodModal) {
+                    moodModal.style.display = 'none';
+                    moodModal.classList.remove('active');
+                    
+                    // Save mood to localStorage
+                    const today = new Date().toISOString().split('T')[0];
+                    const moodHistory = JSON.parse(localStorage.getItem('lumaCare_moodHistory') || '[]');
+                    moodHistory.push({
+                        date: today,
+                        mood: mood,
+                        timestamp: Date.now()
+                    });
+                    localStorage.setItem('lumaCare_moodHistory', JSON.stringify(moodHistory));
+                    
+                    console.log('Mood saved:', mood);
+                }
+            }, 1500);
+        });
+    });
+});
+</script>
+
     <!-- Yoco SDK -->
     <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
