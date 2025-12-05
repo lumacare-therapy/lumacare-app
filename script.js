@@ -2218,3 +2218,3859 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('✅ Initialization complete');
 });
+
+// =================== //
+// MOOD CHECK-IN SYSTEM //
+// =================== //
+
+class MoodSystem {
+    constructor() {
+        this.currentMood = null;
+        this.dailyMoods = [];
+        this.moodHistory = [];
+        this.today = new Date().toISOString().split('T')[0];
+        this.init();
+    }
+
+    init() {
+        this.loadMoodHistory();
+        this.setupMoodSelector();
+        this.showDailyMoodCheck();
+    }
+
+    loadMoodHistory() {
+        const savedMoods = localStorage.getItem('lumaCare_moodHistory');
+        if (savedMoods) {
+            this.moodHistory = JSON.parse(savedMoods);
+        }
+        
+        // Check if mood was already selected today
+        const todayMood = this.moodHistory.find(mood => mood.date === this.today);
+        if (todayMood) {
+            this.currentMood = todayMood.mood;
+            console.log('Today\'s mood already selected:', this.currentMood);
+            // Don't show mood modal if already selected today
+            return;
+        }
+    }
+
+    // Add to MoodSystem setupMoodSelector method
+setupMoodSelector() {
+    const moodOptions = document.querySelectorAll('.mood-option');
+    const continueBtn = document.getElementById('continue-session');
+    const moodDescription = document.getElementById('mood-description');
+    const closeBtn = document.getElementById('close-mood-modal');
+
+    moodOptions.forEach(option => {
+        option.addEventListener('click', (e) => {
+            this.selectMood(e.target.closest('.mood-option'));
+        });
+    });
+
+    continueBtn.addEventListener('click', () => {
+        this.saveMood();
+    });
+
+    // Close button functionality
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            this.hideMoodModal();
+        });
+    }
+
+    // Also close when clicking outside
+    const moodModal = document.getElementById('mood-modal');
+    if (moodModal) {
+        moodModal.addEventListener('click', (e) => {
+            if (e.target === moodModal) {
+                this.hideMoodModal();
+            }
+        });
+    }
+}
+
+// Add hideMoodModal method
+hideMoodModal() {
+    const moodModal = document.getElementById('mood-modal');
+    if (moodModal) {
+        moodModal.classList.remove('active');
+        moodModal.style.display = 'none';
+    }
+}
+
+// Update showDailyMoodCheck to only show if needed
+showDailyMoodCheck() {
+    // Check if user is logged in and hasn't selected mood today
+    if (authSystem && authSystem.isLoggedIn && !this.currentMood) {
+        // Check if modal is already showing
+        const moodModal = document.getElementById('mood-modal');
+        if (moodModal && !moodModal.classList.contains('active')) {
+            setTimeout(() => {
+                moodModal.style.display = 'flex';
+                setTimeout(() => {
+                    moodModal.classList.add('active');
+                }, 10);
+            }, 1000); // Show after 1 second delay
+        }
+    }
+}
+
+    // In the MoodSystem class, update the selectMood method
+selectMood(option) {
+    // Remove selection from all options
+    document.querySelectorAll('.mood-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+
+    // Add selection to clicked option
+    option.classList.add('selected');
+
+    // Add ripple effect
+    this.createRippleEffect(option);
+
+    // Enable continue button
+    const continueBtn = document.getElementById('continue-session');
+    continueBtn.disabled = false;
+
+    // Update description based on mood
+    const mood = option.dataset.mood;
+    const color = option.dataset.color;
+    this.updateMoodDescription(mood, color);
+
+    // Update current mood
+    this.currentMood = mood;
+    this.currentMoodColor = color;
+
+    // Track mood selection event
+    this.trackMoodEvent(mood);
+
+    // AUTO-SELECT after 1.5 seconds
+    setTimeout(() => {
+        if (this.currentMood === mood) { // Double-check it's still selected
+            this.saveMood();
+        }
+    }, 1500);
+}
+
+// Also update the saveMood method to properly close
+saveMood() {
+    if (!this.currentMood) return;
+
+    const moodData = {
+        date: this.today,
+        mood: this.currentMood,
+        color: this.currentMoodColor,
+        timestamp: Date.now()
+    };
+
+    // Add to history
+    this.moodHistory.push(moodData);
+    
+    // Keep only last 90 days
+    if (this.moodHistory.length > 90) {
+        this.moodHistory = this.moodHistory.slice(-90);
+    }
+
+    // Save to localStorage
+    localStorage.setItem('lumaCare_moodHistory', JSON.stringify(this.moodHistory));
+
+    // Update garden
+    if (window.gardenSystem) {
+        gardenSystem.addPlant('checkin', this.currentMoodColor);
+    }
+
+    // Hide mood modal
+    const moodModal = document.getElementById('mood-modal');
+    if (moodModal) {
+        moodModal.classList.remove('active');
+        // Also hide any backdrop
+        moodModal.style.display = 'none';
+    }
+
+    // Update chat greeting based on mood
+    this.updateChatGreeting();
+
+    console.log('Mood saved:', moodData);
+    
+    // Track completion
+    this.trackEvent('daily_checkin_completed', { mood: this.currentMood });
+}
+
+    createRippleEffect(element) {
+        const ripple = document.createElement('div');
+        ripple.classList.add('ripple');
+        
+        const rect = element.getBoundingClientRect();
+        ripple.style.width = ripple.style.height = Math.max(rect.width, rect.height) + 'px';
+        ripple.style.left = (rect.width / 2) + 'px';
+        ripple.style.top = (rect.height / 2) + 'px';
+        
+        element.appendChild(ripple);
+        
+        ripple.addEventListener('animationend', () => {
+            ripple.remove();
+        });
+    }
+
+    updateMoodDescription(mood, color) {
+        const descriptions = {
+            'great': 'Wonderful! Your positive energy will make today\'s session especially productive. 🌟',
+            'good': 'Great to hear you\'re feeling good! Let\'s build on that positivity. 🌈',
+            'okay': 'Thanks for sharing. We\'ll work together to make today even better. 🌱',
+            'neutral': 'It\'s okay to feel neutral. Let\'s explore what might help today. 💭',
+            'heavy': 'Thanks for trusting me with this. We\'ll work through it together, one step at a time. 🤝'
+        };
+
+        const moodDescription = document.getElementById('mood-description');
+        moodDescription.innerHTML = `<p>${descriptions[mood]}</p>`;
+        
+        // Update background gradient based on mood
+        const moodModal = document.querySelector('.mood-modal');
+        if (moodModal) {
+            moodModal.style.background = `linear-gradient(135deg, ${color}20 0%, #764ba2 100%)`;
+        }
+    }
+
+    saveMood() {
+        if (!this.currentMood) return;
+
+        const moodData = {
+            date: this.today,
+            mood: this.currentMood,
+            color: this.currentMoodColor,
+            timestamp: Date.now()
+        };
+
+        // Add to history
+        this.moodHistory.push(moodData);
+        
+        // Keep only last 90 days
+        if (this.moodHistory.length > 90) {
+            this.moodHistory = this.moodHistory.slice(-90);
+        }
+
+        // Save to localStorage
+        localStorage.setItem('lumaCare_moodHistory', JSON.stringify(this.moodHistory));
+
+        // Update garden
+        gardenSystem.addPlant('checkin', this.currentMoodColor);
+
+        // Hide mood modal
+        const moodModal = document.getElementById('mood-modal');
+        if (moodModal) {
+            moodModal.classList.remove('active');
+        }
+
+        // Update chat greeting based on mood
+        this.updateChatGreeting();
+
+        console.log('Mood saved:', moodData);
+        
+        // Track completion
+        this.trackEvent('daily_checkin_completed', { mood: this.currentMood });
+    }
+
+    updateChatGreeting() {
+        const greetings = {
+            'great': 'Your positive energy is contagious! 🌟 I\'m excited to work with you today.',
+            'good': 'Great to see you in good spirits! 🌈 How can I support you today?',
+            'okay': 'Thanks for checking in today. 🌱 What would you like to focus on?',
+            'neutral': 'Welcome. Every step counts. 💭 What\'s on your mind today?',
+            'heavy': 'Thank you for sharing how you feel. 🤝 I\'m here with you. Where would you like to start?'
+        };
+
+        if (greetings[this.currentMood]) {
+            // Add a mood-based message to chat
+            setTimeout(() => {
+                this.addMoodMessageToChat(greetings[this.currentMood]);
+            }, 500);
+        }
+    }
+
+    addMoodMessageToChat(message) {
+        const chatMessages = document.getElementById('chat-messages');
+        if (!chatMessages) return;
+
+        const moodMessageDiv = document.createElement('div');
+        moodMessageDiv.classList.add('message', 'ai-message');
+        moodMessageDiv.innerHTML = `
+            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+            <div class="message-content">
+                <p>${message}</p>
+            </div>
+        `;
+
+        chatMessages.appendChild(moodMessageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    trackMoodEvent(mood) {
+        this.trackEvent('mood_selected', { mood_type: mood });
+    }
+
+    trackEvent(eventName, properties = {}) {
+        // In a real app, you'd send this to analytics
+        console.log(`📊 Event: ${eventName}`, properties);
+    }
+
+    getMoodStats() {
+        const last7Days = this.moodHistory.slice(-7);
+        const moodCounts = last7Days.reduce((acc, mood) => {
+            acc[mood.mood] = (acc[mood.mood] || 0) + 1;
+            return acc;
+        }, {});
+
+        return {
+            last7Days,
+            moodCounts,
+            streak: this.calculateStreak(),
+            totalCheckins: this.moodHistory.length
+        };
+    }
+
+    calculateStreak() {
+        if (this.moodHistory.length === 0) return 0;
+        
+        let streak = 0;
+        const sortedMoods = [...this.moodHistory].sort((a, b) => 
+            new Date(b.date) - new Date(a.date)
+        );
+        
+        let currentDate = new Date();
+        const todayStr = currentDate.toISOString().split('T')[0];
+        
+        // Check if today's mood is logged
+        if (sortedMoods[0]?.date === todayStr) {
+            streak = 1;
+            currentDate.setDate(currentDate.getDate() - 1);
+        }
+        
+        // Check consecutive days
+        for (let i = streak === 1 ? 1 : 0; i < sortedMoods.length; i++) {
+            const moodDate = new Date(sortedMoods[i].date);
+            const expectedDate = new Date(currentDate);
+            
+            if (moodDate.toISOString().split('T')[0] === expectedDate.toISOString().split('T')[0]) {
+                streak++;
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+        
+        return streak;
+    }
+}
+
+// =================== //
+// DAILY GROWTH GARDEN //
+// =================== //
+
+class GardenSystem {
+    constructor() {
+        this.plants = [];
+        this.achievements = [];
+        this.init();
+    }
+
+    init() {
+        this.loadGardenData();
+        this.setupEventListeners();
+        this.renderGarden();
+        this.updateGardenStats();
+    }
+
+    loadGardenData() {
+        const savedGarden = localStorage.getItem('lumaCare_garden');
+        if (savedGarden) {
+            const data = JSON.parse(savedGarden);
+            this.plants = data.plants || [];
+            this.achievements = data.achievements || [];
+        }
+    }
+
+    saveGardenData() {
+        const gardenData = {
+            plants: this.plants,
+            achievements: this.achievements,
+            lastUpdated: Date.now()
+        };
+        localStorage.setItem('lumaCare_garden', JSON.stringify(gardenData));
+    }
+
+    setupEventListeners() {
+        const checkInBtn = document.getElementById('check-in-today');
+        if (checkInBtn) {
+            checkInBtn.addEventListener('click', () => {
+                // Trigger mood check-in
+                const moodModal = document.getElementById('mood-modal');
+                if (moodModal) {
+                    moodModal.classList.add('active');
+                }
+            });
+        }
+
+        // Navigate to garden tab when clicking garden button
+        const gardenNavBtn = document.querySelector('[data-tab="garden"]');
+        if (gardenNavBtn) {
+            gardenNavBtn.addEventListener('click', () => {
+                this.renderGarden();
+            });
+        }
+    }
+
+    addPlant(type, color = '#667eea') {
+        const plantTypes = {
+            'checkin': { emoji: '🌸', name: 'Daily Check-in' },
+            'session': { emoji: '🌿', name: 'Therapy Session' },
+            'journal': { emoji: '🌻', name: 'Journal Entry' },
+            'breathing': { emoji: '🍃', name: 'Breathing Exercise' }
+        };
+
+        const plant = {
+            id: Date.now() + Math.random(),
+            type: type,
+            emoji: plantTypes[type]?.emoji || '🌱',
+            name: plantTypes[type]?.name || 'Plant',
+            color: color,
+            date: new Date().toISOString(),
+            stage: 'seed', // seed → seedling → mature
+            x: Math.random() * 70 + 15, // Position in percentage
+            y: Math.random() * 70 + 15
+        };
+
+        this.plants.push(plant);
+        this.saveGardenData();
+        this.renderPlant(plant);
+
+        // Check for achievements
+        this.checkAchievements();
+
+        // Update stats
+        this.updateGardenStats();
+
+        return plant;
+    }
+
+    renderGarden() {
+        const gardenCanvas = document.getElementById('garden-canvas');
+        if (!gardenCanvas) return;
+
+        // Clear garden
+        gardenCanvas.innerHTML = '';
+
+        if (this.plants.length === 0) {
+            gardenCanvas.innerHTML = `
+                <div class="empty-garden">
+                    <div class="empty-garden-icon">🌱</div>
+                    <h3>Your garden is waiting</h3>
+                    <p>Complete your daily check-in to plant your first seed</p>
+                    <button class="btn-check-in" id="check-in-today">
+                        <i class="fas fa-seedling"></i> Start Growing
+                    </button>
+                </div>
+            `;
+
+            // Re-attach event listener
+            const checkInBtn = document.getElementById('check-in-today');
+            if (checkInBtn) {
+                checkInBtn.addEventListener('click', () => {
+                    const moodModal = document.getElementById('mood-modal');
+                    if (moodModal) {
+                        moodModal.classList.add('active');
+                    }
+                });
+            }
+        } else {
+            // Render all plants
+            this.plants.forEach(plant => {
+                this.renderPlant(plant);
+            });
+        }
+
+        // Update achievements list
+        this.renderAchievements();
+    }
+
+    renderPlant(plant) {
+        const gardenCanvas = document.getElementById('garden-canvas');
+        if (!gardenCanvas || gardenCanvas.querySelector('.empty-garden')) return;
+
+        const plantDiv = document.createElement('div');
+        plantDiv.className = `plant ${plant.stage}`;
+        plantDiv.dataset.id = plant.id;
+        
+        // Determine stage based on age
+        const plantAge = Date.now() - new Date(plant.date).getTime();
+        const hoursOld = plantAge / (1000 * 60 * 60);
+        
+        let stage = 'seed';
+        if (hoursOld > 2) stage = 'seedling';
+        if (hoursOld > 24) stage = 'mature-plant';
+        
+        plant.stage = stage;
+        plantDiv.classList.add(stage);
+
+        plantDiv.innerHTML = `
+            <div class="plant-emoji">${plant.emoji}</div>
+            <div class="plant-tooltip">${plant.name}</div>
+        `;
+
+        // Position the plant
+        plantDiv.style.left = `${plant.x}%`;
+        plantDiv.style.top = `${plant.y}%`;
+        plantDiv.style.color = plant.color;
+        plantDiv.style.transform = `scale(${0.8 + Math.random() * 0.4})`;
+
+        // Add hover effect
+        plantDiv.addEventListener('mouseenter', () => {
+            plantDiv.style.zIndex = '100';
+        });
+
+        plantDiv.addEventListener('mouseleave', () => {
+            plantDiv.style.zIndex = '';
+        });
+
+        // Add click effect
+        plantDiv.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.showPlantDetails(plant);
+        });
+
+        gardenCanvas.appendChild(plantDiv);
+
+        // Animate plant appearance
+        setTimeout(() => {
+            plantDiv.style.opacity = '1';
+        }, 100);
+    }
+
+    showPlantDetails(plant) {
+        const timeAgo = this.getTimeAgo(new Date(plant.date));
+        const details = `
+            <div class="plant-details-modal">
+                <h3>${plant.name}</h3>
+                <div class="plant-details-emoji">${plant.emoji}</div>
+                <p>Planted ${timeAgo}</p>
+                <p>Stage: ${plant.stage}</p>
+                <p>Type: ${plant.type.replace('_', ' ')}</p>
+            </div>
+        `;
+
+        // You could show this in a modal or tooltip
+        console.log('Plant details:', details);
+        
+        // For now, show a toast notification
+        this.showToast(`🌱 ${plant.name} - Planted ${timeAgo}`);
+    }
+
+    getTimeAgo(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+        if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+        return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    }
+
+    checkAchievements() {
+        const achievements = [
+            {
+                id: 'first_plant',
+                title: 'First Seed Planted',
+                description: 'You planted your first seed!',
+                condition: () => this.plants.length >= 1,
+                emoji: '🌱'
+            },
+            {
+                id: 'three_day_streak',
+                title: '3-Day Streak',
+                description: 'You checked in for 3 days in a row!',
+                condition: () => moodSystem.calculateStreak() >= 3,
+                emoji: '🔥'
+            },
+            {
+                id: 'five_plants',
+                title: 'Garden Starter',
+                description: 'You grew 5 plants in your garden!',
+                condition: () => this.plants.length >= 5,
+                emoji: '🌿'
+            },
+            {
+                id: 'variety_gardener',
+                title: 'Variety Gardener',
+                description: 'You tried all types of activities!',
+                condition: () => {
+                    const types = new Set(this.plants.map(p => p.type));
+                    return types.size >= 4;
+                },
+                emoji: '🌺'
+            }
+        ];
+
+        achievements.forEach(achievement => {
+            if (achievement.condition() && 
+                !this.achievements.find(a => a.id === achievement.id)) {
+                
+                const newAchievement = {
+                    ...achievement,
+                    date: new Date().toISOString()
+                };
+                
+                this.achievements.push(newAchievement);
+                this.showAchievementNotification(newAchievement);
+            }
+        });
+
+        this.saveGardenData();
+    }
+
+    showAchievementNotification(achievement) {
+        const notification = document.createElement('div');
+        notification.className = 'achievement-notification';
+        notification.innerHTML = `
+            <div class="achievement-notification-content">
+                <div class="achievement-notification-emoji">${achievement.emoji}</div>
+                <div class="achievement-notification-text">
+                    <h4>${achievement.title}</h4>
+                    <p>${achievement.description}</p>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Animate in
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+        }, 3000);
+
+        // Play achievement sound (optional)
+        this.playAchievementSound();
+    }
+
+    playAchievementSound() {
+        // Create a gentle achievement sound using Web Audio API
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+            oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        } catch (e) {
+            console.log('Audio not supported');
+        }
+    }
+
+    renderAchievements() {
+        const achievementsList = document.getElementById('achievements-list');
+        if (!achievementsList) return;
+
+        achievementsList.innerHTML = '';
+
+        // Sort achievements by date (newest first)
+        const sortedAchievements = [...this.achievements].sort((a, b) => 
+            new Date(b.date) - new Date(a.date)
+        ).slice(0, 5); // Show only 5 most recent
+
+        sortedAchievements.forEach(achievement => {
+            const achievementDiv = document.createElement('div');
+            achievementDiv.className = 'achievement';
+            achievementDiv.innerHTML = `
+                <div class="achievement-icon">${achievement.emoji}</div>
+                <div class="achievement-details">
+                    <h4>${achievement.title}</h4>
+                    <p>${achievement.description}</p>
+                </div>
+                <div class="achievement-date">${this.getTimeAgo(new Date(achievement.date))}</div>
+            `;
+            achievementsList.appendChild(achievementDiv);
+        });
+
+        if (sortedAchievements.length === 0) {
+            achievementsList.innerHTML = `
+                <div class="no-achievements">
+                    <p>Complete activities to earn achievements!</p>
+                </div>
+            `;
+        }
+    }
+
+    updateGardenStats() {
+        const streakCount = document.getElementById('streak-count');
+        const plantCount = document.getElementById('plant-count');
+        const sessionCountGarden = document.getElementById('session-count-garden');
+
+        if (streakCount) {
+            streakCount.textContent = moodSystem.calculateStreak();
+        }
+
+        if (plantCount) {
+            plantCount.textContent = this.plants.length;
+        }
+
+        if (sessionCountGarden) {
+            sessionCountGarden.textContent = this.plants.filter(p => p.type === 'session').length;
+        }
+    }
+
+    showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 3000);
+    }
+}
+
+// =================== //
+// EMOTIONAL WEATHER SYSTEM //
+// =================== //
+
+class WeatherSystem {
+    constructor() {
+        this.currentWeather = null;
+        this.weatherHistory = [];
+        this.animationElements = [];
+        this.init();
+    }
+
+    init() {
+        this.loadWeatherHistory();
+        this.setupEventListeners();
+        this.generateWeather();
+        this.startWeatherAnimation();
+    }
+
+    loadWeatherHistory() {
+        const savedWeather = localStorage.getItem('lumaCare_weather');
+        if (savedWeather) {
+            this.weatherHistory = JSON.parse(savedWeather);
+        }
+    }
+
+    setupEventListeners() {
+        const weatherInfoBtn = document.getElementById('weather-info');
+        if (weatherInfoBtn) {
+            weatherInfoBtn.addEventListener('click', () => {
+                this.showWeatherExplanation();
+            });
+        }
+    }
+
+    generateWeather() {
+        // Get recent moods for weather calculation
+        const moodStats = moodSystem.getMoodStats();
+        const recentMoods = moodStats.last7Days;
+
+        if (recentMoods.length === 0) {
+            this.currentWeather = this.getWeatherForMood('neutral');
+        } else {
+            // Calculate average mood from recent days
+            const moodValues = {
+                'great': 5,
+                'good': 4,
+                'okay': 3,
+                'neutral': 2,
+                'heavy': 1
+            };
+
+            const avgMood = recentMoods.reduce((sum, mood) => {
+                return sum + (moodValues[mood.mood] || 2.5);
+            }, 0) / recentMoods.length;
+
+            // Determine weather based on average mood
+            let weatherType;
+            if (avgMood >= 4.5) weatherType = 'sunny';
+            else if (avgMood >= 3.5) weatherType = 'partly_cloudy';
+            else if (avgMood >= 2.5) weatherType = 'light_rain';
+            else if (avgMood >= 1.5) weatherType = 'stormy';
+            else weatherType = 'rainbow';
+
+            this.currentWeather = this.getWeatherForType(weatherType);
+        }
+
+        // Save weather for today
+        const today = new Date().toISOString().split('T')[0];
+        const todayWeather = this.weatherHistory.find(w => w.date === today);
+        
+        if (!todayWeather) {
+            this.weatherHistory.push({
+                date: today,
+                weather: this.currentWeather,
+                timestamp: Date.now()
+            });
+            
+            // Keep only last 30 days
+            if (this.weatherHistory.length > 30) {
+                this.weatherHistory = this.weatherHistory.slice(-30);
+            }
+            
+            localStorage.setItem('lumaCare_weather', JSON.stringify(this.weatherHistory));
+        }
+
+        // Update UI
+        this.updateWeatherUI();
+    }
+
+    getWeatherForMood(mood) {
+        const weatherMap = {
+            'great': 'sunny',
+            'good': 'partly_cloudy',
+            'okay': 'light_rain',
+            'neutral': 'cloudy',
+            'heavy': 'stormy'
+        };
+
+        return this.getWeatherForType(weatherMap[mood] || 'partly_cloudy');
+    }
+
+    getWeatherForType(type) {
+        const weatherTypes = {
+            'sunny': {
+                icon: '☀️',
+                condition: 'Sunny & Clear',
+                temperature: this.getRandomTemp(70, 85),
+                description: 'Positive and energetic outlook',
+                color: '#FF9800',
+                animation: 'sunny'
+            },
+            'partly_cloudy': {
+                icon: '⛅',
+                condition: 'Partly Cloudy',
+                temperature: this.getRandomTemp(60, 75),
+                description: 'Mixed feelings with moments of clarity',
+                color: '#4FC3F7',
+                animation: 'cloudy'
+            },
+            'light_rain': {
+                icon: '🌧️',
+                condition: 'Light Rain',
+                temperature: this.getRandomTemp(50, 65),
+                description: 'Gentle melancholy with growth potential',
+                color: '#2196F3',
+                animation: 'rain'
+            },
+            'stormy': {
+                icon: '⛈️',
+                condition: 'Stormy',
+                temperature: this.getRandomTemp(45, 60),
+                description: 'Intense emotions with potential for breakthroughs',
+                color: '#673AB7',
+                animation: 'storm'
+            },
+            'rainbow': {
+                icon: '🌈',
+                condition: 'After Rain',
+                temperature: this.getRandomTemp(65, 75),
+                description: 'Growth and clarity after difficulty',
+                color: '#9C27B0',
+                animation: 'rainbow'
+            },
+            'cloudy': {
+                icon: '☁️',
+                condition: 'Cloudy',
+                temperature: this.getRandomTemp(55, 70),
+                description: 'Quiet reflection and introspection',
+                color: '#607D8B',
+                animation: 'cloudy'
+            }
+        };
+
+        return weatherTypes[type] || weatherTypes['partly_cloudy'];
+    }
+
+    getRandomTemp(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    updateWeatherUI() {
+        if (!this.currentWeather) return;
+
+        const weatherIcon = document.getElementById('weather-icon');
+        const weatherCondition = document.getElementById('weather-condition');
+        const weatherTemperature = document.getElementById('weather-temperature');
+        const weatherDescription = document.getElementById('weather-description');
+
+        if (weatherIcon) weatherIcon.textContent = this.currentWeather.icon;
+        if (weatherCondition) weatherCondition.textContent = this.currentWeather.condition;
+        if (weatherTemperature) weatherTemperature.textContent = `${this.currentWeather.temperature}°`;
+        if (weatherDescription) weatherDescription.textContent = this.currentWeather.description;
+
+        // Update widget background
+        const weatherWidget = document.getElementById('weather-widget');
+        if (weatherWidget) {
+            weatherWidget.style.background = `linear-gradient(135deg, ${this.currentWeather.color}20 0%, #764ba2 100%)`;
+        }
+    }
+
+    startWeatherAnimation() {
+        const animationContainer = document.querySelector('.weather-animation');
+        if (!animationContainer || !this.currentWeather) return;
+
+        // Clear previous animations
+        this.animationElements.forEach(el => el.remove());
+        this.animationElements = [];
+
+        // Create animations based on weather type
+        switch (this.currentWeather.animation) {
+            case 'sunny':
+                this.createSunRays(animationContainer);
+                break;
+            case 'rain':
+                this.createRainAnimation(animationContainer);
+                break;
+            case 'storm':
+                this.createStormAnimation(animationContainer);
+                break;
+            case 'rainbow':
+                this.createRainbowAnimation(animationContainer);
+                break;
+            case 'cloudy':
+                this.createCloudAnimation(animationContainer);
+                break;
+        }
+    }
+
+    createSunRays(container) {
+        for (let i = 0; i < 8; i++) {
+            const ray = document.createElement('div');
+            ray.className = 'sun-ray';
+            ray.style.width = '100px';
+            ray.style.height = '2px';
+            ray.style.left = '50%';
+            ray.style.top = '50%';
+            ray.style.transformOrigin = '0 0';
+            ray.style.transform = `rotate(${i * 45}deg)`;
+            
+            container.appendChild(ray);
+            this.animationElements.push(ray);
+        }
+    }
+
+    createRainAnimation(container) {
+        for (let i = 0; i < 20; i++) {
+            const drop = document.createElement('div');
+            drop.className = 'weather-particle rain-particle';
+            drop.style.width = '2px';
+            drop.style.height = '15px';
+            drop.style.left = `${Math.random() * 100}%`;
+            drop.style.animationDelay = `${Math.random() * 2}s`;
+            
+            container.appendChild(drop);
+            this.animationElements.push(drop);
+        }
+    }
+
+    createStormAnimation(container) {
+        // Create rain
+        this.createRainAnimation(container);
+        
+        // Add lightning flashes
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                const flash = document.createElement('div');
+                flash.className = 'lightning-flash';
+                flash.style.position = 'absolute';
+                flash.style.top = '0';
+                flash.style.left = '0';
+                flash.style.right = '0';
+                flash.style.bottom = '0';
+                flash.style.background = 'rgba(255, 255, 255, 0.3)';
+                flash.style.animation = 'flash 0.2s';
+                
+                container.appendChild(flash);
+                this.animationElements.push(flash);
+                
+                setTimeout(() => flash.remove(), 200);
+            }
+        }, 2000);
+    }
+
+    createRainbowAnimation(container) {
+        const colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#8B00FF'];
+        
+        colors.forEach((color, index) => {
+            const arc = document.createElement('div');
+            arc.className = 'rainbow-arc';
+            arc.style.position = 'absolute';
+            arc.style.width = '200px';
+            arc.style.height = '100px';
+            arc.style.borderRadius = '100px 100px 0 0';
+            arc.style.border = `10px solid ${color}`;
+            arc.style.borderBottom = 'none';
+            arc.style.top = '50%';
+            arc.style.left = '50%';
+            arc.style.transform = `translate(-50%, -50%) rotate(${index * 5}deg)`;
+            arc.style.opacity = '0.3';
+            arc.style.animation = 'rainbowPulse 4s infinite';
+            arc.style.animationDelay = `${index * 0.2}s`;
+            
+            container.appendChild(arc);
+            this.animationElements.push(arc);
+        });
+    }
+
+    createCloudAnimation(container) {
+        for (let i = 0; i < 3; i++) {
+            const cloud = document.createElement('div');
+            cloud.className = 'weather-particle';
+            cloud.textContent = '☁️';
+            cloud.style.fontSize = `${Math.random() * 30 + 20}px`;
+            cloud.style.left = `${Math.random() * 100}%`;
+            cloud.style.top = `${Math.random() * 100}%`;
+            cloud.style.animation = `cloudFloat ${Math.random() * 20 + 20}s infinite linear`;
+            cloud.style.animationDelay = `${Math.random() * 5}s`;
+            cloud.style.opacity = '0.3';
+            
+            container.appendChild(cloud);
+            this.animationElements.push(cloud);
+        }
+    }
+
+    showWeatherExplanation() {
+        if (!this.currentWeather) return;
+
+        const explanations = {
+            'Sunny & Clear': 'Your recent mood patterns show positive energy and clarity. Keep embracing the sunlight!',
+            'Partly Cloudy': 'You\'ve been experiencing mixed feelings lately. The clouds will pass, revealing clarity.',
+            'Light Rain': 'Gentle melancholy can be fertile ground for growth. The rain waters your inner garden.',
+            'Stormy': 'Intense emotions are natural storms. Remember, every storm clears the air for new growth.',
+            'After Rain': 'You\'ve been through difficult weather and now see the rainbow. Growth often follows challenge.',
+            'Cloudy': 'Quiet reflection days. Clouds give us time to pause and process before the sun returns.'
+        };
+
+        const explanation = explanations[this.currentWeather.condition] || 
+                          'Your emotional weather reflects your recent journey.';
+
+        alert(`${this.currentWeather.icon} ${this.currentWeather.condition}\n\n${explanation}\n\n${this.currentWeather.description}`);
+    }
+
+    getWeeklyForecast() {
+        // Generate a simple 5-day forecast based on mood trends
+        const forecast = [];
+        const weatherTypes = ['sunny', 'partly_cloudy', 'light_rain', 'stormy', 'rainbow', 'cloudy'];
+        
+        for (let i = 0; i < 5; i++) {
+            const randomType = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
+            forecast.push(this.getWeatherForType(randomType));
+        }
+        
+        return forecast;
+    }
+}
+
+// =================== //
+// ENHANCED CHAT SYSTEM //
+// =================== //
+
+class EnhancedChat {
+    constructor() {
+        this.messageQueue = [];
+        this.isTyping = false;
+        this.setupEnhancedFeatures();
+    }
+
+    setupEnhancedFeatures() {
+        // Add typing indicator
+        this.setupTypingIndicator();
+        
+        // Enhance message animations
+        this.enhanceMessageAnimations();
+        
+        // Add haptic feedback on mobile
+        this.setupHapticFeedback();
+    }
+
+    setupTypingIndicator() {
+        // Add typing indicator to chat messages container
+        const chatMessages = document.getElementById('chat-messages');
+        if (!chatMessages) return;
+
+        this.typingIndicator = document.createElement('div');
+        this.typingIndicator.className = 'message ai-message typing-indicator';
+        this.typingIndicator.style.display = 'none';
+        this.typingIndicator.innerHTML = `
+            <div class="message-avatar"><i class="fas fa-robot"></i></div>
+            <div class="message-content">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        `;
+
+        chatMessages.appendChild(this.typingIndicator);
+    }
+
+    showTypingIndicator(duration = 1500) {
+        if (this.isTyping || !this.typingIndicator) return;
+
+        this.isTyping = true;
+        this.typingIndicator.style.display = 'flex';
+        
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Hide after duration
+        setTimeout(() => {
+            this.hideTypingIndicator();
+        }, duration);
+    }
+
+    hideTypingIndicator() {
+        if (this.typingIndicator) {
+            this.typingIndicator.style.display = 'none';
+        }
+        this.isTyping = false;
+    }
+
+    enhanceMessageAnimations() {
+        // Override the sendMessage function to include typing indicator
+        const originalSendMessage = window.sendMessage;
+        
+        window.sendMessage = function() {
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput?.value.trim();
+            
+            if (!message) return;
+            
+            // Show typing indicator before AI responds
+            enhancedChat.showTypingIndicator();
+            
+            // Call original function
+            originalSendMessage.call(this);
+        }.bind(this);
+    }
+
+    setupHapticFeedback() {
+        if ('vibrate' in navigator) {
+            // Add haptic feedback to buttons
+            const buttons = document.querySelectorAll('button:not(.no-haptic)');
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Gentle tap feedback (10ms)
+                    navigator.vibrate(10);
+                });
+            });
+
+            // Stronger feedback for important actions
+            const importantButtons = document.querySelectorAll('.btn-purchase, .btn-upgrade-now, .btn-check-in');
+            importantButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Pattern: short-long-short
+                    navigator.vibrate([30, 50, 30]);
+                });
+            });
+        }
+    }
+
+    addMessageWithAnimation(message, sender) {
+        return new Promise((resolve) => {
+            const chatMessages = document.getElementById('chat-messages');
+            if (!chatMessages) return resolve();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', `${sender}-message`);
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.classList.add('message-avatar');
+            avatarDiv.innerHTML = `<i class="fas fa-${sender === 'user' ? 'user' : 'robot'}"></i>`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('message-content');
+            contentDiv.innerHTML = `<p>${message}</p>`;
+            
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            
+            // Initially hidden
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transform = sender === 'user' 
+                ? 'translateX(20px)' 
+                : 'translateX(-20px)';
+            
+            chatMessages.appendChild(messageDiv);
+            
+            // Animate in
+            setTimeout(() => {
+                messageDiv.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                messageDiv.style.opacity = '1';
+                messageDiv.style.transform = 'translateX(0)';
+                
+                setTimeout(() => {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                    resolve();
+                }, 400);
+            }, 50);
+        });
+    }
+}
+
+// =================== //
+// INITIALIZE SYSTEMS //
+// =================== //
+
+let moodSystem, gardenSystem, weatherSystem, enhancedChat;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize after auth system is ready
+    setTimeout(() => {
+        moodSystem = new MoodSystem();
+        gardenSystem = new GardenSystem();
+        weatherSystem = new WeatherSystem();
+        enhancedChat = new EnhancedChat();
+        
+        // Track that systems are initialized
+        console.log('🎯 Enhanced systems initialized:', {
+            mood: !!moodSystem,
+            garden: !!gardenSystem,
+            weather: !!weatherSystem,
+            chat: !!enhancedChat
+        });
+        
+        // Update garden tab content
+        const gardenTab = document.getElementById('garden-tab');
+        if (gardenTab) {
+            gardenSystem.renderGarden();
+        }
+        
+        // Update weather widget
+        const weatherWidget = document.getElementById('weather-widget');
+        if (weatherWidget && weatherSystem.currentWeather) {
+            weatherSystem.updateWeatherUI();
+        }
+        
+    }, 1500); // Wait for auth system to initialize
+});
+
+// =================== //
+// ADDITIONAL CSS FOR NEW FEATURES //
+// =================== //
+
+// Add these styles to your existing CSS
+const additionalStyles = `
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    max-width: 90%;
+    text-align: center;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* Achievement Notifications */
+.achievement-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    max-width: 300px;
+}
+
+.achievement-notification.show {
+    transform: translateX(0);
+}
+
+.achievement-notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.achievement-notification-emoji {
+    font-size: 2rem;
+}
+
+.achievement-notification-text h4 {
+    margin: 0 0 4px 0;
+    font-size: 1rem;
+}
+
+.achievement-notification-text p {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+/* Plant Tooltips */
+.plant-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 100;
+}
+
+.plant:hover .plant-tooltip {
+    opacity: 1;
+}
+
+/* Lightning Flash Animation */
+@keyframes flash {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+/* Rainbow Pulse Animation */
+@keyframes rainbowPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+/* Cloud Float Animation */
+@keyframes cloudFloat {
+    0% { transform: translateX(-100px); }
+    100% { transform: translateX(calc(100vw + 100px)); }
+}
+
+/* Message Stagger Animation */
+.message:nth-child(odd) {
+    animation-delay: 0.1s;
+}
+
+.message:nth-child(even) {
+    animation-delay: 0.2s;
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255, 255, 255, 0.1) 50%, 
+        transparent 100%);
+    animation: loadingShimmer 1.5s infinite;
+    background-size: 200% 100%;
+}
+
+@keyframes loadingShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+`;
+
+// Add the additional styles to the document
+const styleSheet = document.createElement('style');
+styleSheet.textContent = additionalStyles;
+document.head.appendChild(styleSheet);
+
+// =================== //
+// TRACKING EVENTS //
+// =================== //
+
+// Track the events mentioned in your requirements
+function trackEvent(eventName, properties = {}) {
+    const eventData = {
+        event: eventName,
+        timestamp: Date.now(),
+        userId: authSystem.currentUser?.email || 'guest',
+        properties
+    };
+    
+    console.log('📊 Event tracked:', eventData);
+    
+    // In production, you would send this to your analytics service
+    // Example: sendToAnalytics(eventData);
+}
+
+// Initialize event tracking
+document.addEventListener('DOMContentLoaded', function() {
+    // Track app load
+    trackEvent('app_loaded');
+    
+    // Track tab views
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            trackEvent('tab_viewed', { tab_name: tab });
+        });
+    });
+    
+    // Track session duration
+    let sessionStart = Date.now();
+    window.addEventListener('beforeunload', function() {
+        const sessionDuration = Math.round((Date.now() - sessionStart) / 1000);
+        trackEvent('session_ended', { duration_seconds: sessionDuration });
+    });
+});
+
+// Add this to your existing onLoginSuccess function
+const originalOnLoginSuccess = window.onLoginSuccess;
+window.onLoginSuccess = function() {
+    originalOnLoginSuccess();
+    trackEvent('user_logged_in');
+};
+
+// =================== //
+// PWA ENHANCEMENTS //
+// =================== //
+
+// Add to your existing service worker or manifest enhancements
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js').then(
+            function(registration) {
+                console.log('ServiceWorker registration successful');
+            },
+            function(err) {
+                console.log('ServiceWorker registration failed: ', err);
+            }
+        );
+    });
+}
+
+// Add install prompt for PWA
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent Chrome 67 and earlier from automatically showing the prompt
+    e.preventDefault();
+    // Stash the event so it can be triggered later
+    deferredPrompt = e;
+    
+    // Show custom install button
+    setTimeout(() => {
+        showInstallPrompt();
+    }, 5000);
+});
+
+function showInstallPrompt() {
+    const installPrompt = document.createElement('div');
+    installPrompt.className = 'install-prompt';
+    installPrompt.innerHTML = `
+        <div class="install-prompt-content">
+            <p>Install LumaCare for a better experience?</p>
+            <div class="install-actions">
+                <button class="btn-install" id="install-app">Install</button>
+                <button class="btn-later" id="install-later">Later</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(installPrompt);
+    
+    document.getElementById('install-app').addEventListener('click', () => {
+        installPrompt.remove();
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                trackEvent('pwa_installed');
+            }
+            deferredPrompt = null;
+        });
+    });
+    
+    document.getElementById('install-later').addEventListener('click', () => {
+        installPrompt.remove();
+    });
+}
+
+// =================== //
+// PHASE 2: ADVANCED FEATURES //
+// =================== //
+
+class PersonalizationSystem {
+    constructor() {
+        this.userPreferences = {};
+        this.dailyRituals = [];
+        this.sosSequences = {};
+        this.init();
+    }
+
+    init() {
+        this.loadPreferences();
+        this.setupDailyRituals();
+        this.setupSOSSequences();
+        this.setupNameMemory();
+    }
+
+    loadPreferences() {
+        const saved = localStorage.getItem('lumaCare_preferences');
+        if (saved) {
+            this.userPreferences = JSON.parse(saved);
+        } else {
+            // Default preferences
+            this.userPreferences = {
+                preferredName: '',
+                morningRoutine: true,
+                eveningReflection: true,
+                breathingReminders: true,
+                moodTracking: true,
+                notificationTime: '09:00',
+                theme: 'auto',
+                reducedMotion: false,
+                voiceGuidance: true,
+                hapticFeedback: true
+            };
+        }
+    }
+
+    setupNameMemory() {
+        const user = authSystem.currentUser;
+        if (user && user.name && !this.userPreferences.preferredName) {
+            this.userPreferences.preferredName = user.name.split(' ')[0];
+            this.savePreferences();
+        }
+    }
+
+    savePreferences() {
+        localStorage.setItem('lumaCare_preferences', JSON.stringify(this.userPreferences));
+    }
+
+    setupDailyRituals() {
+        this.dailyRituals = [
+            {
+                id: 'morning_intention',
+                title: 'Morning Intention',
+                emoji: '🌅',
+                time: 'morning',
+                description: 'Set a positive intention for your day',
+                duration: '5 min',
+                steps: [
+                    'Take 3 deep breaths',
+                    'Ask: "What do I need today?"',
+                    'Set one simple intention',
+                    'Visualize your day going well'
+                ],
+                enabled: this.userPreferences.morningRoutine
+            },
+            {
+                id: 'midday_checkin',
+                title: 'Midday Check-in',
+                emoji: '🌞',
+                time: 'afternoon',
+                description: 'Brief emotional temperature check',
+                duration: '2 min',
+                steps: [
+                    'Pause what you\'re doing',
+                    'Scan your body for tension',
+                    'Name one thing you feel',
+                    'Take a conscious breath'
+                ],
+                enabled: true
+            },
+            {
+                id: 'evening_reflection',
+                title: 'Evening Reflection',
+                emoji: '🌙',
+                time: 'evening',
+                description: 'Gentle review of your day',
+                duration: '7 min',
+                steps: [
+                    'Find a quiet space',
+                    'Review 3 good moments',
+                    'Acknowledge 1 challenge',
+                    'Practice gratitude',
+                    'Release the day'
+                ],
+                enabled: this.userPreferences.eveningReflection
+            },
+            {
+                id: 'breathing_break',
+                title: 'Breathing Break',
+                emoji: '🍃',
+                time: 'flexible',
+                description: 'Reset your nervous system',
+                duration: '3 min',
+                steps: [
+                    'Find comfortable position',
+                    '4-7-8 breathing pattern',
+                    'Focus on exhale',
+                    'Repeat 5 cycles'
+                ],
+                enabled: this.userPreferences.breathingReminders
+            },
+            {
+                id: 'gratitude_moment',
+                title: 'Gratitude Moment',
+                emoji: '🙏',
+                time: 'flexible',
+                description: 'Cultivate appreciation',
+                duration: '2 min',
+                steps: [
+                    'Close your eyes',
+                    'Think of 3 specific things',
+                    'Feel the gratitude',
+                    'Smile genuinely'
+                ],
+                enabled: true
+            }
+        ];
+    }
+
+    getTodaysRituals() {
+        const now = new Date();
+        const hour = now.getHours();
+        let timeOfDay = 'flexible';
+        
+        if (hour >= 5 && hour < 12) timeOfDay = 'morning';
+        else if (hour >= 12 && hour < 17) timeOfDay = 'afternoon';
+        else timeOfDay = 'evening';
+
+        return this.dailyRituals.filter(ritual => 
+            ritual.enabled && (ritual.time === timeOfDay || ritual.time === 'flexible')
+        );
+    }
+
+    showRitualSuggestion() {
+        const rituals = this.getTodaysRituals();
+        if (rituals.length === 0) return;
+
+        const ritual = rituals[Math.floor(Math.random() * rituals.length)];
+        const lastSuggested = localStorage.getItem('last_ritual_suggestion');
+        const today = new Date().toDateString();
+        
+        if (lastSuggested !== today) {
+            setTimeout(() => {
+                this.showRitualModal(ritual);
+                localStorage.setItem('last_ritual_suggestion', today);
+            }, 3000); // Show after 3 seconds
+        }
+    }
+
+    showRitualModal(ritual) {
+        const modalHTML = `
+            <div class="modal ritual-modal active">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>${ritual.emoji} Daily Ritual Suggestion</h2>
+                        <button class="close-modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="ritual-card featured">
+                            <div class="ritual-header">
+                                <div class="ritual-emoji">${ritual.emoji}</div>
+                                <div class="ritual-info">
+                                    <h3>${ritual.title}</h3>
+                                    <p>${ritual.description}</p>
+                                    <div class="ritual-meta">
+                                        <span><i class="fas fa-clock"></i> ${ritual.duration}</span>
+                                        <span><i class="fas fa-sun"></i> ${ritual.time}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ritual-steps">
+                                <h4>Steps:</h4>
+                                <ol>
+                                    ${ritual.steps.map(step => `<li>${step}</li>`).join('')}
+                                </ol>
+                            </div>
+                            
+                            <div class="ritual-actions">
+                                <button class="btn-start-ritual" data-ritual="${ritual.id}">
+                                    <i class="fas fa-play"></i> Start Ritual
+                                </button>
+                                <button class="btn-skip-ritual">
+                                    Remind me later
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHTML;
+        document.body.appendChild(modalContainer);
+
+        // Add event listeners
+        modalContainer.querySelector('.close-modal').addEventListener('click', () => {
+            modalContainer.remove();
+        });
+
+        modalContainer.querySelector('.btn-start-ritual').addEventListener('click', () => {
+            this.startRitual(ritual);
+            modalContainer.remove();
+        });
+
+        modalContainer.querySelector('.btn-skip-ritual').addEventListener('click', () => {
+            modalContainer.remove();
+        });
+
+        // Close on backdrop click
+        modalContainer.querySelector('.modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                modalContainer.remove();
+            }
+        });
+    }
+
+    startRitual(ritual) {
+        // Add plant for ritual completion
+        gardenSystem.addPlant('ritual', '#9C27B0');
+        
+        // Track completion
+        trackEvent('ritual_started', { ritual_id: ritual.id });
+        
+        // Show ritual in chat
+        this.showRitualInChat(ritual);
+    }
+
+    showRitualInChat(ritual) {
+        const chatMessages = document.getElementById('chat-messages');
+        if (!chatMessages) return;
+
+        const ritualMessage = `
+            <div class="message ai-message">
+                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">
+                    <div class="ritual-chat-card">
+                        <h4>${ritual.emoji} ${ritual.title}</h4>
+                        <p>Let's practice this together. I'll guide you through each step:</p>
+                        <div class="ritual-chat-steps">
+                            ${ritual.steps.map((step, i) => `
+                                <div class="ritual-step">
+                                    <span class="step-number">${i + 1}</span>
+                                    <span class="step-text">${step}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <p>Take your time with each step. I'm here with you.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = ritualMessage;
+        chatMessages.appendChild(tempDiv.firstElementChild);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Add voice guidance if enabled
+        if (this.userPreferences.voiceGuidance) {
+            const textToSpeak = `Let's practice ${ritual.title}. ${ritual.steps.join('. Next, ')}`;
+            speakText(textToSpeak);
+        }
+    }
+
+    setupSOSSequences() {
+        this.sosSequences = {
+            panic_attack: {
+                title: 'Panic Attack SOS',
+                emoji: '🆘',
+                color: '#F44336',
+                steps: [
+                    'Ground yourself: Name 5 things you see',
+                    'Breathing: 4-7-8 pattern (inhale 4, hold 7, exhale 8)',
+                    'Temperature: Splash cold water on your face',
+                    'Movement: Gentle stretches to release tension',
+                    'Repeat: "This will pass. I am safe."'
+                ],
+                duration: '10 min'
+            },
+            overwhelm: {
+                title: 'Overwhelm SOS',
+                emoji: '🌊',
+                color: '#2196F3',
+                steps: [
+                    'Pause everything. Close your eyes.',
+                    'Priority matrix: Urgent vs Important',
+                    'Break tasks into tiny steps',
+                    'Choose one micro-action to start',
+                    'Celebrate starting, not finishing'
+                ],
+                duration: '8 min'
+            },
+            sadness: {
+                title: 'Sadness SOS',
+                emoji: '💙',
+                color: '#3F51B5',
+                steps: [
+                    'Self-compassion: "It\'s okay to feel this"',
+                    'Gentle movement: Slow stretching',
+                    'Comfort: Wrap yourself in a blanket',
+                    'Connection: Text one trusted person',
+                    'Small kindness: Do one tiny nice thing for yourself'
+                ],
+                duration: '12 min'
+            },
+            anger: {
+                title: 'Anger SOS',
+                emoji: '🔥',
+                color: '#FF9800',
+                steps: [
+                    'Safe release: Scream into a pillow',
+                    'Physical: Squeeze stress ball or pillow',
+                    'Cool down: Cold water on wrists',
+                    'Reframe: "This is a signal, not my identity"',
+                    'Channel: Write it out, then tear it up'
+                ],
+                duration: '7 min'
+            },
+            dissociation: {
+                title: 'Dissociation SOS',
+                emoji: '🌀',
+                color: '#9C27B0',
+                steps: [
+                    '5-4-3-2-1 grounding technique',
+                    'Physical anchor: Hold an ice cube',
+                    'Strong sensation: Sour candy or strong mint',
+                    'Movement: Gentle rocking or tapping',
+                    'Affirmation: "I am here. I am present."'
+                ],
+                duration: '15 min'
+            }
+        };
+    }
+
+    showSOSSelector() {
+        const sosHTML = `
+            <div class="modal sos-modal active">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-life-ring"></i> SOS Calm Sequence</h2>
+                        <p>Choose what you're experiencing for immediate support</p>
+                    </div>
+                    <div class="modal-body">
+                        <div class="sos-options">
+                            ${Object.entries(this.sosSequences).map(([key, sequence]) => `
+                                <div class="sos-option" data-sequence="${key}" style="border-color: ${sequence.color}">
+                                    <div class="sos-emoji">${sequence.emoji}</div>
+                                    <div class="sos-info">
+                                        <h3>${sequence.title}</h3>
+                                        <p>${sequence.duration}</p>
+                                    </div>
+                                    <div class="sos-arrow">→</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="sos-note">
+                            <i class="fas fa-heart"></i>
+                            <p>These are immediate coping tools. For crisis support, please call 988 (US) or your local emergency number.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = sosHTML;
+        document.body.appendChild(modalContainer);
+
+        // Add event listeners
+        modalContainer.querySelectorAll('.sos-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const sequenceKey = option.dataset.sequence;
+                this.startSOSSequence(sequenceKey);
+                modalContainer.remove();
+            });
+        });
+
+        // Close on backdrop click
+        modalContainer.querySelector('.modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                modalContainer.remove();
+            }
+        });
+    }
+
+    startSOSSequence(sequenceKey) {
+        const sequence = this.sosSequences[sequenceKey];
+        if (!sequence) return;
+
+        // Track SOS usage
+        trackEvent('sos_sequence_started', { sequence_type: sequenceKey });
+        
+        // Show sequence in chat
+        this.showSOSInChat(sequence);
+        
+        // Add plant for self-care
+        gardenSystem.addPlant('self_care', sequence.color);
+    }
+
+    showSOSInChat(sequence) {
+        const chatMessages = document.getElementById('chat-messages');
+        if (!chatMessages) return;
+
+        const sosMessage = `
+            <div class="message ai-message">
+                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                <div class="message-content">
+                    <div class="sos-chat-card" style="border-left-color: ${sequence.color}">
+                        <h4>${sequence.emoji} ${sequence.title}</h4>
+                        <p>Let's walk through this together. I'll guide you step by step:</p>
+                        <div class="sos-steps">
+                            ${sequence.steps.map((step, i) => `
+                                <div class="sos-step">
+                                    <div class="sos-step-number">${i + 1}</div>
+                                    <div class="sos-step-content">${step}</div>
+                                    <button class="btn-step-complete" data-step="${i}">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <p class="sos-encouragement">You're doing great. One step at a time. 💙</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = sosMessage;
+        chatMessages.appendChild(tempDiv.firstElementChild);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Add step completion listeners
+        setTimeout(() => {
+            document.querySelectorAll('.btn-step-complete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const stepNum = parseInt(this.dataset.step);
+                    this.innerHTML = '<i class="fas fa-check-circle"></i>';
+                    this.classList.add('completed');
+                    this.disabled = true;
+                    
+                    // Track step completion
+                    trackEvent('sos_step_completed', { 
+                        step_number: stepNum + 1,
+                        sequence_title: sequence.title
+                    });
+                    
+                    // Gentle encouragement
+                    if (stepNum < sequence.steps.length - 1) {
+                        setTimeout(() => {
+                            const encouragements = [
+                                "Good job! Keep going.",
+                                "You're doing great.",
+                                "One step at a time.",
+                                "I'm here with you.",
+                                "This is helping."
+                            ];
+                            const randomEncouragement = encouragements[Math.floor(Math.random() * encouragements.length)];
+                            
+                            const encouragementMsg = document.createElement('div');
+                            encouragementMsg.className = 'message ai-message';
+                            encouragementMsg.innerHTML = `
+                                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                                <div class="message-content">
+                                    <p>${randomEncouragement}</p>
+                                </div>
+                            `;
+                            chatMessages.appendChild(encouragementMsg);
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        }, 500);
+                    }
+                });
+            });
+        }, 100);
+
+        // Voice guidance
+        if (this.userPreferences.voiceGuidance) {
+            const textToSpeak = `${sequence.title}. Let's begin. ${sequence.steps.join('. Next: ')}`;
+            setTimeout(() => speakText(textToSpeak), 1000);
+        }
+    }
+
+    updatePreference(key, value) {
+        this.userPreferences[key] = value;
+        this.savePreferences();
+        trackEvent('preference_updated', { key, value });
+    }
+
+    getPersonalizedGreeting() {
+        const name = this.userPreferences.preferredName || '';
+        const hour = new Date().getHours();
+        let timeGreeting = 'Welcome';
+        
+        if (hour >= 5 && hour < 12) timeGreeting = 'Good morning';
+        else if (hour >= 12 && hour < 17) timeGreeting = 'Good afternoon';
+        else timeGreeting = 'Good evening';
+        
+        return name ? `${timeGreeting}, ${name}` : timeGreeting;
+    }
+}
+
+// =================== //
+// PHASE 3: PROGRESS INSIGHTS & ANALYTICS //
+// =================== //
+
+// =================== //
+// PROGRESS INSIGHTS CLASS - REPLACE ENTIRE CLASS //
+// =================== //
+
+class ProgressInsights {
+    constructor() {
+        this.insights = [];
+        this.patterns = {};
+        // Don't call init here - wait for DOM
+    }
+
+    init() {
+        this.loadInsights();
+        this.analyzePatterns();
+        this.setupInsightsTab();
+        this.renderInsights();
+    }
+
+    loadInsights() {
+        const saved = localStorage.getItem('lumaCare_insights');
+        if (saved) {
+            this.insights = JSON.parse(saved);
+        }
+    }
+
+    analyzePatterns() {
+        // Analyze mood patterns
+        const moodHistory = window.moodSystem ? window.moodSystem.moodHistory : [];
+        if (moodHistory.length < 3) return;
+
+        // Weekly patterns
+        const weeklyMoods = moodHistory.slice(-7);
+        const moodCounts = {};
+        weeklyMoods.forEach(mood => {
+            moodCounts[mood.mood] = (moodCounts[mood.mood] || 0) + 1;
+        });
+
+        // Time of day patterns
+        const hourCounts = {};
+        weeklyMoods.forEach(mood => {
+            const hour = new Date(mood.timestamp).getHours();
+            const timeOfDay = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+            hourCounts[timeOfDay] = (hourCounts[timeOfDay] || 0) + 1;
+        });
+
+        // Session patterns
+        const plantHistory = window.gardenSystem ? window.gardenSystem.plants : [];
+        const sessionPlants = plantHistory.filter(p => p.type === 'session');
+        const journalPlants = plantHistory.filter(p => p.type === 'journal');
+        const breathingPlants = plantHistory.filter(p => p.type === 'breathing');
+
+        this.patterns = {
+            dominantMood: this.getDominantMood(moodCounts),
+            mostActiveTime: this.getMostActiveTime(hourCounts),
+            sessionFrequency: sessionPlants.length,
+            journalFrequency: journalPlants.length,
+            breathingFrequency: breathingPlants.length,
+            consistencyStreak: window.moodSystem ? window.moodSystem.calculateStreak() : 0,
+            moodStability: this.calculateMoodStability(weeklyMoods)
+        };
+
+        // Generate insights
+        this.generateInsights();
+    }
+
+    getDominantMood(moodCounts) {
+        let maxCount = 0;
+        let dominantMood = 'neutral';
+        
+        Object.entries(moodCounts).forEach(([mood, count]) => {
+            if (count > maxCount) {
+                maxCount = count;
+                dominantMood = mood;
+            }
+        });
+        
+        return dominantMood;
+    }
+
+    getMostActiveTime(hourCounts) {
+        let maxCount = 0;
+        let mostActive = 'flexible';
+        
+        Object.entries(hourCounts).forEach(([time, count]) => {
+            if (count > maxCount) {
+                maxCount = count;
+                mostActive = time;
+            }
+        });
+        
+        return mostActive;
+    }
+
+    calculateMoodStability(weeklyMoods) {
+        if (weeklyMoods.length < 2) return 'neutral';
+        
+        const moodValues = {
+            'great': 5,
+            'good': 4,
+            'okay': 3,
+            'neutral': 2,
+            'heavy': 1
+        };
+        
+        const values = weeklyMoods.map(m => moodValues[m.mood] || 2.5);
+        const mean = values.reduce((a, b) => a + b) / values.length;
+        const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+        const stdDev = Math.sqrt(variance);
+        
+        if (stdDev < 0.5) return 'very_stable';
+        if (stdDev < 1) return 'stable';
+        if (stdDev < 1.5) return 'moderate';
+        return 'variable';
+    }
+
+    generateInsights() {
+        this.insights = [];
+        const now = new Date();
+
+        // Mood-based insights
+        if (this.patterns.dominantMood) {
+            const moodInsights = {
+                'great': 'Your positive mood patterns show resilience. Keep nurturing this energy!',
+                'good': 'Consistent good moods indicate effective coping strategies.',
+                'okay': 'Steady moods show balanced emotional regulation.',
+                'neutral': 'Neutral moods can be grounding. Consider exploring what brings you joy.',
+                'heavy': 'Heavy moods deserve attention. Remember, all feelings are valid.'
+            };
+            
+            if (moodInsights[this.patterns.dominantMood]) {
+                this.insights.push({
+                    id: 'mood_pattern',
+                    title: 'Mood Pattern Insight',
+                    emoji: '📊',
+                    message: moodInsights[this.patterns.dominantMood],
+                    date: now.toISOString(),
+                    type: 'pattern'
+                });
+            }
+        }
+
+        // Consistency insight
+        if (this.patterns.consistencyStreak >= 3) {
+            this.insights.push({
+                id: 'consistency_streak',
+                title: 'Consistency Streak!',
+                emoji: '🔥',
+                message: `You've checked in ${this.patterns.consistencyStreak} days in a row! Consistency builds resilience.`,
+                date: now.toISOString(),
+                type: 'achievement'
+            });
+        }
+
+        // Garden growth insight
+        if (window.gardenSystem && window.gardenSystem.plants.length >= 5) {
+            this.insights.push({
+                id: 'garden_growth',
+                title: 'Garden Flourishing',
+                emoji: '🌺',
+                message: `Your garden has ${window.gardenSystem.plants.length} plants! Each one represents your growth journey.`,
+                date: now.toISOString(),
+                type: 'growth'
+            });
+        }
+
+        // Save insights
+        this.saveInsights();
+    }
+
+    saveInsights() {
+        // Keep only last 30 insights
+        if (this.insights.length > 30) {
+            this.insights = this.insights.slice(-30);
+        }
+        localStorage.setItem('lumaCare_insights', JSON.stringify(this.insights));
+    }
+
+    setupInsightsTab() {
+        console.log('Setting up insights tab...');
+        
+        // Check if tab already exists
+        let insightsTab = document.getElementById('insights-tab');
+        let insightsBtn = document.querySelector('[data-tab="insights"]');
+        
+        // Create tab if it doesn't exist
+        if (!insightsTab) {
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                insightsTab = document.createElement('div');
+                insightsTab.className = 'tab-content';
+                insightsTab.id = 'insights-tab';
+                insightsTab.innerHTML = this.getInsightsHTML();
+                mainContent.appendChild(insightsTab);
+                console.log('Created insights tab');
+            }
+        }
+        
+        // Create button if it doesn't exist
+        if (!insightsBtn) {
+            const nav = document.querySelector('.nav');
+            if (nav) {
+                insightsBtn = document.createElement('button');
+                insightsBtn.className = 'nav-btn';
+                insightsBtn.dataset.tab = 'insights';
+                insightsBtn.innerHTML = '<i class="fas fa-chart-line"></i> Insights';
+                
+                // Insert before settings button
+                const settingsBtn = document.querySelector('[data-tab="settings"]');
+                if (settingsBtn) {
+                    settingsBtn.parentNode.insertBefore(insightsBtn, settingsBtn);
+                } else {
+                    nav.appendChild(insightsBtn);
+                }
+                
+                console.log('Created insights button');
+            }
+        }
+        
+        // Setup refresh button
+        setTimeout(() => {
+            const refreshBtn = document.getElementById('refresh-insights');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => {
+                    this.analyzePatterns();
+                    this.renderInsights();
+                });
+            }
+        }, 500);
+    }
+
+    showInsightsTab() {
+        console.log('showInsightsTab called');
+        
+        // Update navigation
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        const insightsBtn = document.querySelector('[data-tab="insights"]');
+        if (insightsBtn) {
+            insightsBtn.classList.add('active');
+        }
+        
+        // Update tab content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        
+        const insightsTab = document.getElementById('insights-tab');
+        if (insightsTab) {
+            insightsTab.classList.add('active');
+            
+            // Render insights
+            this.analyzePatterns();
+            this.renderInsights();
+        } else {
+            console.log('Creating insights tab on the fly...');
+            this.setupInsightsTab();
+            this.showInsightsTab(); // Try again
+        }
+    }
+
+    getInsightsHTML() {
+        return `
+            <div class="insights-container">
+                <div class="insights-header">
+                    <h2>Your Progress Insights</h2>
+                    <p>Personalized insights based on your journey</p>
+                </div>
+                
+                <div class="insights-stats">
+                    <div class="insight-stat">
+                        <div class="stat-value" id="streak-insight">0</div>
+                        <div class="stat-label">Day Streak</div>
+                    </div>
+                    <div class="insight-stat">
+                        <div class="stat-value" id="mood-stability-insight">-</div>
+                        <div class="stat-label">Mood Stability</div>
+                    </div>
+                    <div class="insight-stat">
+                        <div class="stat-value" id="session-count-insight">0</div>
+                        <div class="stat-label">Sessions</div>
+                    </div>
+                    <div class="insight-stat">
+                        <div class="stat-value" id="insight-count">0</div>
+                        <div class="stat-label">Insights</div>
+                    </div>
+                </div>
+                
+                <div class="insights-content">
+                    <div class="insights-list" id="insights-list">
+                        <!-- Insights will be loaded here -->
+                    </div>
+                    
+                    <div class="insights-actions">
+                        <button class="btn-refresh-insights" id="refresh-insights">
+                            <i class="fas fa-sync-alt"></i> Refresh Insights
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderInsights() {
+        this.analyzePatterns();
+        
+        // Update stats
+        const streakEl = document.getElementById('streak-insight');
+        const stabilityEl = document.getElementById('mood-stability-insight');
+        const sessionEl = document.getElementById('session-count-insight');
+        const insightEl = document.getElementById('insight-count');
+        
+        if (streakEl) streakEl.textContent = this.patterns.consistencyStreak || 0;
+        if (stabilityEl) stabilityEl.textContent = 
+            this.patterns.moodStability ? this.patterns.moodStability.replace('_', ' ') : '-';
+        if (sessionEl) sessionEl.textContent = this.patterns.sessionFrequency || 0;
+        if (insightEl) insightEl.textContent = this.insights.length;
+
+        // Render insights list
+        const insightsList = document.getElementById('insights-list');
+        if (insightsList) {
+            if (this.insights.length === 0) {
+                insightsList.innerHTML = `
+                    <div class="no-insights">
+                        <div class="no-insights-icon">🔍</div>
+                        <h3>No insights yet</h3>
+                        <p>Continue using LumaCare to generate personalized insights</p>
+                    </div>
+                `;
+            } else {
+                // Sort by date (newest first)
+                const sortedInsights = [...this.insights].sort((a, b) => 
+                    new Date(b.date) - new Date(a.date)
+                ).slice(0, 5); // Show only 5 most recent
+
+                insightsList.innerHTML = sortedInsights.map(insight => `
+                    <div class="insight-card insight-${insight.type}">
+                        <div class="insight-header">
+                            <div class="insight-emoji">${insight.emoji}</div>
+                            <div class="insight-title">
+                                <h4>${insight.title}</h4>
+                                <span class="insight-date">${this.getTimeAgo(new Date(insight.date))}</span>
+                            </div>
+                        </div>
+                        <div class="insight-message">
+                            <p>${insight.message}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+    }
+
+    getTimeAgo(date) {
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 60) return `${diffMins}m ago`;
+        if (diffHours < 24) return `${diffHours}h ago`;
+        if (diffDays < 7) return `${diffDays}d ago`;
+        return date.toLocaleDateString();
+    }
+}  // ❤️ END OF CLASS - MAKE SURE NOTHING COMES AFTER THIS!
+
+// =================== //
+// INTEGRATION WITH EXISTING SYSTEMS //
+// =================== //
+
+// Update the initialization
+let personalizationSystem, progressInsights;
+
+// Add SOS button to chat interface
+function addSOSButton() {
+    const chatHeader = document.querySelector('.chat-header');
+    if (chatHeader && !chatHeader.querySelector('.sos-button')) {
+        const sosButton = document.createElement('button');
+        sosButton.className = 'icon-btn sos-button';
+        sosButton.innerHTML = '<i class="fas fa-life-ring"></i>';
+        sosButton.title = 'SOS Calm Sequence';
+        sosButton.addEventListener('click', () => {
+            if (personalizationSystem) {
+                personalizationSystem.showSOSSelector();
+            }
+        });
+        
+        const chatActions = document.querySelector('.chat-actions');
+        if (chatActions) {
+            chatActions.insertBefore(sosButton, chatActions.firstChild);
+        }
+    }
+}
+
+// Update the main initialization
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all systems
+    setTimeout(() => {
+        moodSystem = new MoodSystem();
+        gardenSystem = new GardenSystem();
+        weatherSystem = new WeatherSystem();
+        enhancedChat = new EnhancedChat();
+        personalizationSystem = new PersonalizationSystem();
+        progressInsights = new ProgressInsights();
+        
+        // Add SOS button
+        addSOSButton();
+        
+        // Show ritual suggestion after mood check-in
+        const checkMoodInterval = setInterval(() => {
+            if (moodSystem.currentMood) {
+                personalizationSystem.showRitualSuggestion();
+                clearInterval(checkMoodInterval);
+            }
+        }, 1000);
+        
+        // Update personalized greeting
+        setTimeout(() => {
+            const greeting = personalizationSystem.getPersonalizedGreeting();
+            if (greeting && document.getElementById('chat-messages')) {
+                const personalizedMsg = `
+                    <div class="message ai-message">
+                        <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                        <div class="message-content">
+                            <p>${greeting}. I'm here to support you today. 💙</p>
+                        </div>
+                    </div>
+                `;
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = personalizedMsg;
+                document.getElementById('chat-messages').appendChild(tempDiv.firstElementChild);
+            }
+        }, 2000);
+        
+        console.log('🎯 All enhancement phases initialized');
+        
+    }, 1500);
+});
+
+// =================== //
+// ADDITIONAL CSS FOR NEW FEATURES //
+// =================== //
+
+// Add these styles to your CSS
+const phase2Styles = `
+/* Ritual Modal */
+.ritual-modal .modal-content {
+    max-width: 500px;
+}
+
+.ritual-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.ritual-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.ritual-emoji {
+    font-size: 3rem;
+}
+
+.ritual-info h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.4rem;
+}
+
+.ritual-info p {
+    margin: 0 0 0.5rem 0;
+    opacity: 0.9;
+}
+
+.ritual-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.ritual-steps {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    margin: 1rem 0;
+}
+
+.ritual-steps h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.1rem;
+}
+
+.ritual-steps ol {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.ritual-steps li {
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0;
+}
+
+.ritual-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.btn-start-ritual {
+    background: white;
+    color: #667eea;
+    border: none;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-start-ritual:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-skip-ritual {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-skip-ritual:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Ritual Chat Card */
+.ritual-chat-card {
+    background: rgba(138, 43, 226, 0.1);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border-left: 4px solid #9C27B0;
+}
+
+.ritual-chat-card h4 {
+    margin: 0 0 0.75rem 0;
+    color: var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ritual-chat-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.ritual-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+}
+
+.step-number {
+    background: var(--primary);
+    color: white;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.step-text {
+    flex: 1;
+    line-height: 1.5;
+}
+
+/* SOS Styles */
+.sos-modal .modal-content {
+    max-width: 500px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.sos-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.sos-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sos-option:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+}
+
+.sos-emoji {
+    font-size: 2rem;
+}
+
+.sos-info {
+    flex: 1;
+}
+
+.sos-info h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.2rem;
+}
+
+.sos-info p {
+    margin: 0;
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+.sos-arrow {
+    font-size: 1.5rem;
+    opacity: 0.7;
+}
+
+.sos-note {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    margin-top: 1rem;
+}
+
+.sos-note i {
+    color: #FF5252;
+    margin-top: 0.25rem;
+}
+
+.sos-note p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* SOS Chat Card */
+.sos-chat-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border-left: 4px solid;
+}
+
+.sos-chat-card h4 {
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sos-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.sos-step {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.sos-step:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.sos-step-number {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.sos-step-content {
+    flex: 1;
+    line-height: 1.5;
+}
+
+.btn-step-complete {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.btn-step-complete:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.btn-step-complete.completed {
+    background: #4CAF50;
+    color: white;
+}
+
+.sos-encouragement {
+    text-align: center;
+    font-style: italic;
+    opacity: 0.9;
+    margin: 1rem 0 0 0;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Insights Styles */
+.insights-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    color: white;
+}
+
+.insights-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.insights-header h2 {
+    color: white;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.insights-header p {
+    opacity: 0.8;
+    font-size: 1rem;
+}
+
+.insights-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 1rem;
+}
+
+.insight-stat {
+    text-align: center;
+}
+
+.insight-stat .stat-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.25rem;
+}
+
+.insight-stat .stat-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.insights-content {
+    display: grid;
+    gap: 2rem;
+}
+
+.insights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.insight-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+}
+
+.insight-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(5px);
+}
+
+.insight-pattern {
+    border-left-color: #2196F3;
+}
+
+.insight-achievement {
+    border-left-color: #FF9800;
+}
+
+.insight-growth {
+    border-left-color: #4CAF50;
+}
+
+.insight-commitment {
+    border-left-color: #9C27B0;
+}
+
+.insight-analysis {
+    border-left-color: #607D8B;
+}
+
+.insight-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.insight-emoji {
+    font-size: 1.5rem;
+}
+
+.insight-title {
+    flex: 1;
+}
+
+.insight-title h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.1rem;
+}
+
+.insight-date {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.insight-message p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+.no-insights {
+    text-align: center;
+    padding: 3rem;
+}
+
+.no-insights-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.no-insights h3 {
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.no-insights p {
+    opacity: 0.7;
+}
+
+.insights-patterns {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 1rem;
+}
+
+.insights-patterns h3 {
+    color: white;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+}
+
+.patterns-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.pattern-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    padding: 1rem;
+}
+
+.pattern-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.pattern-emoji {
+    font-size: 1.25rem;
+}
+
+.pattern-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: white;
+}
+
+.pattern-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.chart-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chart-label {
+    width: 60px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.chart-progress {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: white;
+    border-radius: 3px;
+}
+
+.chart-value {
+    width: 30px;
+    text-align: right;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.progress-display {
+    text-align: center;
+}
+
+.progress-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.progress-label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+}
+
+.progress-breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.streak-display {
+    text-align: center;
+}
+
+.streak-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.streak-label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-bottom: 0.5rem;
+}
+
+.streak-history {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.insights-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn-refresh-insights {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-refresh-insights:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-export-insights {
+    background: white;
+    color: #667eea;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-export-insights:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* SOS Button in Chat */
+.sos-button {
+    background: linear-gradient(135deg, #FF5252 0%, #FF4081 100%);
+    color: white;
+    border: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: sosPulse 2s infinite;
+}
+
+@keyframes sosPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.sos-button:hover {
+    animation: none;
+    transform: scale(1.15);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .insights-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .patterns-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .sos-option {
+        padding: 1rem;
+    }
+    
+    .ritual-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .insights-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .insight-stat .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .pattern-card {
+        padding: 0.75rem;
+    }
+    
+    .ritual-actions {
+        gap: 0.5rem;
+    }
+}
+`;
+
+// Add the phase 2 styles to the document
+const phase2StyleSheet = document.createElement('style');
+phase2StyleSheet.textContent = phase2Styles;
+document.head.appendChild(phase2StyleSheet);
+
+// =================== //
+// SETTINGS ENHANCEMENTS //
+// =================== //
+
+// Add personalization settings to settings tab
+function enhanceSettingsTab() {
+    const settingsContainer = document.querySelector('#settings-tab .settings-container');
+    if (!settingsContainer || document.querySelector('.personalization-section')) return;
+
+    const personalizationHTML = `
+        <div class="settings-section personalization-section">
+            <h3>Personalization</h3>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Preferred Name</h4>
+                    <p>What should I call you?</p>
+                </div>
+                <input type="text" id="preferred-name" placeholder="Enter your name" 
+                       value="${personalizationSystem?.userPreferences?.preferredName || ''}" 
+                       style="width: 150px; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--light);">
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Daily Rituals</h4>
+                    <p>Receive daily practice suggestions</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="daily-rituals-toggle" 
+                           ${personalizationSystem?.userPreferences?.morningRoutine ? 'checked' : ''}>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Voice Guidance</h4>
+                    <p>Audio support during exercises</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="voice-guidance-toggle" 
+                           ${personalizationSystem?.userPreferences?.voiceGuidance ? 'checked' : ''}>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Haptic Feedback</h4>
+                    <p>Gentle vibrations on interaction</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="haptic-feedback-toggle" 
+                           ${personalizationSystem?.userPreferences?.hapticFeedback ? 'checked' : ''}>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Reduced Motion</h4>
+                    <p>Minimize animations</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="reduced-motion-toggle" 
+                           ${personalizationSystem?.userPreferences?.reducedMotion ? 'checked' : ''}>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+    `;
+
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = personalizationHTML;
+    const personalizationSection = tempDiv.firstElementChild;
+    
+    // Insert after appearance section
+    const appearanceSection = settingsContainer.querySelector('.settings-section');
+    if (appearanceSection) {
+        appearanceSection.insertAdjacentElement('afterend', personalizationSection);
+        
+        // Add event listeners
+        setTimeout(() => {
+            const nameInput = document.getElementById('preferred-name');
+            const ritualsToggle = document.getElementById('daily-rituals-toggle');
+            const voiceToggle = document.getElementById('voice-guidance-toggle');
+            const hapticToggle = document.getElementById('haptic-feedback-toggle');
+            const motionToggle = document.getElementById('reduced-motion-toggle');
+            
+            if (nameInput && personalizationSystem) {
+                nameInput.addEventListener('change', (e) => {
+                    personalizationSystem.updatePreference('preferredName', e.target.value);
+                });
+            }
+            
+            if (ritualsToggle && personalizationSystem) {
+                ritualsToggle.addEventListener('change', (e) => {
+                    personalizationSystem.updatePreference('morningRoutine', e.target.checked);
+                    personalizationSystem.updatePreference('eveningReflection', e.target.checked);
+                });
+            }
+            
+            if (voiceToggle && personalizationSystem) {
+                voiceToggle.addEventListener('change', (e) => {
+                    personalizationSystem.updatePreference('voiceGuidance', e.target.checked);
+                });
+            }
+            
+            if (hapticToggle && personalizationSystem) {
+                hapticToggle.addEventListener('change', (e) => {
+                    personalizationSystem.updatePreference('hapticFeedback', e.target.checked);
+                });
+            }
+            
+            if (motionToggle && personalizationSystem) {
+                motionToggle.addEventListener('change', (e) => {
+                    personalizationSystem.updatePreference('reducedMotion', e.target.checked);
+                    if (e.target.checked) {
+                        document.documentElement.style.setProperty('--animation-speed', '0.01ms');
+                    } else {
+                        document.documentElement.style.removeProperty('--animation-speed');
+                    }
+                });
+            }
+        }, 100);
+    }
+}
+
+// Update settings when tab is viewed
+document.addEventListener('DOMContentLoaded', function() {
+    const settingsBtn = document.querySelector('[data-tab="settings"]');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            setTimeout(enhanceSettingsTab, 100);
+        });
+    }
+});
+
+// =================== //
+// FINAL INITIALIZATION //
+// =================== //
+
+console.log('🎯 LumaCare Enhancement Phases Complete!');
+console.log('✅ Phase 1: Mood Check-in, Growth Garden, Emotional Weather');
+console.log('✅ Phase 2: Daily Rituals, SOS Sequences, Personalization');
+console.log('✅ Phase 3: Progress Insights, Analytics, Settings Integration');
+console.log('✅ All systems integrated and ready');
+
+// =================== //
+// FINAL INTEGRATION & OPTIMIZATION //
+// =================== //
+
+class LumaCareOptimizer {
+    constructor() {
+        this.performanceMetrics = {};
+        this.init();
+    }
+
+    init() {
+        this.setupPerformanceMonitoring();
+        this.setupResourceOptimization();
+        this.setupAnalyticsQueue();
+        this.setupConnectionMonitor();
+        this.setupBatteryOptimization();
+    }
+
+    setupPerformanceMonitoring() {
+        // Measure initial load time
+        this.performanceMetrics.loadStart = performance.now();
+        
+        window.addEventListener('load', () => {
+            this.performanceMetrics.loadEnd = performance.now();
+            this.performanceMetrics.loadTime = 
+                this.performanceMetrics.loadEnd - this.performanceMetrics.loadStart;
+            
+            console.log(`🚀 Load time: ${this.performanceMetrics.loadTime.toFixed(2)}ms`);
+            
+            // Track performance
+            trackEvent('performance_metrics', {
+                load_time: Math.round(this.performanceMetrics.loadTime),
+                memory_usage: performance.memory ? 
+                    Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) : 'N/A'
+            });
+        });
+
+        // Monitor memory usage
+        if (performance.memory) {
+            setInterval(() => {
+                const memoryMB = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+                if (memoryMB > 50) { // Threshold
+                    this.triggerMemoryCleanup();
+                }
+            }, 30000); // Check every 30 seconds
+        }
+
+        // Monitor frame rate
+        this.setupFPSMonitoring();
+    }
+
+    setupFPSMonitoring() {
+        let frameCount = 0;
+        let lastTime = performance.now();
+        
+        const checkFPS = () => {
+            frameCount++;
+            const currentTime = performance.now();
+            
+            if (currentTime >= lastTime + 1000) {
+                const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+                frameCount = 0;
+                lastTime = currentTime;
+                
+                if (fps < 50) {
+                    console.warn(`⚠️ Low FPS: ${fps}`);
+                    this.optimizeAnimations();
+                }
+            }
+            
+            requestAnimationFrame(checkFPS);
+        };
+        
+        requestAnimationFrame(checkFPS);
+    }
+
+    optimizeAnimations() {
+        // Reduce animation intensity when performance is low
+        document.querySelectorAll('.mood-emoji, .weather-icon, .plant').forEach(el => {
+            el.style.animationPlayState = 'paused';
+            
+            setTimeout(() => {
+                el.style.animationPlayState = 'running';
+                el.style.animationDuration = '2s';
+            }, 100);
+        });
+    }
+
+    triggerMemoryCleanup() {
+        // Clear unused caches
+        if (window.gc) {
+            window.gc();
+        }
+        
+        // Clear image caches
+        document.querySelectorAll('img').forEach(img => {
+            if (!img.offsetParent) { // Not visible
+                img.src = '';
+            }
+        });
+        
+        console.log('🧹 Memory cleanup triggered');
+    }
+
+    setupResourceOptimization() {
+        // Lazy load non-critical resources
+        this.lazyLoadImages();
+        this.deferNonCriticalCSS();
+        
+        // Optimize animations for battery
+        this.setupAnimationOptimization();
+    }
+
+    lazyLoadImages() {
+        const images = document.querySelectorAll('img[data-src]');
+        const imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    imageObserver.unobserve(img);
+                }
+            });
+        });
+        
+        images.forEach(img => imageObserver.observe(img));
+    }
+
+    deferNonCriticalCSS() {
+        // Critical CSS is already inlined
+        // Non-critical CSS can be loaded later
+        const nonCriticalCSS = [
+            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+        ];
+        
+        nonCriticalCSS.forEach(href => {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            link.media = 'print';
+            link.onload = () => {
+                link.media = 'all';
+            };
+            document.head.appendChild(link);
+        });
+    }
+
+    setupAnimationOptimization() {
+        // Reduce animations when page is not visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.pauseAnimations();
+            } else {
+                this.resumeAnimations();
+            }
+        });
+        
+        // Reduce animations on battery saver
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(battery => {
+                if (battery.charging === false && battery.level < 0.2) {
+                    this.reduceAnimationIntensity();
+                }
+                
+                battery.addEventListener('chargingchange', () => {
+                    if (battery.charging === false && battery.level < 0.2) {
+                        this.reduceAnimationIntensity();
+                    } else {
+                        this.normalizeAnimations();
+                    }
+                });
+            });
+        }
+    }
+
+    pauseAnimations() {
+        document.querySelectorAll('*').forEach(el => {
+            const style = window.getComputedStyle(el);
+            if (style.animationName !== 'none') {
+                el.dataset.originalAnimationPlayState = style.animationPlayState;
+                el.style.animationPlayState = 'paused';
+            }
+        });
+    }
+
+    resumeAnimations() {
+        document.querySelectorAll('*').forEach(el => {
+            if (el.dataset.originalAnimationPlayState) {
+                el.style.animationPlayState = el.dataset.originalAnimationPlayState;
+                delete el.dataset.originalAnimationPlayState;
+            }
+        });
+    }
+
+    reduceAnimationIntensity() {
+        document.documentElement.style.setProperty('--animation-speed', '2s');
+        document.querySelectorAll('.mood-emoji, .weather-icon').forEach(el => {
+            el.style.animationIterationCount = '1';
+        });
+    }
+
+    normalizeAnimations() {
+        document.documentElement.style.removeProperty('--animation-speed');
+        document.querySelectorAll('.mood-emoji, .weather-icon').forEach(el => {
+            el.style.animationIterationCount = 'infinite';
+        });
+    }
+
+    setupAnalyticsQueue() {
+        this.analyticsQueue = [];
+        this.flushInterval = setInterval(() => this.flushAnalytics(), 30000); // Every 30 seconds
+        
+        // Flush on page hide
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.flushAnalytics();
+            }
+        });
+    }
+
+    queueAnalyticsEvent(eventName, properties = {}) {
+        this.analyticsQueue.push({
+            id: Date.now() + Math.random(),
+            event: eventName,
+            timestamp: Date.now(),
+            properties
+        });
+        
+        // Store in localStorage for offline
+        localStorage.setItem('lumaCare_analytics_queue', JSON.stringify(this.analyticsQueue));
+    }
+
+    async flushAnalytics() {
+        if (this.analyticsQueue.length === 0 || !navigator.onLine) return;
+        
+        const eventsToSend = [...this.analyticsQueue];
+        this.analyticsQueue = [];
+        
+        try {
+            // In production, send to your analytics endpoint
+            // await fetch('/api/analytics', { method: 'POST', body: JSON.stringify(eventsToSend) });
+            
+            console.log(`📤 Sent ${eventsToSend.length} analytics events`);
+            localStorage.removeItem('lumaCare_analytics_queue');
+        } catch (error) {
+            // Requeue if failed
+            this.analyticsQueue = [...this.analyticsQueue, ...eventsToSend];
+            console.error('Failed to send analytics:', error);
+        }
+    }
+
+    setupConnectionMonitor() {
+        const connectionStatus = document.createElement('div');
+        connectionStatus.className = 'connection-status';
+        connectionStatus.innerHTML = `
+            <div class="connection-dot ${navigator.onLine ? 'online' : 'offline'}"></div>
+            <span>${navigator.onLine ? 'Online' : 'Offline'}</span>
+        `;
+        document.body.appendChild(connectionStatus);
+        
+        window.addEventListener('online', () => {
+            connectionStatus.querySelector('.connection-dot').className = 'connection-dot online';
+            connectionStatus.querySelector('span').textContent = 'Online';
+            this.flushAnalytics();
+        });
+        
+        window.addEventListener('offline', () => {
+            connectionStatus.querySelector('.connection-dot').className = 'connection-dot offline';
+            connectionStatus.querySelector('span').textContent = 'Offline';
+        });
+    }
+
+    setupBatteryOptimization() {
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(battery => {
+                if (battery.level < 0.3) {
+                    this.enableBatterySaverMode();
+                }
+                
+                battery.addEventListener('levelchange', () => {
+                    if (battery.level < 0.3) {
+                        this.enableBatterySaverMode();
+                    } else {
+                        this.disableBatterySaverMode();
+                    }
+                });
+            });
+        }
+    }
+
+    enableBatterySaverMode() {
+        document.body.classList.add('battery-saver');
+        
+        // Reduce animations
+        this.reduceAnimationIntensity();
+        
+        // Reduce polling intervals
+        if (weatherSystem) {
+            clearInterval(weatherSystem.animationInterval);
+        }
+        
+        console.log('🔋 Battery saver mode enabled');
+    }
+
+    disableBatterySaverMode() {
+        document.body.classList.remove('battery-saver');
+        this.normalizeAnimations();
+        console.log('🔋 Battery saver mode disabled');
+    }
+}
+
+// =================== //
+// GLOBAL ERROR HANDLING //
+// =================== //
+
+window.addEventListener('error', function(e) {
+    console.error('🚨 Global error:', e.error);
+    
+    // Track error
+    if (window.optimizer) {
+        optimizer.queueAnalyticsEvent('error_occurred', {
+            message: e.error.message,
+            stack: e.error.stack,
+            filename: e.filename,
+            lineno: e.lineno,
+            colno: e.colno
+        });
+    }
+    
+    // Don't show error to user in production
+    // In development, you might want to show a friendly error
+    if (window.location.hostname === 'localhost') {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-notification';
+        errorDiv.innerHTML = `
+            <div class="error-content">
+                <h4>Something went wrong</h4>
+                <p>${e.error.message}</p>
+                <button class="btn-dismiss-error">Dismiss</button>
+                <button class="btn-report-error">Report</button>
+            </div>
+        `;
+        document.body.appendChild(errorDiv);
+        
+        errorDiv.querySelector('.btn-dismiss-error').addEventListener('click', () => {
+            errorDiv.remove();
+        });
+        
+        errorDiv.querySelector('.btn-report-error').addEventListener('click', () => {
+            window.location.href = `mailto:lumacare.therapy@gmail.com?subject=LumaCare%20Error&body=${encodeURIComponent(e.error.stack)}`;
+            errorDiv.remove();
+        });
+    }
+});
+
+// =================== //
+// FINAL INITIALIZATION //
+// =================== //
+
+// Initialize everything when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 LumaCare v2.0 Initializing...');
+    
+    // Show loading overlay
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.className = 'loading-overlay';
+    loadingOverlay.innerHTML = `
+        <div class="loading-spinner-large"></div>
+        <p>Preparing your therapy space...</p>
+    `;
+    document.body.appendChild(loadingOverlay);
+    
+    // Initialize systems with delay for better UX
+    setTimeout(() => {
+        try {
+            // Core systems
+            moodSystem = new MoodSystem();
+            gardenSystem = new GardenSystem();
+            weatherSystem = new WeatherSystem();
+            enhancedChat = new EnhancedChat();
+            personalizationSystem = new PersonalizationSystem();
+            progressInsights = new ProgressInsights();
+            optimizer = new LumaCareOptimizer();
+            
+            // Add SOS button
+            addSOSButton();
+            
+            // Enhance settings
+            enhanceSettingsTab();
+            
+            // Register service worker for PWA
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered');
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    showUpdateNotification();
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            }
+            
+            // Remove loading overlay
+            setTimeout(() => {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.remove();
+                    
+                    // Show welcome message
+                    setTimeout(() => {
+                        const welcomeMessage = personalizationSystem.getPersonalizedGreeting();
+                        if (welcomeMessage && document.getElementById('chat-messages')) {
+                            const welcomeDiv = document.createElement('div');
+                            welcomeDiv.className = 'message ai-message';
+                            welcomeDiv.innerHTML = `
+                                <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                                <div class="message-content">
+                                    <p>${welcomeMessage}. Welcome to LumaCare v2.0! ✨</p>
+                                    <p>Your enhanced therapy experience is ready with:</p>
+                                    <ul>
+                                        <li>🌱 Daily Growth Garden</li>
+                                        <li>🌦️ Emotional Weather</li>
+                                        <li>🆘 SOS Calm Sequences</li>
+                                        <li>📊 Progress Insights</li>
+                                        <li>💫 Personalized Rituals</li>
+                                    </ul>
+                                    <p>I'm here to support your mental wellness journey. 💙</p>
+                                </div>
+                            `;
+                            document.getElementById('chat-messages').appendChild(welcomeDiv);
+                            document.getElementById('chat-messages').scrollTop = 
+                                document.getElementById('chat-messages').scrollHeight;
+                        }
+                    }, 500);
+                }, 300);
+            }, 1000);
+            
+            console.log('✅ LumaCare v2.0 Initialized Successfully!');
+            console.log('🎯 All Phases Complete:');
+            console.log('   ✅ Phase 1: Mood, Garden, Weather');
+            console.log('   ✅ Phase 2: Rituals, SOS, Personalization');
+            console.log('   ✅ Phase 3: Insights, Analytics, Optimization');
+            console.log('   ✅ PWA: Service Worker, Manifest, Offline');
+            console.log('   ✅ Performance: Monitoring, Optimization');
+            
+            // Track successful initialization
+            optimizer.queueAnalyticsEvent('app_initialized', {
+                version: '2.0',
+                features: ['mood', 'garden', 'weather', 'rituals', 'sos', 'insights', 'pwa'],
+                load_time: optimizer.performanceMetrics.loadTime ?
+                    Math.round(optimizer.performanceMetrics.loadTime) : 'N/A'
+            });
+            
+        } catch (error) {
+            console.error('❌ Initialization failed:', error);
+            loadingOverlay.innerHTML = `
+                <div class="error-icon">❌</div>
+                <h3>Initialization Error</h3>
+                <p>${error.message}</p>
+                <button onclick="location.reload()">Retry</button>
+            `;
+            
+            // Track initialization error
+            if (window.optimizer) {
+                optimizer.queueAnalyticsEvent('initialization_failed', {
+                    error: error.message,
+                    stack: error.stack
+                });
+            }
+        }
+    }, 500);
+});
+
+function showUpdateNotification() {
+    const updateNotification = document.createElement('div');
+    updateNotification.className = 'update-notification';
+    updateNotification.innerHTML = `
+        <div class="update-content">
+            <h4>Update Available</h4>
+            <p>A new version of LumaCare is available.</p>
+            <button class="btn-update-now">Update Now</button>
+            <button class="btn-update-later">Later</button>
+        </div>
+    `;
+    
+    document.body.appendChild(updateNotification);
+    
+    updateNotification.querySelector('.btn-update-now').addEventListener('click', () => {
+        window.location.reload();
+    });
+    
+    updateNotification.querySelector('.btn-update-later').addEventListener('click', () => {
+        updateNotification.remove();
+    });
+}
+
+// System status indicator
+setTimeout(() => {
+    const systemStatus = document.createElement('div');
+    systemStatus.className = 'system-status';
+    systemStatus.innerHTML = `
+        <div class="status-dot"></div>
+        <span>v2.0</span>
+    `;
+    document.body.appendChild(systemStatus);
+}, 2000);
