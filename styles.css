@@ -3245,3 +3245,293 @@ body.light-mode .payment-security-info {
 .hero-disclaimer i {
     margin-right: 8px;
 }
+/* Extra Mobile Fixes */
+@media (max-width: 480px) {
+  /* Fix chat input on very small screens */
+  #message-input {
+      font-size: 16px !important; /* Prevents iOS zoom */
+      padding: 12px 15px !important;
+  }
+  
+  /* Fix payment modal scrolling */
+  .modal-content {
+      max-height: 85vh !important;
+      overflow-y: auto !important;
+  }
+  
+  /* Fix hero section on mobile */
+  .landing-hero h1 {
+      font-size: 2rem !important;
+  }
+  
+  .hero-features {
+      flex-direction: column !important;
+      align-items: center !important;
+  }
+  
+  .feature {
+      width: 90% !important;
+      margin-bottom: 15px !important;
+  }
+  
+  /* Fix nav buttons on small screens */
+  .nav {
+      overflow-x: auto !important;
+      white-space: nowrap !important;
+      padding-bottom: 5px !important;
+  }
+  
+  .nav-btn {
+      padding: 8px 12px !important;
+      font-size: 14px !important;
+  }
+}
+
+/* Fix for iOS input styling */
+input, textarea, select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+/* Prevent blue highlight on tap (iOS) */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+/* =================== */
+/* OPTIMAL CHAT SIZE FOR DESKTOP */
+/* =================== */
+
+/* For desktop screens (1024px and up) */
+@media (min-width: 1024px) {
+  /* Slightly taller chat container - NOT TOO BIG */
+  .chat-container {
+      height: 75vh !important; /* Just 5vh more than original 70vh */
+      max-height: 75vh !important;
+  }
+  
+  /* Make chat messages area visible with good proportions */
+  .chat-messages {
+      height: calc(75vh - 200px) !important; /* Leaves room for input */
+      min-height: 55vh !important;
+      max-height: 55vh !important;
+      padding: 1.5rem !important;
+  }
+  
+  /* Make messages slightly wider but not too much */
+  .message {
+      max-width: 82% !important; /* Small increase from 80% */
+  }
+  
+  /* Better message padding for readability */
+  .message-content {
+      padding: 1.2rem 1.8rem !important;
+      font-size: 1.03rem !important;
+      line-height: 1.6 !important;
+  }
+  
+  /* Input area - keep visible */
+  .chat-input-container {
+      padding: 1.5rem !important;
+      height: auto !important;
+      min-height: 140px !important;
+  }
+  
+  /* Input field - comfortable but not huge */
+  #message-input {
+      padding: 1rem 1.8rem !important;
+      font-size: 1.05rem !important;
+      border-radius: 2rem !important;
+      height: 56px !important;
+  }
+  
+  /* Send button - proportional */
+  #send-btn {
+      width: 56px !important;
+      height: 56px !important;
+  }
+  
+  /* Quick responses - subtle increase */
+  .quick-response {
+      padding: 0.6rem 1.2rem !important;
+      font-size: 0.95rem !important;
+      border-radius: 1.2rem !important;
+      margin: 0.25rem !important;
+  }
+  
+  /* Good spacing between messages */
+  .chat-messages {
+      gap: 1.2rem !important;
+  }
+  
+  /* Make sure typing area is always visible */
+  .chat-input-container {
+      position: relative !important;
+      bottom: 0 !important;
+      background: var(--dark) !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* For larger desktop screens (1280px and up) */
+@media (min-width: 1280px) {
+  .chat-container {
+      height: 78vh !important;
+  }
+  
+  .chat-messages {
+      height: calc(78vh - 200px) !important;
+      min-height: 58vh !important;
+      max-height: 58vh !important;
+  }
+  
+  .message {
+      max-width: 84% !important;
+  }
+}
+
+/* For extra large screens (1920px and up) */
+@media (min-width: 1920px) {
+  .chat-container {
+      height: 80vh !important; /* Max 80vh even on huge screens */
+  }
+  
+  /* =================== */
+/* FIXED CHAT SIZE - WORKS WITH SEND BUTTON */
+/* =================== */
+
+/* For desktop screens (1024px and up) */
+@media (min-width: 1024px) {
+  /* Just increase overall container height */
+  .chat-container {
+      height: 78vh !important; /* Increased from 70vh */
+      max-height: 78vh !important;
+  }
+  
+  /* DON'T set height on chat-messages - let it flow naturally */
+  .chat-messages {
+      /* Remove any height calculations */
+      flex: 1 !important; /* Let it take available space */
+      overflow-y: auto !important;
+      padding: 1.5rem !important;
+  }
+  
+  /* Keep input container at bottom */
+  .chat-input-container {
+      padding: 1.5rem !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+      background: var(--dark) !important;
+      flex-shrink: 0 !important; /* Don't shrink */
+  }
+  
+  /* Slightly better message width */
+  .message {
+      max-width: 82% !important;
+  }
+  
+  /* Better message padding */
+  .message-content {
+      padding: 1.2rem 1.8rem !important;
+      font-size: 1.03rem !important;
+      line-height: 1.6 !important;
+  }
+  
+  /* Input field improvements */
+  #message-input {
+      padding: 1rem 1.8rem !important;
+      font-size: 1.05rem !important;
+      border-radius: 2rem !important;
+  }
+  
+  /* Quick responses */
+  .quick-response {
+      padding: 0.6rem 1.2rem !important;
+      font-size: 0.95rem !important;
+  }
+}
+
+/* For larger screens */
+@media (min-width: 1280px) {
+  .chat-container {
+      height: 80vh !important;
+  }
+}
+  
+  .message {
+      max-width: 75% !important; /* Keep readable width */
+  }
+}
+
+/* Ensure typing area never gets hidden */
+@media (min-width: 1024px) {
+  .chat-input-container {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: flex-end !important;
+      min-height: 140px !important;
+      padding-top: 1rem !important;
+      padding-bottom: 1rem !important;
+  }
+  
+  .input-wrapper {
+      margin-bottom: 0.75rem !important;
+  }
+  
+  .quick-responses {
+      margin-top: 0.75rem !important;
+      padding-top: 0.75rem !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+}
+
+/* Light mode adjustments */
+@media (min-width: 1024px) {
+  body.light-mode .chat-input-container {
+      background: var(--dark) !important;
+      border-top: 1px solid #e5e7eb !important;
+  }
+  
+  body.light-mode .quick-responses {
+      border-top: 1px solid #e5e7eb !important;
+  }
+}
+/* Minimal balanced chat size */
+@media (min-width: 1024px) {
+  .chat-container {
+      height: 75vh !important; /* Slightly bigger */
+  }
+  
+  .chat-messages {
+      height: 55vh !important; /* Leaves room for input */
+      padding: 1.5rem !important;
+  }
+  
+  .chat-input-container {
+      min-height: 140px !important; /* Ensures typing area stays visible */
+      padding: 1.5rem !important;
+  }
+  
+  #message-input {
+      padding: 1rem 1.5rem !important;
+      height: 56px !important;
+  }
+}
+/* EMERGENCY FIX: Ensure typing area always shows */
+.chat-container {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.chat-messages {
+  flex: 1 !important;
+  overflow-y: auto !important;
+}
+
+.chat-input-container {
+  flex-shrink: 0 !important; /* Prevents shrinking */
+  position: sticky !important;
+  bottom: 0 !important;
+  background: var(--dark) !important;
+  z-index: 10 !important;
+}
