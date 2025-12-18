@@ -1,21 +1,15 @@
 {
-  "name": "lumacare",
-  "version": "1.0.0",
-  "description": "AI Therapy App with Yoco Payment Integration",
-  "main": "script.js",
+  "name": "vite-starter",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "build": "echo 'Build complete'"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "dependencies": {
-    "node-fetch": "^2.6.7"
-  },
-  "keywords": [
-    "therapy",
-    "ai",
-    "mental-health",
-    "payment",
-    "yoco"
-  ],
-  "author": "LumaCare",
-  "license": "MIT"
+  "devDependencies": {
+    "vite": "^7.2.4"
+  }
 }
+
