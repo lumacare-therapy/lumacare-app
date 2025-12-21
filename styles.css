@@ -4912,3 +4912,49 @@ body.light-mode .achievement-badge {
   margin-bottom: 0.25rem !important;
   word-break: break-word !important;
 }
+/* Why LumaCare Section */
+.why-lumacare {
+  max-width: 700px;
+  margin: 2.5rem auto 1.5rem auto;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  text-align: center;
+  animation: fadeIn 0.8s ease;
+}
+
+.why-lumacare h3 {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  color: white;
+  font-weight: 700;
+}
+
+.why-lumacare p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  margin: 0 auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .why-lumacare {
+      margin: 2rem 1rem 1.5rem 1rem;
+      padding: 1.25rem;
+  }
+  
+  .why-lumacare h3 {
+      font-size: 1.4rem;
+  }
+  
+  .why-lumacare p {
+      font-size: 1rem;
+  }
+}
