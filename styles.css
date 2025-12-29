@@ -4958,3 +4958,156 @@ body.light-mode .achievement-badge {
       font-size: 1rem;
   }
 }
+
+/* =================== */
+/* PRIORITY MATRIX ENHANCEMENTS */
+/* =================== */
+
+.first-time-hint {
+    background: rgba(255, 193, 7, 0.1);
+    border: 2px solid #FFC107;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    animation: gentlePulse 3s infinite;
+}
+
+@keyframes gentlePulse {
+    0%, 100% { border-color: #FFC107; }
+    50% { border-color: #FFD54F; }
+}
+
+.hint-icon {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.hint-content h5 {
+    color: #FFC107;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.example-tasks-preview {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+}
+
+.example-quadrant {
+    margin-bottom: 0.5rem;
+}
+
+.example-quadrant ul {
+    margin: 0.5rem 0 0 1.5rem;
+    padding: 0;
+}
+
+.example-quadrant li {
+    margin-bottom: 0.25rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.btn-start-with-examples,
+.btn-start-blank {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0.5rem 0;
+    border: none;
+}
+
+.btn-start-with-examples {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-start-blank {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-start-with-examples:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-start-blank:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.priority-matrix-guide {
+    background: rgba(138, 43, 226, 0.1);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border-left: 4px solid var(--primary);
+}
+
+.priority-matrix-guide h4 {
+    color: var(--primary-light);
+    margin-bottom: 1rem;
+}
+
+.priority-matrix-guide ol {
+    margin: 1rem 0 1rem 1.5rem;
+}
+
+.priority-matrix-guide li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.matrix-tips {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+}
+
+.tip {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.tip-emoji {
+    font-size: 1.2rem;
+}
+
+.common-examples {
+    background: rgba(59, 130, 246, 0.1);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.common-examples p {
+    margin: 0.5rem 0;
+}
+
+/* Light mode support */
+body.light-mode .first-time-hint {
+    background: rgba(255, 193, 7, 0.05);
+    border: 2px solid #FF9800;
+}
+
+body.light-mode .priority-matrix-guide {
+    background: rgba(138, 43, 226, 0.05);
+    border-left: 4px solid var(--primary);
+}
+
+body.light-mode .matrix-tips {
+    background: #f3f4f6;
+}
+
+body.light-mode .common-examples {
+    background: rgba(59, 130, 246, 0.05);
+}
