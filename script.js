@@ -113,33 +113,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-// Also call this after login/signup
-function onLoginSuccess() {
-    // Hide landing page
-    const landingHero = document.getElementById('landing-hero');
-    if (landingHero) {
-        landingHero.style.display = 'none';
-    }
-    
-    // Show main app
-    const appContainer = document.querySelector('.container');
-    if (appContainer) {
-        appContainer.style.display = 'block';
-    }
-}
 // Therapeutic techniques database
 const therapeuticTechniques = {
     "priority-matrix": {
         title: "Priority Matrix (Eisenhower Matrix)",
         description: "Organize tasks by urgency and importance to reduce overwhelm and create clarity",
         steps: [
-            "List all your tasks and projects",
-            "Categorize them: Urgent & Important (do now), Important but Not Urgent (schedule), Urgent but Not Important (delegate), Neither (eliminate)",
-            "Focus on Quadrant 2 tasks for long-term success",
+            "Start by reviewing example tasks in each quadrant",
+            "Click any example to edit it to match your actual tasks",
+            "Drag tasks between quadrants if your priorities change",
+            "Focus on Quadrant 2 (Important, Not Urgent) for long-term success",
             "Set realistic time blocks for each category"
         ],
-        whenToUse: "When feeling overwhelmed with multiple responsibilities and unclear priorities"
+        whenToUse: "When feeling overwhelmed with multiple responsibilities and unclear priorities",
+        exampleTasks: {
+            'urgent-important': [
+                'Finish today\'s work report',
+                'Prepare for 3pm meeting',
+                'Handle urgent client request'
+            ],
+            'important-not-urgent': [
+                'Plan next week\'s schedule',
+                'Learn new skill for career growth',
+                'Exercise for long-term health'
+            ],
+            'urgent-not-important': [
+                'Reply to non-critical emails',
+                'Schedule routine appointment',
+                'Attend optional but time-sensitive meeting'
+            ],
+            'neither': [
+                'Browse social media',
+                'Watch random YouTube videos',
+                'Organize already-organized drawer'
+            ]
+        }
     },
     "box-breathing": {
         title: "Box Breathing Technique",
@@ -1741,12 +1749,37 @@ function addMessageToChat(message, sender) {
 function showTechniqueDetails(techniqueId) {
     const technique = therapeuticTechniques[techniqueId];
     if (!technique) return;
-    
+
     const techniqueHTML = `
         <div class="technique-detail">
             <h4>${technique.title} - Step by Step</h4>
             <p><strong>Description:</strong> ${technique.description}</p>
             <p><strong>When to use:</strong> ${technique.whenToUse}</p>
+
+            ${techniqueId === 'priority-matrix' ? `
+                <div class="first-time-hint">
+                    <div class="hint-icon">💡</div>
+                    <div class="hint-content">
+                        <h5>Quick Start Tip:</h5>
+                        <p>Start with our example tasks! Click any task to edit it to match your actual priorities.</p>
+                        <div class="example-tasks-preview">
+                            <div class="example-quadrant">
+                                <strong>Urgent & Important:</strong>
+                                <ul>
+                                    ${technique.exampleTasks['urgent-important'].slice(0, 2).map(task => `<li>${task}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                        <button class="btn-start-with-examples" onclick="startPriorityMatrixWithExamples()">
+                            🚀 Start with Examples
+                        </button>
+                        <button class="btn-start-blank" onclick="startPriorityMatrixBlank()">
+                            📝 Start from Scratch
+                        </button>
+                    </div>
+                </div>
+            ` : ''}
+
             <h5>Steps:</h5>
             <ol>
                 ${technique.steps.map(step => `<li>${step}</li>`).join('')}
@@ -6074,3 +6107,150 @@ setTimeout(() => {
     `;
     document.body.appendChild(systemStatus);
 }, 2000);
+// =================== //
+// PRIORITY MATRIX ENHANCEMENT //
+// =================== //
+
+class PriorityMatrixSystem {
+    constructor() {
+        this.isFirstTime = !localStorage.getItem('lumaCare_priorityMatrix_visited');
+        this.init();
+    }
+
+    init() {
+        if (this.isFirstTime) {
+            this.setupFirstTimeExperience();
+        }
+    }
+
+    setupFirstTimeExperience() {
+        // Example tasks for first-time users
+        const exampleTasks = {
+            'urgent-important': [
+                { id: 1, text: 'Finish today\'s work report', editable: true },
+                { id: 2, text: 'Prepare for 3pm meeting', editable: true }
+            ],
+            'important-not-urgent': [
+                { id: 3, text: 'Plan next week\'s schedule', editable: true },
+                { id: 4, text: 'Learn new skill for career growth', editable: true }
+            ],
+            'urgent-not-important': [
+                { id: 5, text: 'Reply to non-critical emails', editable: true },
+                { id: 6, text: 'Schedule routine appointment', editable: true }
+            ],
+            'neither': [
+                { id: 7, text: 'Browse social media', editable: true },
+                { id: 8, text: 'Watch random YouTube videos', editable: true }
+            ]
+        };
+
+        // Save examples to localStorage
+        localStorage.setItem('lumaCare_priorityMatrix_examples', JSON.stringify(exampleTasks));
+        
+        // Mark as visited
+        localStorage.setItem('lumaCare_priorityMatrix_visited', 'true');
+        
+        console.log('✅ Priority Matrix examples loaded for first-time user');
+    }
+
+    getExamples() {
+        const examples = localStorage.getItem('lumaCare_priorityMatrix_examples');
+        return examples ? JSON.parse(examples) : null;
+    }
+
+    clearExamples() {
+        localStorage.removeItem('lumaCare_priorityMatrix_examples');
+        console.log('🗑️ Priority Matrix examples cleared');
+    }
+}
+
+// Initialize when page loads
+let priorityMatrixSystem;
+document.addEventListener('DOMContentLoaded', function() {
+    priorityMatrixSystem = new PriorityMatrixSystem();
+});
+
+// Helper functions for Priority Matrix
+function startPriorityMatrixWithExamples() {
+    console.log('Starting Priority Matrix with examples');
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message ai-message';
+    messageDiv.innerHTML = `
+        <div class="message-avatar"><i class="fas fa-robot"></i></div>
+        <div class="message-content">
+            <div class="priority-matrix-guide">
+                <h4>🚀 Priority Matrix - Quick Start</h4>
+                <p>I've loaded example tasks for you! Here's how to get started:</p>
+                <ol>
+                    <li><strong>Click any example task</strong> to edit it to match your actual work</li>
+                    <li><strong>Drag tasks between quadrants</strong> if your priorities change</li>
+                    <li><strong>Add your own tasks</strong> using the "Add Task" button</li>
+                    <li><strong>Focus on Quadrant 2</strong> (Important, Not Urgent) for long-term success</li>
+                </ol>
+                <p>Remember: The goal is clarity, not perfection! Start simple.</p>
+                <div class="matrix-tips">
+                    <div class="tip">
+                        <span class="tip-emoji">💡</span>
+                        <span>Tip: Don't overthink categories. You can always move tasks later.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const chatMessages = document.getElementById('chat-messages');
+    if (chatMessages) {
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    const techniqueModal = document.getElementById('technique-modal');
+    if (techniqueModal) {
+        techniqueModal.classList.remove('active');
+    }
+
+    trackEvent('priority_matrix_started', { method: 'with_examples' });
+}
+
+function startPriorityMatrixBlank() {
+    console.log('Starting Priority Matrix with blank slate');
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message ai-message';
+    messageDiv.innerHTML = `
+        <div class="message-avatar"><i class="fas fa-robot"></i></div>
+        <div class="message-content">
+            <div class="priority-matrix-guide">
+                <h4>📝 Priority Matrix - Blank Canvas</h4>
+                <p>Great! Starting fresh. Here's a simple approach:</p>
+                <ol>
+                    <li><strong>Brainstorm 5-8 tasks</strong> on your mind right now</li>
+                    <li><strong>Ask for each:</strong> "Is this urgent?" and "Is this important?"</li>
+                    <li><strong>Place tasks</strong> in the matching quadrant</li>
+                    <li><strong>Don't overthink</strong> - you can always adjust later</li>
+                </ol>
+                <p>Need help categorizing? Try starting with these common examples:</p>
+                <div class="common-examples">
+                    <p><strong>Urgent & Important:</strong> Deadline today, crisis to fix</p>
+                    <p><strong>Important, Not Urgent:</strong> Exercise, learning, planning</p>
+                    <p><strong>Urgent, Not Important:</strong> Some emails, interruptions</p>
+                    <p><strong>Neither:</strong> Social media, trivial tasks</p>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const chatMessages = document.getElementById('chat-messages');
+    if (chatMessages) {
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    const techniqueModal = document.getElementById('technique-modal');
+    if (techniqueModal) {
+        techniqueModal.classList.remove('active');
+    }
+
+    trackEvent('priority_matrix_started', { method: 'blank_slate' });
+}
