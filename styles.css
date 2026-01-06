@@ -5111,3 +5111,492 @@ body.light-mode .matrix-tips {
 body.light-mode .common-examples {
     background: rgba(59, 130, 246, 0.05);
 }
+
+/* =================== */
+/* BRAIN DUMP STYLES */
+/* =================== */
+
+.brain-dump-modal .modal-content {
+    max-width: 900px;
+    max-height: 85vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.brain-dump-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 1.5rem 0;
+}
+
+.dump-instructions {
+    background: rgba(59, 130, 246, 0.1);
+    border: 2px solid var(--secondary);
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.task-input-container {
+    margin: 1.5rem 0;
+}
+
+#brain-dump-input {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.75rem;
+    color: var(--light);
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: vertical;
+    font-family: inherit;
+}
+
+#brain-dump-input:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+.input-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btn-add-task {
+    flex: 2;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-quick-add {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-add-task:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+}
+
+.btn-quick-add:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.quick-suggestions {
+    margin-top: 1.5rem;
+}
+
+.quick-suggestions h4 {
+    margin-bottom: 0.75rem;
+    color: var(--light);
+    font-size: 1rem;
+}
+
+.suggestion-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.suggestion-chip {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--light);
+    padding: 0.5rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.suggestion-chip:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+.task-list-container {
+    background: rgba(138, 43, 226, 0.1);
+    border: 2px solid var(--primary);
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.task-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin: 1rem 0;
+    padding-right: 0.5rem;
+}
+
+.task-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.task-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.task-list::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.task-content {
+    flex: 1;
+}
+
+.task-text {
+    display: block;
+    margin-bottom: 0.25rem;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.task-category {
+    display: inline-block;
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.btn-remove-task {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.btn-remove-task:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #EF4444;
+}
+
+.empty-task-list {
+    text-align: center;
+    padding: 2rem;
+    color: var(--gray);
+}
+
+.empty-task-list i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.list-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-clear-list {
+    flex: 1;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #EF4444;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-proceed {
+    flex: 2;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-proceed:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-proceed:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-clear-list:hover {
+    background: rgba(239, 68, 68, 0.2);
+}
+
+.brain-dump-tips {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid #FFC107;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-top: 1.5rem;
+}
+
+.brain-dump-tips .tip {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.brain-dump-tips .tip:last-child {
+    margin-bottom: 0;
+}
+
+.brain-dump-tips i {
+    color: #FFC107;
+    margin-top: 0.25rem;
+    flex-shrink: 0;
+}
+
+/* Matrix Transition Guide */
+.matrix-transition-guide {
+    background: rgba(138, 43, 226, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border-left: 4px solid var(--primary);
+}
+
+.matrix-instructions {
+    margin: 1.5rem 0;
+}
+
+.instruction-step {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
+}
+
+.step-number {
+    width: 2rem;
+    height: 2rem;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-content ul {
+    margin: 0.5rem 0 0 1.5rem;
+    padding: 0;
+}
+
+.step-content li {
+    margin-bottom: 0.25rem;
+    color: var(--gray);
+}
+
+.urgent {
+    color: #EF4444;
+    font-weight: 600;
+}
+
+.important {
+    color: #10B981;
+    font-weight: 600;
+}
+
+.quadrant-guide {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.quadrant {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.urgent-important {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid #EF4444;
+}
+
+.important-not-urgent {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid #10B981;
+}
+
+.urgent-not-important {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid #F59E0B;
+}
+
+.neither {
+    background: rgba(156, 163, 175, 0.1);
+    border: 1px solid #9CA3AF;
+}
+
+.transition-actions {
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.btn-view-tasks {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-start-organizing {
+    flex: 2;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-view-tasks:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-start-organizing:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(138, 43, 226, 0.3);
+}
+
+.encouragement {
+    text-align: center;
+    font-style: italic;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .brain-dump-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    .quadrant-guide {
+        grid-template-columns: 1fr;
+    }
+
+    .transition-actions {
+        flex-direction: column;
+    }
+
+    .brain-dump-modal .modal-content {
+        max-width: 95vw;
+    }
+}
+
+/* Light mode support */
+body.light-mode .dump-instructions {
+    background: rgba(59, 130, 246, 0.05);
+    border: 2px solid #3b82f6;
+}
+
+body.light-mode #brain-dump-input {
+    background: white;
+    border: 1px solid #d1d5db;
+    color: #374151;
+}
+
+body.light-mode .task-list-container {
+    background: rgba(138, 43, 226, 0.05);
+    border: 2px solid var(--primary);
+}
+
+body.light-mode .task-item {
+    background: #f3f4f6;
+}
+
+body.light-mode .brain-dump-tips {
+    background: rgba(255, 193, 7, 0.05);
+    border: 1px solid #F59E0B;
+}
+
+body.light-mode .matrix-transition-guide {
+    background: rgba(138, 43, 226, 0.05);
+}
+/* Add to styles.css - Fix for container display */
+.container {
+  display: none; /* Initially hidden */
+  flex-direction: column;
+  height: 100vh;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.container.show {
+  display: flex;
+}
