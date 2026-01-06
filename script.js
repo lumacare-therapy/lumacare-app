@@ -59,41 +59,95 @@
 })();
 
 function onLoginSuccess() {
-    // Hide landing page
-    const landingHero = document.getElementById('landing-hero');
-    if (landingHero) {
-        landingHero.style.display = 'none';
-    }
+    console.log('✅ Login successful, hiding modals and showing app');
     
-    // Show main app
-    const appContainer = document.querySelector('.container');
-    if (appContainer) {
-        appContainer.style.display = 'block';
-    }
-    
-    // Hide auth modal
+    // Hide ALL modals
     const authModal = document.getElementById('auth-modal');
+    const landingHero = document.getElementById('landing-hero');
+    const appContainer = document.querySelector('.container');
+    
     if (authModal) {
+        console.log('Hiding auth modal');
         authModal.classList.remove('active');
+        authModal.style.display = 'none';
     }
+    
+    if (landingHero) {
+        console.log('Hiding landing hero');
+        landingHero.style.display = 'none';
+        landingHero.classList.remove('show');
+    }
+    
+    // Show main app container
+    if (appContainer) {
+        console.log('Showing app container');
+        appContainer.style.display = 'flex'; // Changed from 'block' to 'flex'
+    }
+    
+    // Make sure chat tab is active
+    setTimeout(() => {
+        const therapyTab = document.getElementById('therapy-tab');
+        const therapyBtn = document.querySelector('[data-tab="therapy"]');
+        
+        if (therapyTab && therapyBtn) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            therapyTab.classList.add('active');
+            therapyBtn.classList.add('active');
+        }
+    }, 100);
 }
+
 // Landing Page Logic
 function checkAuthAndShowLanding() {
     const user = JSON.parse(localStorage.getItem('lumaCare_user'));
     const landingHero = document.getElementById('landing-hero');
+    const appContainer = document.querySelector('.container');
     
-    if (!user && landingHero) {
+    if (!user) {
         // No user logged in - show landing page
-        landingHero.classList.add('show');
+        if (landingHero) {
+            landingHero.style.display = 'block';
+            landingHero.classList.add('show');
+        }
         
         // Hide the main app container
-        const appContainer = document.querySelector('.container');
         if (appContainer) {
             appContainer.style.display = 'none';
         }
-    } else if (landingHero) {
-        // User is logged in - hide landing page
-        landingHero.style.display = 'none';
+    } else {
+        // User is logged in - show app
+        if (landingHero) {
+            landingHero.style.display = 'none';
+            landingHero.classList.remove('show');
+        }
+        
+        if (appContainer) {
+            appContainer.style.display = 'flex';
+        }
+        
+        // Make sure chat tab is active
+        setTimeout(() => {
+            const therapyTab = document.getElementById('therapy-tab');
+            const therapyBtn = document.querySelector('[data-tab="therapy"]');
+            
+            if (therapyTab && therapyBtn) {
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                therapyTab.classList.add('active');
+                therapyBtn.classList.add('active');
+            }
+        }, 100);
     }
 }
 
@@ -1350,7 +1404,20 @@ class AuthSystem {
     }
 
     hideAuthModal() {
-        document.getElementById('auth-modal').classList.remove('active');
+        const authModal = document.getElementById('auth-modal');
+        if (authModal) {
+            authModal.classList.remove('active');
+            authModal.style.display = 'none';
+            
+            // Clear form inputs
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('signup-name').value = '';
+            document.getElementById('signup-email').value = '';
+            document.getElementById('signup-password').value = '';
+            
+            console.log('✅ Auth modal hidden and forms cleared');
+        }
     }
 
     switchAuthTab(tabName) {
@@ -1368,12 +1435,12 @@ class AuthSystem {
     handleLogin() {
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
-
+    
         if (!email || !password) {
             alert('Please fill in all fields');
             return;
         }
-
+    
         this.currentUser = {
             name: email.split('@')[0],
             email: email,
@@ -1385,26 +1452,45 @@ class AuthSystem {
             purchasedSessions: 0,
             paymentHistory: []
         };
-
+    
         this.isLoggedIn = true;
         localStorage.setItem('lumaCare_user', JSON.stringify(this.currentUser));
         this.updateUI();
-        this.hideAuthModal();
         
+        // Hide modal FIRST, then show success
+        this.hideAuthModal();
         onLoginSuccess();
-        alert('Successfully logged in! Welcome to LumaCare.');
+        
+        // Don't use alert() - use in-app message instead
+        setTimeout(() => {
+            const chatMessages = document.getElementById('chat-messages');
+            if (chatMessages) {
+                const welcomeMsg = document.createElement('div');
+                welcomeMsg.className = 'message ai-message';
+                welcomeMsg.innerHTML = `
+                    <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">
+                        <p>🎉 Welcome back to LumaCare! Good to see you again.</p>
+                        <p>How can I help you today?</p>
+                    </div>
+                `;
+                chatMessages.appendChild(welcomeMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }, 500);
     }
 
     handleSignup() {
         const name = document.getElementById('signup-name').value;
         const email = document.getElementById('signup-email').value;
         const password = document.getElementById('signup-password').value;
-
+    
         if (!name || !email || !password) {
             alert('Please fill in all fields');
             return;
         }
-
+    
+        // Create user
         this.currentUser = {
             name: name,
             email: email,
@@ -1416,14 +1502,32 @@ class AuthSystem {
             purchasedSessions: 0,
             paymentHistory: []
         };
-
+    
         this.isLoggedIn = true;
         localStorage.setItem('lumaCare_user', JSON.stringify(this.currentUser));
         this.updateUI();
-        this.hideAuthModal();
         
+        // Hide modal FIRST, then show success
+        this.hideAuthModal();
         onLoginSuccess();
-        alert('Account created successfully! Welcome to LumaCare.');
+        
+        // Don't use alert() - it blocks execution and causes issues
+        setTimeout(() => {
+            const chatMessages = document.getElementById('chat-messages');
+            if (chatMessages) {
+                const welcomeMsg = document.createElement('div');
+                welcomeMsg.className = 'message ai-message';
+                welcomeMsg.innerHTML = `
+                    <div class="message-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="message-content">
+                        <p>🎉 Welcome to LumaCare, ${name}! Your account has been created successfully.</p>
+                        <p>I'm here to help you with stress, anxiety, and overwhelm. How are you feeling today?</p>
+                    </div>
+                `;
+                chatMessages.appendChild(welcomeMsg);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }, 500);
     }
 
     updatePaymentHistory() {
@@ -1750,35 +1854,16 @@ function showTechniqueDetails(techniqueId) {
     const technique = therapeuticTechniques[techniqueId];
     if (!technique) return;
 
+    if (techniqueId === 'priority-matrix') {
+        showBrainDumpModal();
+        return;
+    }
+
     const techniqueHTML = `
         <div class="technique-detail">
             <h4>${technique.title} - Step by Step</h4>
             <p><strong>Description:</strong> ${technique.description}</p>
             <p><strong>When to use:</strong> ${technique.whenToUse}</p>
-
-            ${techniqueId === 'priority-matrix' ? `
-                <div class="first-time-hint">
-                    <div class="hint-icon">💡</div>
-                    <div class="hint-content">
-                        <h5>Quick Start Tip:</h5>
-                        <p>Start with our example tasks! Click any task to edit it to match your actual priorities.</p>
-                        <div class="example-tasks-preview">
-                            <div class="example-quadrant">
-                                <strong>Urgent & Important:</strong>
-                                <ul>
-                                    ${technique.exampleTasks['urgent-important'].slice(0, 2).map(task => `<li>${task}</li>`).join('')}
-                                </ul>
-                            </div>
-                        </div>
-                        <button class="btn-start-with-examples" onclick="startPriorityMatrixWithExamples()">
-                            🚀 Start with Examples
-                        </button>
-                        <button class="btn-start-blank" onclick="startPriorityMatrixBlank()">
-                            📝 Start from Scratch
-                        </button>
-                    </div>
-                </div>
-            ` : ''}
 
             <h5>Steps:</h5>
             <ol>
@@ -1787,7 +1872,7 @@ function showTechniqueDetails(techniqueId) {
             <p><em>Would you like to practice this technique together now?</em></p>
         </div>
     `;
-    
+
     const messageDiv = document.createElement('div');
     messageDiv.classList.add('message', 'ai-message');
     messageDiv.innerHTML = `
@@ -1797,10 +1882,10 @@ function showTechniqueDetails(techniqueId) {
             ${techniqueHTML}
         </div>
     `;
-    
+
     chatMessages.appendChild(messageDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    
+
     if (isVoiceEnabled && femaleVoice) {
         const stepsText = technique.steps.map((step, index) => `Step ${index + 1}: ${step}`).join('. ');
         const speechText = `Let me walk you through the ${technique.title}. ${technique.description}. Here are the steps: ${stepsText}`;
@@ -6164,11 +6249,395 @@ class PriorityMatrixSystem {
     }
 }
 
+// =================== //
+// BRAIN DUMP SYSTEM //
+// =================== //
+
+class BrainDumpSystem {
+    constructor() {
+        this.tasks = [];
+        this.maxTasks = 20;
+        this.init();
+    }
+
+    init() {
+        this.loadSavedTasks();
+        this.setupEventListeners();
+    }
+
+    loadSavedTasks() {
+        const saved = localStorage.getItem('lumaCare_brainDump_tasks');
+        if (saved) {
+            this.tasks = JSON.parse(saved);
+        }
+    }
+
+    saveTasks() {
+        localStorage.setItem('lumaCare_brainDump_tasks', JSON.stringify(this.tasks));
+    }
+
+    setupEventListeners() {
+    }
+
+    addTask(text, category = 'uncategorized') {
+        if (this.tasks.length >= this.maxTasks) {
+            return { success: false, message: 'Maximum 20 tasks for clarity' };
+        }
+
+        const task = {
+            id: Date.now() + Math.random(),
+            text: text.trim(),
+            category: category,
+            createdAt: Date.now(),
+            quadrant: null,
+            completed: false
+        };
+
+        this.tasks.push(task);
+        this.saveTasks();
+
+        trackEvent('brain_dump_task_added', { source: 'manual' });
+
+        return { success: true, task };
+    }
+
+    removeTask(taskId) {
+        this.tasks = this.tasks.filter(task => task.id !== taskId);
+        this.saveTasks();
+    }
+
+    clearAllTasks() {
+        this.tasks = [];
+        this.saveTasks();
+        trackEvent('brain_dump_cleared');
+    }
+
+    getUncategorizedTasks() {
+        return this.tasks.filter(task => !task.quadrant);
+    }
+
+    categorizeTask(taskId, quadrant) {
+        const task = this.tasks.find(t => t.id === taskId);
+        if (task) {
+            task.quadrant = quadrant;
+            this.saveTasks();
+            trackEvent('task_categorized', { quadrant });
+        }
+    }
+
+    getQuickSuggestions() {
+        return [
+            "Finish work report",
+            "Reply to emails",
+            "Plan next week",
+            "Exercise",
+            "Grocery shopping",
+            "Call family",
+            "Learn something new",
+            "Clean workspace",
+            "Pay bills",
+            "Schedule appointment"
+        ];
+    }
+}
+
+let brainDumpSystem;
+
 // Initialize when page loads
 let priorityMatrixSystem;
 document.addEventListener('DOMContentLoaded', function() {
     priorityMatrixSystem = new PriorityMatrixSystem();
+    brainDumpSystem = new BrainDumpSystem();
 });
+
+// =================== //
+// BRAIN DUMP UI FUNCTIONS //
+// =================== //
+
+function showBrainDumpModal() {
+    const modalHTML = `
+        <div class="modal brain-dump-modal active">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🗂️ Priority Matrix - Start with Brain Dump</h2>
+                    <p>First, dump ALL tasks on your mind. Then we'll organize them.</p>
+                </div>
+                <div class="modal-body">
+                    <div class="brain-dump-container">
+                        <div class="dump-instructions">
+                            <h3>Step 1: Brain Dump</h3>
+                            <p>List everything on your mind. Don't judge or organize yet.</p>
+                            <div class="task-input-container">
+                                <textarea
+                                    id="brain-dump-input"
+                                    placeholder="Type your tasks here... One per line or separated by commas.
+
+Quick examples: Finish report, Call mom, Exercise, Plan vacation, Pay bills"
+                                    rows="4"
+                                ></textarea>
+                                <div class="input-actions">
+                                    <button class="btn-add-task" id="add-task-btn">
+                                        <i class="fas fa-plus"></i> Add Tasks
+                                    </button>
+                                    <button class="btn-quick-add" id="quick-suggest-btn">
+                                        <i class="fas fa-bolt"></i> Quick Add
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="quick-suggestions">
+                                <h4>Common Tasks (click to add):</h4>
+                                <div class="suggestion-chips" id="suggestion-chips">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="task-list-container">
+                            <h3>Your Tasks (<span id="task-count">0</span>)</h3>
+                            <div class="task-list" id="brain-dump-list">
+                            </div>
+                            <div class="list-actions">
+                                <button class="btn-clear-list" id="clear-list-btn">
+                                    <i class="fas fa-trash"></i> Clear All
+                                </button>
+                                <button class="btn-proceed" id="proceed-to-matrix-btn" disabled>
+                                    <i class="fas fa-arrow-right"></i> Organize in Matrix →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="brain-dump-tips">
+                        <div class="tip">
+                            <i class="fas fa-lightbulb"></i>
+                            <span><strong>Tip:</strong> Dump everything first, even small tasks. We'll organize next.</span>
+                        </div>
+                        <div class="tip">
+                            <i class="fas fa-clock"></i>
+                            <span><strong>Time:</strong> Spend 2-3 minutes just listing. Perfection comes later.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHTML;
+    document.body.appendChild(modalContainer);
+
+    initBrainDumpUI();
+}
+
+function initBrainDumpUI() {
+    renderTaskList();
+
+    document.getElementById('add-task-btn').addEventListener('click', addTasksFromInput);
+    document.getElementById('clear-list-btn').addEventListener('click', clearAllTasks);
+    document.getElementById('proceed-to-matrix-btn').addEventListener('click', proceedToPriorityMatrix);
+    document.getElementById('brain-dump-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            addTasksFromInput();
+        }
+    });
+
+    loadQuickSuggestions();
+}
+
+function addTasksFromInput() {
+    const input = document.getElementById('brain-dump-input');
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    const tasks = text.split(/[\n,]/)
+        .map(t => t.trim())
+        .filter(t => t.length > 0);
+
+    let addedCount = 0;
+    tasks.forEach(taskText => {
+        if (taskText && brainDumpSystem.tasks.length < brainDumpSystem.maxTasks) {
+            const result = brainDumpSystem.addTask(taskText);
+            if (result.success) addedCount++;
+        }
+    });
+
+    if (addedCount > 0) {
+        input.value = '';
+        renderTaskList();
+        showToast(`Added ${addedCount} task${addedCount > 1 ? 's' : ''}`);
+    }
+
+    updateProceedButton();
+}
+
+function loadQuickSuggestions() {
+    const container = document.getElementById('suggestion-chips');
+    const suggestions = brainDumpSystem.getQuickSuggestions();
+
+    container.innerHTML = suggestions.map(suggestion => `
+        <span class="suggestion-chip" data-text="${suggestion}">
+            ${suggestion}
+        </span>
+    `).join('');
+
+    document.querySelectorAll('.suggestion-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            const text = this.dataset.text;
+            document.getElementById('brain-dump-input').value += text + '\n';
+            showToast(`Added: ${text}`);
+        });
+    });
+}
+
+function renderTaskList() {
+    const container = document.getElementById('brain-dump-list');
+    const countElement = document.getElementById('task-count');
+
+    if (!brainDumpSystem.tasks.length) {
+        container.innerHTML = `
+            <div class="empty-task-list">
+                <i class="fas fa-tasks"></i>
+                <p>No tasks yet. Start typing above!</p>
+            </div>
+        `;
+        countElement.textContent = '0';
+        return;
+    }
+
+    container.innerHTML = brainDumpSystem.tasks.map(task => `
+        <div class="task-item" data-id="${task.id}">
+            <div class="task-content">
+                <span class="task-text">${task.text}</span>
+                ${task.quadrant ? `<span class="task-category">${task.quadrant}</span>` : ''}
+            </div>
+            <button class="btn-remove-task" data-id="${task.id}">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `).join('');
+
+    countElement.textContent = brainDumpSystem.tasks.length;
+
+    document.querySelectorAll('.btn-remove-task').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const taskId = parseFloat(this.dataset.id);
+            brainDumpSystem.removeTask(taskId);
+            renderTaskList();
+            updateProceedButton();
+            showToast('Task removed');
+        });
+    });
+}
+
+function clearAllTasks() {
+    if (confirm('Clear all tasks? This cannot be undone.')) {
+        brainDumpSystem.clearAllTasks();
+        renderTaskList();
+        updateProceedButton();
+        showToast('All tasks cleared');
+    }
+}
+
+function updateProceedButton() {
+    const btn = document.getElementById('proceed-to-matrix-btn');
+    btn.disabled = brainDumpSystem.tasks.length === 0;
+
+    if (!btn.disabled) {
+        btn.innerHTML = `<i class="fas fa-arrow-right"></i> Organize ${brainDumpSystem.tasks.length} Task${brainDumpSystem.tasks.length > 1 ? 's' : ''} →`;
+    }
+}
+
+function proceedToPriorityMatrix() {
+    const modal = document.querySelector('.brain-dump-modal');
+    if (modal) modal.remove();
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message ai-message';
+    messageDiv.innerHTML = `
+        <div class="message-avatar"><i class="fas fa-robot"></i></div>
+        <div class="message-content">
+            <div class="matrix-transition-guide">
+                <h4>🎯 Great! Now Let's Organize</h4>
+                <p>You listed <strong>${brainDumpSystem.tasks.length} tasks</strong>. Here's how to use the Priority Matrix:</p>
+
+                <div class="matrix-instructions">
+                    <div class="instruction-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <strong>For each task, ask:</strong>
+                            <ul>
+                                <li>Is this <span class="urgent">URGENT</span>? (Needs immediate attention)</li>
+                                <li>Is this <span class="important">IMPORTANT</span>? (Aligns with your goals)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="instruction-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <strong>Drag tasks to the right quadrant:</strong>
+                            <div class="quadrant-guide">
+                                <div class="quadrant urgent-important">
+                                    <strong>Urgent & Important</strong>
+                                    <p>Do these NOW (deadlines, crises)</p>
+                                </div>
+                                <div class="quadrant important-not-urgent">
+                                    <strong>Important, Not Urgent</strong>
+                                    <p>Schedule these (planning, growth)</p>
+                                </div>
+                                <div class="quadrant urgent-not-important">
+                                    <strong>Urgent, Not Important</strong>
+                                    <p>Delegate or minimize these</p>
+                                </div>
+                                <div class="quadrant neither">
+                                    <strong>Neither</strong>
+                                    <p>Eliminate or do later</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instruction-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <strong>Focus on Quadrant 2</strong> (Important, Not Urgent) for long-term success
+                        </div>
+                    </div>
+                </div>
+
+                <div class="transition-actions">
+                    <button class="btn-view-tasks" onclick="showTaskListForMatrix()">
+                        <i class="fas fa-list"></i> View Your Tasks
+                    </button>
+                    <button class="btn-start-organizing" onclick="startMatrixOrganization()">
+                        <i class="fas fa-th-large"></i> Start Organizing
+                    </button>
+                </div>
+
+                <p class="encouragement">💡 Remember: This is about clarity, not perfection!</p>
+            </div>
+        </div>
+    `;
+
+    const chatMessages = document.getElementById('chat-messages');
+    if (chatMessages) {
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    trackEvent('brain_dump_completed', { task_count: brainDumpSystem.tasks.length });
+}
+
+function showTaskListForMatrix() {
+    const tasks = brainDumpSystem.tasks;
+    const taskList = tasks.map(t => `- ${t.text}`).join('\n');
+    showToast(`You have ${tasks.length} tasks ready to organize`);
+}
+
+function startMatrixOrganization() {
+    showToast('Matrix organization feature coming soon!');
+}
 
 // Helper functions for Priority Matrix
 function startPriorityMatrixWithExamples() {
