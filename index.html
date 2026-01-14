@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+
     <!-- PWA Manifest -->
 <link rel="manifest" href="manifest.json">
 
@@ -9,7 +11,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LumaCare">
 
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+<link rel="icon" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  <text x='50' y='75' font-family='Arial' font-size='70' 
+        text-anchor='middle' fill='%238A2BE2' font-weight='bold'>🧠</text>
+</svg>">
+
 <!-- Theme Color -->
 <meta name="theme-color" content="#8a2be2">
     <meta charset="UTF-8">
@@ -129,6 +136,7 @@
                 <button class="nav-btn" data-tab="techniques">Techniques</button>
                 <button class="nav-btn" data-tab="profile">Profile</button>
                 <button class="nav-btn" data-tab="settings">Settings</button>
+                <a href="/guide" class="nav-btn" style="text-decoration: none; color: inherit;">Guide</a>
                 <!-- In the nav section, add these after Settings button -->
                 <button class="nav-btn" data-tab="privacy">Privacy</button>
                 <button class="nav-btn" data-tab="cookies">Cookies</button>
@@ -705,5 +713,3 @@ document.addEventListener('DOMContentLoaded', function() {
     <script src="script.js"></script>
 </body>
 </html>
-
-
