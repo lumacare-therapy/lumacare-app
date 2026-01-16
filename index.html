@@ -10,7 +10,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="LumaCare">
-<meta name="google-site-verification" content="ksJBeRJOvgNx1HVMyTtSP8PXSg2UIE7jcP-y1wUuxJs" />
 
 <link rel="icon" href="data:image/svg+xml,
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
@@ -135,10 +134,11 @@
             <nav class="nav">
                 <button class="nav-btn active" data-tab="therapy">Therapy</button>
                 <button class="nav-btn" data-tab="techniques">Techniques</button>
+                <!-- ADD THIS LINE -->
+                <button class="nav-btn" data-tab="guide">Guide</button>
+                <!-- END ADDITION -->
                 <button class="nav-btn" data-tab="profile">Profile</button>
                 <button class="nav-btn" data-tab="settings">Settings</button>
-                <a href="/guide" class="nav-btn" style="text-decoration: none; color: inherit;">Guide</a>
-                <!-- In the nav section, add these after Settings button -->
                 <button class="nav-btn" data-tab="privacy">Privacy</button>
                 <button class="nav-btn" data-tab="cookies">Cookies</button>
             </nav>
@@ -195,58 +195,189 @@
                 </div>
             </div>
 
-            <!-- Techniques Tab -->
-            <div class="tab-content" id="techniques-tab">
-                <div class="techniques-container">
-                    <h2>Therapeutic Techniques</h2>
-                    <div class="techniques-grid">
-                        <div class="technique-card" data-technique="priority-matrix">
-                            <div class="technique-icon">
-                                <i class="fas fa-th-large"></i>
-                            </div>
-                            <h3>Priority Matrix</h3>
-                            <p>Organize tasks by urgency and importance to reduce overwhelm</p>
-                            <button class="btn-learn-more">Learn More</button>
+<!-- Techniques Tab -->
+<div class="tab-content" id="techniques-tab">
+    <div class="techniques-container">
+        <h2><i class="fas fa-tools"></i> Your Stress Management Tools</h2>
+        <p class="techniques-subtitle">Evidence-based methods to reduce overwhelm and improve focus</p>
+        
+        <div class="techniques-grid">
+            <!-- Priority Matrix -->
+            <div class="technique-card" data-technique="priority-matrix">
+                <div class="technique-icon">
+                    <i class="fas fa-th-large"></i>
+                </div>
+                <h3>Priority Matrix</h3>
+                <p>Sort tasks by urgency vs importance. Instantly see what needs attention now vs later.</p>
+                <div class="technique-meta">
+                    <span><i class="fas fa-clock"></i> 5 min</span>
+                    <span><i class="fas fa-brain"></i> Clarity</span>
+                </div>
+                <button class="btn-learn-more" onclick="showTechniqueDetails('priority-matrix')">
+                    <i class="fas fa-play-circle"></i> Start Now
+                </button>
+            </div>
+            
+            <!-- Box Breathing -->
+            <div class="technique-card" data-technique="box-breathing">
+                <div class="technique-icon">
+                    <i class="fas fa-wind"></i>
+                </div>
+                <h3>Box Breathing</h3>
+                <p>4-second breathing pattern to calm physical anxiety symptoms quickly.</p>
+                <div class="technique-meta">
+                    <span><i class="fas fa-clock"></i> 3 min</span>
+                    <span><i class="fas fa-heartbeat"></i> Calm</span>
+                </div>
+                <button class="btn-learn-more" onclick="showTechniqueDetails('box-breathing')">
+                    <i class="fas fa-play-circle"></i> Start Now
+                </button>
+            </div>
+            
+            <!-- Thought Challenging -->
+            <div class="technique-card" data-technique="thought-challenging">
+                <div class="technique-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h3>Cognitive Reframing</h3>
+                <p>Identify and reframe negative thought patterns that cause anxiety.</p>
+                <div class="technique-meta">
+                    <span><i class="fas fa-clock"></i> 7 min</span>
+                    <span><i class="fas fa-lightbulb"></i> Insight</span>
+                </div>
+                <button class="btn-learn-more" onclick="showTechniqueDetails('thought-challenging')">
+                    <i class="fas fa-play-circle"></i> Start Now
+                </button>
+            </div>
+            
+            <!-- Pomodoro -->
+            <div class="technique-card" data-technique="pomodoro">
+                <div class="technique-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>Focus Sprints</h3>
+                <p>Work in 25-minute focused intervals with breaks to prevent burnout.</p>
+                <div class="technique-meta">
+                    <span><i class="fas fa-clock"></i> 25 min</span>
+                    <span><i class="fas fa-bullseye"></i> Focus</span>
+                </div>
+                <button class="btn-learn-more" onclick="showTechniqueDetails('pomodoro')">
+                    <i class="fas fa-play-circle"></i> Start Now
+                </button>
+            </div>
+            
+            <!-- Grounding -->
+            <div class="technique-card" data-technique="grounding">
+                <div class="technique-icon">
+                    <i class="fas fa-mountain"></i>
+                </div>
+                <h3>5-4-3-2-1 Grounding</h3>
+                <p>Use your senses to stay present during anxiety or dissociation.</p>
+                <div class="technique-meta">
+                    <span><i class="fas fa-clock"></i> 2 min</span>
+                    <span><i class="fas fa-anchor"></i> Present</span>
+                </div>
+                <button class="btn-learn-more" onclick="showTechniqueDetails('grounding')">
+                    <i class="fas fa-play-circle"></i> Start Now
+                </button>
+            </div>
+            
+            <!-- SOS -->
+            <div class="technique-card" data-technique="sos">
+                <div class="technique-icon" style="background: linear-gradient(135deg, #EF4444, #DC2626);">
+                    <i class="fas fa-life-ring"></i>
+                </div>
+                <h3>SOS Calm Sequence</h3>
+                <p>Step-by-step guidance for panic attacks or acute overwhelm.</p>
+                <div class="technique-meta">
+                    <span><i class="fas fa-clock"></i> 10 min</span>
+                    <span><i class="fas fa-first-aid"></i> Emergency</span>
+                </div>
+                <button class="btn-learn-more" onclick="showSOSSelector()">
+                    <i class="fas fa-play-circle"></i> Use Now
+                </button>
+            </div>
+        </div>
+        
+        <div class="techniques-tip">
+            <i class="fas fa-lightbulb"></i>
+            <p><strong>Pro tip:</strong> Start with the Priority Matrix when feeling overwhelmed, then use Box Breathing if anxiety hits during the process.</p>
+        </div>
+    </div>
+</div>
+
+<!-- ============ ADD GUIDE TAB HERE ============ -->
+<div class="tab-content" id="guide-tab">
+    <div class="guide-container">
+        <div class="guide-header">
+            <h2><i class="fas fa-book-open"></i> The 5-Minute Priority Matrix Method</h2>
+            <p class="guide-subtitle">When stress makes everything feel urgent, this method clears the noise.</p>
+        </div>
+
+        <div class="guide-content">
+            <div class="guide-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3><i class="fas fa-pencil-alt"></i> Brain Dump (1 minute)</h3>
+                    <p>Set a timer. Open a blank note and write down <em>every single</em> task, email, and nagging thought. Don't judge, don't organize. The messier, the better.</p>
+                </div>
+            </div>
+
+            <div class="guide-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3><i class="fas fa-th-large"></i> Sort (3 minutes)</h3>
+                    <p>Draw a 2x2 grid. For each item, ask two questions:</p>
+                    <ul>
+                        <li><strong>"Is this truly urgent?"</strong> (time-sensitive)</li>
+                        <li><strong>"Is this truly important?"</strong> (aligns with your goals)</li>
+                    </ul>
+                    <p>Force every item into one box:</p>
+                    <div class="quadrant-examples">
+                        <div class="quadrant urgent-important">
+                            <h4>Urgent & Important</h4>
+                            <p>Do it NOW</p>
                         </div>
-                        
-                        <div class="technique-card" data-technique="box-breathing">
-                            <div class="technique-icon">
-                                <i class="fas fa-wind"></i>
-                            </div>
-                            <h3>Box Breathing</h3>
-                            <p>4-second breathing pattern to calm anxiety quickly</p>
-                            <button class="btn-learn-more">Learn More</button>
+                        <div class="quadrant important-not-urgent">
+                            <h4>Important / Not Urgent</h4>
+                            <p>Schedule it</p>
                         </div>
-                        
-                        <div class="technique-card" data-technique="thought-challenging">
-                            <div class="technique-icon">
-                                <i class="fas fa-comments"></i>
-                            </div>
-                            <h3>Thought Challenging</h3>
-                            <p>Identify and reframe negative thought patterns</p>
-                            <button class="btn-learn-more">Learn More</button>
+                        <div class="quadrant urgent-not-important">
+                            <h4>Urgent / Not Important</h4>
+                            <p>Delegate or batch</p>
                         </div>
-                        
-                        <div class="technique-card" data-technique="pomodoro">
-                            <div class="technique-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <h3>Pomodoro Technique</h3>
-                            <p>Work in focused intervals to manage work stress</p>
-                            <button class="btn-learn-more">Learn More</button>
-                        </div>
-                        
-                        <div class="technique-card" data-technique="grounding">
-                            <div class="technique-icon">
-                                <i class="fas fa-mountain"></i>
-                            </div>
-                            <h3>5-4-3-2-1 Grounding</h3>
-                            <p>Use your senses to stay present during anxiety</p>
-                            <button class="btn-learn-more">Learn More</button>
+                        <div class="quadrant neither">
+                            <h4>Neither</h4>
+                            <p>Delete it</p>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="guide-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3><i class="fas fa-rocket"></i> First Move (1 minute)</h3>
+                    <p>Ignore 75% of the grid. Look <strong>only</strong> at the <em>Urgent & Important</em> box. Pick the <strong>one</strong> task that would make everything else feel easier. Do a 5-minute sprint on just that.</p>
+                </div>
+            </div>
+
+            <div class="guide-cta">
+                <p><em>This app's <strong>"Priority Matrix" tool</strong> (in the Techniques tab) automates this sorting for you.</em></p>
+                <button class="btn-guide-action" onclick="showTechniquesTab()">
+                    <i class="fas fa-th-large"></i> Go to Priority Matrix Tool
+                </button>
+            </div>
+
+            <div class="guide-tip">
+                <i class="fas fa-lightbulb"></i>
+                <p><strong>Tip:</strong> The power isn't in complexity. It's in forcing a clear choice for every single task. This transforms emotional overwhelm into logical decisions.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ============ END GUIDE TAB ============ -->
+
 
             <!-- Profile Tab -->
             <div class="tab-content" id="profile-tab">
@@ -714,4 +845,3 @@ document.addEventListener('DOMContentLoaded', function() {
     <script src="script.js"></script>
 </body>
 </html>
-
