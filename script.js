@@ -6723,3 +6723,23 @@ function startPriorityMatrixBlank() {
 
     trackEvent('priority_matrix_started', { method: 'blank_slate' });
 }
+// Function to show techniques tab from guide
+function showTechniquesTab() {
+    // Update navigation
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector('[data-tab="techniques"]').classList.add('active');
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    document.getElementById('techniques-tab').classList.add('active');
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
+}
+
+// The existing tab switching should already work for 'guide'
+// Make sure showTab function supports 'guide' tab
