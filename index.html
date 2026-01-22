@@ -7,7 +7,7 @@
         <!-- Primary Meta Tags -->
         <title>LumaCare | Free Eisenhower Matrix App for Stress & Anxiety Relief</title>
         <meta name="description" content="Free priority matrix app to organize tasks, reduce overwhelm, and calm anxiety. Use the Eisenhower Matrix, guided breathing, and AI therapy tools - no login required.">
-        <meta name="p:domain_verify" content="09cd65d8b7526abbc4b7814de2961d3f"/>
+        
         <!-- Google Search Console Verification -->
         <meta name="google-site-verification" content="ksJBeRJOvgNx1HVMyTtSP8PXSg2UIE7jcP-y1wUuxJs" />
         
@@ -158,6 +158,10 @@
                 <h1>LumaCare</h1>
             </div>
             <nav class="nav">
+                <!-- In your nav section, add this button -->
+                <button class="nav-btn" data-tab="dashboard">
+                <i class="fas fa-chart-line"></i> Dashboard
+                </button>
                 <button class="nav-btn active" data-tab="therapy">Therapy</button>
                 <button class="nav-btn" data-tab="techniques">Techniques</button>
                 <!-- ADD THIS LINE -->
@@ -220,6 +224,270 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Dashboard Tab -->
+<div class="tab-content" id="dashboard-tab">
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h2><i class="fas fa-heartbeat"></i> Your Health Dashboard</h2>
+        <p class="dashboard-subtitle">Daily wellness summary and progress tracking</p>
+        <div class="dashboard-date">
+            <i class="fas fa-calendar-alt"></i>
+            <span id="current-date">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Health Summary Cards -->
+    <div class="health-summary">
+        <div class="summary-card">
+            <div class="summary-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="summary-content">
+                <h3>Mental Wellness</h3>
+                <div class="progress-bars">
+                    <div class="progress-item">
+                        <span>Stress Level</span>
+                        <div class="ssd-progress">
+                            <div class="progress-fill" style="width: 40%" data-value="40"></div>
+                            <span class="progress-value">40%</span>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <span>Anxiety</span>
+                        <div class="ssd-progress">
+                            <div class="progress-fill" style="width: 25%" data-value="25"></div>
+                            <span class="progress-value">25%</span>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <span>Mood Stability</span>
+                        <div class="ssd-progress">
+                            <div class="progress-fill" style="width: 65%" data-value="65"></div>
+                            <span class="progress-value">65%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <i class="fas fa-seedling"></i>
+            </div>
+            <div class="summary-content">
+                <h3>Growth Progress</h3>
+                <div class="progress-bars">
+                    <div class="progress-item">
+                        <span>Day Streak</span>
+                        <div class="hdd-progress">
+                            <div class="progress-fill" style="width: 80%" data-value="80"></div>
+                            <span class="progress-value">8 days</span>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <span>Session Count</span>
+                        <div class="hdd-progress">
+                            <div class="progress-fill" style="width: 60%" data-value="60"></div>
+                            <span class="progress-value">12/20</span>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <span>Techniques Used</span>
+                        <div class="hdd-progress">
+                            <div class="progress-fill" style="width: 45%" data-value="45"></div>
+                            <span class="progress-value">9 total</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Progress Chart -->
+    <div class="weekly-progress">
+        <div class="section-header">
+            <h3><i class="fas fa-chart-bar"></i> Weekly Progress</h3>
+            <div class="chart-legend">
+                <span class="legend-item">
+                    <div class="legend-color" style="background: #667eea;"></div>
+                    Mood Score
+                </span>
+                <span class="legend-item">
+                    <div class="legend-color" style="background: #10b981;"></div>
+                    Sessions
+                </span>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-bars">
+                <!-- Bars will be generated by JavaScript -->
+                <div class="chart-day" data-mood="70" data-sessions="3">
+                    <div class="bar-group">
+                        <div class="bar mood-bar" style="height: 70%"></div>
+                        <div class="bar session-bar" style="height: 30%"></div>
+                    </div>
+                    <span>Mon</span>
+                </div>
+                <div class="chart-day" data-mood="65" data-sessions="2">
+                    <div class="bar-group">
+                        <div class="bar mood-bar" style="height: 65%"></div>
+                        <div class="bar session-bar" style="height: 20%"></div>
+                    </div>
+                    <span>Tue</span>
+                </div>
+                <div class="chart-day" data-mood="80" data-sessions="4">
+                    <div class="bar-group">
+                        <div class="bar mood-bar" style="height: 80%"></div>
+                        <div class="bar session-bar" style="height: 40%"></div>
+                    </div>
+                    <span>Wed</span>
+                </div>
+                <div class="chart-day" data-mood="75" data-sessions="3">
+                    <div class="bar-group">
+                        <div class="bar mood-bar" style="height: 75%"></div>
+                        <div class="bar session-bar" style="height: 30%"></div>
+                    </div>
+                    <span>Thu</span>
+                </div>
+                <div class="chart-day" data-mood="85" data-sessions="5">
+                    <div class="bar-group">
+                        <div class="bar mood-bar" style="height: 85%"></div>
+                        <div class="bar session-bar" style="height: 50%"></div>
+                    </div>
+                    <span>Fri</span>
+                </div>
+                <div class="chart-day" data-mood="90" data-sessions="6">
+                    <div class="bar-group">
+                        <div class="bar mood-bar" style="height: 90%"></div>
+                        <div class="bar session-bar" style="height: 60%"></div>
+                    </div>
+                    <span>Sat</span>
+                </div>
+                <div class="chart-day" data-mood="95" data-sessions="7">
+                    <div class="bar-group">
+                        <div class="bar mood-bar" style="height: 95%"></div>
+                        <div class="bar session-bar" style="height: 70%"></div>
+                    </div>
+                    <span>Sun</span>
+                </div>
+            </div>
+            <div class="chart-y-axis">
+                <span>100</span>
+                <span>75</span>
+                <span>50</span>
+                <span>25</span>
+                <span>0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-info">
+                <h4>AI Sessions</h4>
+                <div class="stat-value" id="ai-sessions-count">18</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+2 this week</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-wind"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Breathing Exercises</h4>
+                <div class="stat-value" id="breathing-count">24</div>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+5 this week</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-journal-whills"></i>
+            </div>
+            <div class="stat-info">
+                <h4>Journal Entries</h4>
+                <div class="stat-value" id="journal-count">12</div>
+                <div class="stat-change neutral">
+                    <i class="fas fa-minus"></i>
+                    <span>No change</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="stat-info">
+                <h4>SOS Used</h4>
+                <div class="stat-value" id="sos-count">2</div>
+                <div class="stat-change negative">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>-1 this week</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Section -->
+    <div class="download-section">
+        <div class="section-header">
+            <h3><i class="fas fa-download"></i> Export Your Data</h3>
+            <p>Download your wellness progress reports</p>
+        </div>
+        
+        <div class="download-options">
+            <button class="download-btn" id="download-weekly-report">
+                <i class="fas fa-file-pdf"></i>
+                <span>Weekly Report</span>
+                <small>PDF format</small>
+            </button>
+            
+            <button class="download-btn" id="download-raw-data">
+                <i class="fas fa-file-csv"></i>
+                <span>Raw Data</span>
+                <small>CSV format</small>
+            </button>
+            
+            <button class="download-btn" id="download-insights">
+                <i class="fas fa-chart-line"></i>
+                <span>Insights</span>
+                <small>Detailed analysis</small>
+            </button>
+        </div>
+        
+        <div class="data-info">
+            <i class="fas fa-info-circle"></i>
+            <p>Your data is encrypted and stored securely. Download for personal tracking or to share with healthcare professionals.</p>
+        </div>
+    </div>
+
+    <!-- Dashboard Tips -->
+    <div class="dashboard-tips">
+        <div class="tip-card">
+            <i class="fas fa-lightbulb"></i>
+            <p><strong>Tip:</strong> Check your dashboard daily to track progress and identify patterns.</p>
+        </div>
+        <div class="tip-card">
+            <i class="fas fa-calendar-check"></i>
+            <p><strong>Consistency:</strong> Regular check-ins lead to better insights and faster progress.</p>
+        </div>
+    </div>
+</div>
+</div>
 
 <!-- Techniques Tab -->
 <div class="tab-content" id="techniques-tab">
@@ -892,4 +1160,3 @@ document.addEventListener('DOMContentLoaded', function() {
         </script>
 </body>
 </html>
-
