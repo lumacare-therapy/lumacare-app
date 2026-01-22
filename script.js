@@ -2111,7 +2111,7 @@ newChatBtn.addEventListener('click', () => {
     }
 });
 
-// Navigation
+// Make sure this is in your existing navigation event listener
 navBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         const tabId = btn.getAttribute('data-tab');
@@ -2120,13 +2120,14 @@ navBtns.forEach(btn => {
         btn.classList.add('active');
         
         tabContents.forEach(content => content.classList.remove('active'));
-        document.getElementById(`${tabId}-tab`).classList.add('active');
+        document.getElementById(`${tabId}-tab`)?.classList.add('active');
         
-        // Load policy content when those tabs are clicked
-        if (tabId === 'privacy') {
-            loadPrivacyPolicy();
-        } else if (tabId === 'cookies') {
-            loadCookiePolicy();
+        // If dashboard tab is clicked, refresh data
+        if (tabId === 'dashboard' && window.dashboardSystem) {
+            setTimeout(() => {
+                window.dashboardSystem.loadDashboardData();
+                window.dashboardSystem.animateProgressBars();
+            }, 100);
         }
     });
 });
@@ -6743,3 +6744,414 @@ function showTechniquesTab() {
 
 // The existing tab switching should already work for 'guide'
 // Make sure showTab function supports 'guide' tab
+// =================== //
+// DASHBOARD SYSTEM //
+// =================== //
+
+class DashboardSystem {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.updateCurrentDate();
+        this.loadDashboardData();
+        this.animateProgressBars();
+    }
+
+    setupEventListeners() {
+        // Download buttons
+        document.getElementById('download-weekly-report')?.addEventListener('click', () => {
+            this.downloadWeeklyReport();
+        });
+
+        document.getElementById('download-raw-data')?.addEventListener('click', () => {
+            this.downloadRawData();
+        });
+
+        document.getElementById('download-insights')?.addEventListener('click', () => {
+            this.downloadInsights();
+        });
+
+        // Refresh dashboard when tab is opened
+        const dashboardBtn = document.querySelector('[data-tab="dashboard"]');
+        if (dashboardBtn) {
+            dashboardBtn.addEventListener('click', () => {
+                setTimeout(() => {
+                    this.loadDashboardData();
+                    this.animateProgressBars();
+                }, 100);
+            });
+        }
+    }
+
+    updateCurrentDate() {
+        const dateElement = document.getElementById('current-date');
+        if (dateElement) {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            dateElement.textContent = now.toLocaleDateString('en-US', options);
+        }
+    }
+
+    loadDashboardData() {
+        // Load user data from localStorage
+        const user = JSON.parse(localStorage.getItem('lumaCare_user')) || {};
+        const moodHistory = JSON.parse(localStorage.getItem('lumaCare_moodHistory')) || [];
+        const gardenData = JSON.parse(localStorage.getItem('lumaCare_garden')) || { plants: [] };
+        
+        // Update stats from garden
+        const plants = gardenData.plants || [];
+        const aiSessions = plants.filter(p => p.type === 'session').length;
+        const breathingExercises = plants.filter(p => p.type === 'breathing').length;
+        const journalEntries = plants.filter(p => p.type === 'journal').length;
+        
+        // Update UI
+        this.updateStat('ai-sessions-count', aiSessions);
+        this.updateStat('breathing-count', breathingExercises);
+        this.updateStat('journal-count', journalEntries);
+        
+        // Calculate SOS usage (could be from separate tracking)
+        const sosCount = plants.filter(p => p.type === 'self_care').length || 0;
+        this.updateStat('sos-count', sosCount);
+        
+        // Calculate mood data for weekly chart
+        this.updateWeeklyChart(moodHistory);
+        
+        // Update streak from mood system
+        const streak = this.calculateStreak(moodHistory);
+        this.updateProgressBar('.hdd-progress .progress-fill[data-value="80"]', streak * 10);
+    }
+
+    updateStat(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
+    calculateStreak(moodHistory) {
+        if (moodHistory.length === 0) return 0;
+        
+        // Sort by date descending
+        const sortedMoods = [...moodHistory].sort((a, b) => 
+            new Date(b.date) - new Date(a.date)
+        );
+        
+        let streak = 0;
+        let currentDate = new Date();
+        
+        for (let mood of sortedMoods) {
+            const moodDate = new Date(mood.date);
+            const daysDiff = Math.floor((currentDate - moodDate) / (1000 * 60 * 60 * 24));
+            
+            if (daysDiff === streak) {
+                streak++;
+            } else {
+                break;
+            }
+        }
+        
+        return streak;
+    }
+
+    updateWeeklyChart(moodHistory) {
+        // Get last 7 days of data
+        const last7Days = this.getLast7Days();
+        
+        // Group mood data by day
+        const moodByDay = {};
+        moodHistory.forEach(mood => {
+            const date = mood.date.split('T')[0];
+            if (last7Days.includes(date)) {
+                if (!moodByDay[date]) {
+                    moodByDay[date] = [];
+                }
+                moodByDay[date].push(mood);
+            }
+        });
+        
+        // Update chart bars
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const chartDays = document.querySelectorAll('.chart-day');
+        
+        chartDays.forEach((dayElement, index) => {
+            const dayName = days[index];
+            const date = this.getDateForDay(dayName);
+            
+            if (moodByDay[date]) {
+                // Calculate average mood for the day
+                const moods = moodByDay[date];
+                const moodValues = {
+                    'great': 95,
+                    'good': 85,
+                    'okay': 75,
+                    'neutral': 65,
+                    'heavy': 50
+                };
+                
+                const avgMood = moods.reduce((sum, mood) => 
+                    sum + (moodValues[mood.mood] || 65), 0
+                ) / moods.length;
+                
+                // Update bar height
+                const moodBar = dayElement.querySelector('.mood-bar');
+                const sessionBar = dayElement.querySelector('.session-bar');
+                
+                if (moodBar) {
+                    moodBar.style.height = `${avgMood}%`;
+                    moodBar.setAttribute('data-value', avgMood.toFixed(0));
+                }
+                
+                if (sessionBar) {
+                    const sessionHeight = Math.min(moods.length * 10, 70);
+                    sessionBar.style.height = `${sessionHeight}%`;
+                    sessionBar.setAttribute('data-value', moods.length);
+                }
+                
+                // Update data attributes
+                dayElement.setAttribute('data-mood', avgMood.toFixed(0));
+                dayElement.setAttribute('data-sessions', moods.length);
+            }
+        });
+    }
+
+    getLast7Days() {
+        const dates = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            dates.push(date.toISOString().split('T')[0]);
+        }
+        return dates;
+    }
+
+    getDateForDay(dayName) {
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const today = new Date();
+        const todayIndex = today.getDay();
+        const targetIndex = days.indexOf(dayName);
+        
+        const diff = targetIndex - todayIndex;
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + diff);
+        
+        return targetDate.toISOString().split('T')[0];
+    }
+
+    animateProgressBars() {
+        // Animate all progress bars
+        document.querySelectorAll('.progress-fill').forEach(bar => {
+            const targetWidth = bar.getAttribute('data-value') + '%';
+            bar.style.width = '0%';
+            
+            setTimeout(() => {
+                bar.style.width = targetWidth;
+            }, 100);
+        });
+        
+        // Animate chart bars
+        document.querySelectorAll('.bar').forEach(bar => {
+            const currentHeight = bar.style.height;
+            bar.style.height = '0%';
+            
+            setTimeout(() => {
+                bar.style.height = currentHeight;
+            }, 300);
+        });
+    }
+
+    updateProgressBar(selector, value) {
+        const bar = document.querySelector(selector);
+        if (bar) {
+            bar.style.width = `${value}%`;
+            bar.setAttribute('data-value', value);
+            
+            // Update the corresponding value display
+            const valueElement = bar.closest('.ssd-progress, .hdd-progress')
+                ?.querySelector('.progress-value');
+            if (valueElement) {
+                if (selector.includes('data-value="80"')) {
+                    valueElement.textContent = `${Math.floor(value / 10)} days`;
+                } else {
+                    valueElement.textContent = `${value}%`;
+                }
+            }
+        }
+    }
+
+    async downloadWeeklyReport() {
+        try {
+            // Create a simple PDF report
+            const reportData = {
+                title: 'LumaCare Weekly Wellness Report',
+                date: new Date().toLocaleDateString(),
+                user: JSON.parse(localStorage.getItem('lumaCare_user'))?.name || 'User',
+                moodHistory: JSON.parse(localStorage.getItem('lumaCare_moodHistory')) || [],
+                sessions: JSON.parse(localStorage.getItem('lumaCare_garden'))?.plants?.filter(p => p.type === 'session').length || 0,
+                streak: this.calculateStreak(JSON.parse(localStorage.getItem('lumaCare_moodHistory')) || [])
+            };
+            
+            // Convert to JSON string
+            const jsonString = JSON.stringify(reportData, null, 2);
+            
+            // Create blob and download
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `LumaCare_Report_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.showToast('Weekly report downloaded successfully!');
+            
+        } catch (error) {
+            console.error('Error downloading report:', error);
+            this.showToast('Error downloading report. Please try again.');
+        }
+    }
+
+    async downloadRawData() {
+        try {
+            // Gather all user data
+            const userData = {
+                user: JSON.parse(localStorage.getItem('lumaCare_user')),
+                moodHistory: JSON.parse(localStorage.getItem('lumaCare_moodHistory')),
+                garden: JSON.parse(localStorage.getItem('lumaCare_garden')),
+                preferences: JSON.parse(localStorage.getItem('lumaCare_preferences')),
+                insights: JSON.parse(localStorage.getItem('lumaCare_insights')),
+                weather: JSON.parse(localStorage.getItem('lumaCare_weather'))
+            };
+            
+            // Convert to CSV format
+            let csvContent = 'Data Type,Date,Value\n';
+            
+            // Add mood data
+            if (userData.moodHistory) {
+                userData.moodHistory.forEach(mood => {
+                    csvContent += `Mood,${mood.date},${mood.mood}\n`;
+                });
+            }
+            
+            // Add session data
+            if (userData.garden?.plants) {
+                userData.garden.plants.forEach(plant => {
+                    csvContent += `Activity,${plant.date},${plant.type}\n`;
+                });
+            }
+            
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `LumaCare_Data_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.showToast('Raw data downloaded successfully!');
+            
+        } catch (error) {
+            console.error('Error downloading data:', error);
+            this.showToast('Error downloading data. Please try again.');
+        }
+    }
+
+    async downloadInsights() {
+        try {
+            // Get insights from localStorage
+            const insights = JSON.parse(localStorage.getItem('lumaCare_insights')) || [];
+            
+            if (insights.length === 0) {
+                this.showToast('No insights available yet. Continue using LumaCare to generate insights.');
+                return;
+            }
+            
+            // Create insights report
+            let insightsText = 'LumaCare Personal Insights Report\n';
+            insightsText += '================================\n\n';
+            
+            insights.forEach((insight, index) => {
+                insightsText += `${index + 1}. ${insight.title}\n`;
+                insightsText += `   ${insight.message}\n`;
+                insightsText += `   Date: ${new Date(insight.date).toLocaleDateString()}\n\n`;
+            });
+            
+            // Create blob and download
+            const blob = new Blob([insightsText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `LumaCare_Insights_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.showToast('Insights report downloaded successfully!');
+            
+        } catch (error) {
+            console.error('Error downloading insights:', error);
+            this.showToast('Error downloading insights. Please try again.');
+        }
+    }
+
+    showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 10000;
+            animation: slideUp 0.3s ease;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideDown 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+}
+
+// Initialize dashboard system when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Add CSS animations for toast
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideUp {
+            from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(0); opacity: 1; }
+            to { transform: translateX(-50%) translateY(100px); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Initialize dashboard system
+    setTimeout(() => {
+        window.dashboardSystem = new DashboardSystem();
+        console.log('✅ Dashboard system initialized');
+    }, 1000);
+});
