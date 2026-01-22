@@ -5887,3 +5887,555 @@ body.light-mode .techniques-tip {
 body.light-mode .techniques-tip p {
   color: #374151;
 }
+/* =================== */
+/* DASHBOARD STYLES */
+/* =================== */
+
+.dashboard-container {
+  background: var(--dark);
+  border-radius: 1rem;
+  padding: 2rem;
+  color: var(--light);
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dashboard-header h2 {
+  color: var(--primary);
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.dashboard-subtitle {
+  color: var(--gray);
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.dashboard-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.9rem;
+}
+
+/* Health Summary Cards */
+.health-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.summary-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.summary-icon i {
+  font-size: 1.8rem;
+  color: white;
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-content h3 {
+  color: var(--light);
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+/* SSD/HDD Style Progress Bars */
+.progress-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.progress-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-item span {
+  width: 120px;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+.ssd-progress,
+.hdd-progress {
+  flex: 1;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* SSD Style - Modern look */
+.ssd-progress .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 6px;
+  position: relative;
+  transition: width 1s ease;
+}
+
+.ssd-progress .progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255, 255, 255, 0.2) 50%, 
+      transparent 100%);
+}
+
+/* HDD Style - Traditional look */
+.hdd-progress .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 6px;
+  position: relative;
+  transition: width 1s ease;
+}
+
+.hdd-progress .progress-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, 
+      rgba(255, 255, 255, 0.3) 0%, 
+      transparent 100%);
+}
+
+.progress-value {
+  width: 50px;
+  text-align: right;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--light);
+}
+
+/* Weekly Progress Chart */
+.weekly-progress {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.section-header h3 {
+  color: var(--light);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--gray);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.chart-container {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  min-height: 200px;
+}
+
+.chart-bars {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.5rem;
+  height: 180px;
+}
+
+.chart-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 24px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.bar {
+  width: 100%;
+  border-radius: 3px 3px 0 0;
+  transition: height 1s ease;
+}
+
+.mood-bar {
+  background: #667eea;
+  height: 70%;
+}
+
+.session-bar {
+  background: #10b981;
+  height: 30%;
+}
+
+.chart-day span {
+  font-size: 0.85rem;
+  color: var(--gray);
+}
+
+.chart-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 180px;
+  padding: 10px 0;
+}
+
+.chart-y-axis span {
+  font-size: 0.75rem;
+  color: var(--gray);
+  text-align: right;
+}
+
+/* Quick Stats */
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  background: rgba(138, 43, 226, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-icon i {
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-info h4 {
+  color: var(--gray);
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--light);
+  margin-bottom: 0.25rem;
+}
+
+.stat-change {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.stat-change.positive {
+  color: #10b981;
+}
+
+.stat-change.neutral {
+  color: var(--gray);
+}
+
+.stat-change.negative {
+  color: #ef4444;
+}
+
+/* Download Section */
+.download-section {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid var(--secondary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.download-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.download-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--light);
+  padding: 1.5rem 1rem;
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.download-btn i {
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+.download-btn span {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.download-btn small {
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.data-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  margin-top: 1rem;
+}
+
+.data-info i {
+  color: var(--secondary);
+  margin-top: 0.25rem;
+}
+
+.data-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--gray);
+  line-height: 1.5;
+}
+
+/* Dashboard Tips */
+.dashboard-tips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.tip-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tip-card i {
+  color: #FFC107;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.tip-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--gray);
+  line-height: 1.5;
+}
+
+/* Light Mode Support */
+body.light-mode .dashboard-container,
+body.light-mode .summary-card,
+body.light-mode .weekly-progress,
+body.light-mode .stat-card,
+body.light-mode .tip-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+}
+
+body.light-mode .ssd-progress,
+body.light-mode .hdd-progress {
+  background: #f3f4f6;
+}
+
+body.light-mode .download-section {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid #3b82f6;
+}
+
+body.light-mode .data-info {
+  background: #f9fafb;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .health-summary {
+      grid-template-columns: 1fr;
+  }
+  
+  .quick-stats {
+      grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+      padding: 1rem;
+  }
+  
+  .chart-container {
+      flex-direction: column;
+      align-items: stretch;
+  }
+  
+  .chart-y-axis {
+      flex-direction: row;
+      height: auto;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+  }
+  
+  .quick-stats {
+      grid-template-columns: 1fr;
+  }
+  
+  .download-options {
+      grid-template-columns: 1fr;
+  }
+  
+  .dashboard-tips {
+      grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .health-summary {
+      grid-template-columns: 1fr;
+  }
+  
+  .summary-card {
+      flex-direction: column;
+      text-align: center;
+  }
+  
+  .progress-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+  }
+  
+  .progress-item span {
+      width: 100%;
+  }
+  
+  .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+  }
+  
+  .chart-legend {
+      align-self: flex-start;
+  }
+}
