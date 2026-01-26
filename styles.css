@@ -6439,3 +6439,229 @@ body.light-mode .data-info {
       align-self: flex-start;
   }
 }
+/* Add to your styles.css at the top of the file */
+html, body {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.container {
+  height: 100vh;
+  width: 100vw;
+  max-width: 100% !important;
+  margin: 0;
+  padding: 0;
+}
+
+.main-content {
+  height: calc(100vh - 80px); /* Adjust based on header height */
+  overflow-y: auto;
+}
+
+.chat-container {
+  height: calc(100vh - 180px) !important; /* Full height minus headers */
+}
+/* Make everything bigger on desktop */
+@media (min-width: 1024px) {
+  .container {
+      padding: 0;
+  }
+  
+  .header {
+      padding: 1rem 2rem;
+      height: 70px;
+  }
+  
+  .main-content {
+      padding: 2rem;
+      height: calc(100vh - 70px);
+  }
+  
+  .chat-container {
+      height: calc(100vh - 250px) !important;
+      max-height: none !important;
+  }
+  
+  .chat-messages {
+      max-height: calc(100vh - 350px) !important;
+  }
+  
+  /* Make dashboard cards bigger */
+  .summary-card {
+      padding: 2rem;
+  }
+  
+  .summary-icon {
+      width: 5rem;
+      height: 5rem;
+  }
+  
+  .summary-icon i {
+      font-size: 2.5rem;
+  }
+}
+
+/* Remove max-width constraints */
+.container {
+  max-width: none !important;
+}
+
+/* Make modal full screen */
+.modal-content {
+  max-width: 95vw;
+  max-height: 95vh;
+}
+/* FIX SCROLLING - ADD THIS AT THE TOP OF YOUR CSS FILE */
+html, body {
+  height: 100%;
+  overflow: auto !important;
+}
+
+body {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.container {
+  min-height: 100vh;
+  height: auto !important;
+  overflow-y: visible !important;
+}
+
+.main-content {
+  overflow-y: visible !important;
+  height: auto !important;
+  min-height: calc(100vh - 80px);
+}
+
+/* Remove any height: 100vh that's breaking scroll */
+.chat-container {
+  height: 70vh !important; /* Fixed height for chat only */
+  min-height: 500px;
+  max-height: 70vh;
+}
+
+.chat-messages {
+  height: calc(70vh - 160px) !important;
+  overflow-y: auto !important;
+}
+
+/* Dashboard and other tabs should scroll normally */
+#dashboard-tab,
+#techniques-tab,
+#profile-tab,
+#settings-tab,
+#guide-tab {
+  height: auto !important;
+  min-height: calc(100vh - 80px);
+  overflow-y: visible !important;
+}
+/* Skills Section for Dashboard */
+.skills-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+
+.skills-content p {
+  color: var(--gray);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.skill-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.skill-card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.skill-icon {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem auto;
+}
+
+.skill-icon i {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.skill-card h4 {
+  color: var(--light);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.skill-card p {
+  color: var(--gray);
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.btn-explore-skills {
+  width: 100%;
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.btn-explore-skills:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* Light mode support */
+body.light-mode .skills-section,
+body.light-mode .skill-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+body.light-mode .skill-card:hover {
+  background: #f3f4f6;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .skills-grid {
+      grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .skills-grid {
+      grid-template-columns: 1fr;
+  }
+}
