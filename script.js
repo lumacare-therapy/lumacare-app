@@ -81,24 +81,52 @@ function onLoginSuccess() {
     // Show main app container
     if (appContainer) {
         console.log('Showing app container');
-        appContainer.style.display = 'flex'; // Changed from 'block' to 'flex'
+        appContainer.style.display = 'flex';
     }
     
-    // Make sure chat tab is active
+    // AUTO-REDIRECT TO DASHBOARD AFTER LOGIN
     setTimeout(() => {
-        const therapyTab = document.getElementById('therapy-tab');
-        const therapyBtn = document.querySelector('[data-tab="therapy"]');
-        
-        if (therapyTab && therapyBtn) {
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            therapyTab.classList.add('active');
-            therapyBtn.classList.add('active');
+        // Show mood modal first
+        const moodModal = document.getElementById('mood-modal');
+        if (moodModal) {
+            moodModal.style.display = 'flex';
+            setTimeout(() => {
+                moodModal.classList.add('active');
+            }, 10);
+        } else {
+            // If no mood modal, go straight to dashboard
+            redirectToDashboard();
+        }
+    }, 100);
+}
+
+// Add this helper function
+function redirectToDashboard() {
+    // Update navigation
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    const dashboardBtn = document.querySelector('[data-tab="dashboard"]');
+    if (dashboardBtn) {
+        dashboardBtn.classList.add('active');
+    }
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    const dashboardTab = document.getElementById('dashboard-tab');
+    if (dashboardTab) {
+        dashboardTab.classList.add('active');
+    }
+    
+    // Refresh dashboard data
+    setTimeout(() => {
+        if (window.dashboardSystem) {
+            window.dashboardSystem.loadDashboardData();
+            window.dashboardSystem.animateProgressBars();
         }
     }, 100);
 }
@@ -2472,6 +2500,7 @@ selectMood(option) {
 }
 
 // Also update the saveMood method to properly close
+// KEEP THIS ONE (lines 1-35) and UPDATE IT:
 saveMood() {
     if (!this.currentMood) return;
 
@@ -2502,12 +2531,11 @@ saveMood() {
     const moodModal = document.getElementById('mood-modal');
     if (moodModal) {
         moodModal.classList.remove('active');
-        // Also hide any backdrop
         moodModal.style.display = 'none';
     }
 
-    // Update chat greeting based on mood
-    this.updateChatGreeting();
+    // REDIRECT TO DASHBOARD INSTEAD OF CHAT
+    this.redirectToDashboard();
 
     console.log('Mood saved:', moodData);
     
@@ -2515,96 +2543,53 @@ saveMood() {
     this.trackEvent('daily_checkin_completed', { mood: this.currentMood });
 }
 
-    createRippleEffect(element) {
-        const ripple = document.createElement('div');
-        ripple.classList.add('ripple');
-        
-        const rect = element.getBoundingClientRect();
-        ripple.style.width = ripple.style.height = Math.max(rect.width, rect.height) + 'px';
-        ripple.style.left = (rect.width / 2) + 'px';
-        ripple.style.top = (rect.height / 2) + 'px';
-        
-        element.appendChild(ripple);
-        
-        ripple.addEventListener('animationend', () => {
-            ripple.remove();
-        });
+// ADD THIS METHOD RIGHT AFTER saveMood() (around line 37):
+redirectToDashboard() {
+    console.log('🚀 Redirecting to dashboard after mood check');
+    
+    // Update navigation
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    const dashboardBtn = document.querySelector('[data-tab="dashboard"]');
+    if (dashboardBtn) {
+        dashboardBtn.classList.add('active');
+    } else {
+        console.error('❌ Dashboard button not found in navigation');
+        // Fallback to therapy tab
+        const therapyBtn = document.querySelector('[data-tab="therapy"]');
+        if (therapyBtn) therapyBtn.classList.add('active');
     }
-
-    updateMoodDescription(mood, color) {
-        const descriptions = {
-            'great': 'Wonderful! Your positive energy will make today\'s session especially productive. 🌟',
-            'good': 'Great to hear you\'re feeling good! Let\'s build on that positivity. 🌈',
-            'okay': 'Thanks for sharing. We\'ll work together to make today even better. 🌱',
-            'neutral': 'It\'s okay to feel neutral. Let\'s explore what might help today. 💭',
-            'heavy': 'Thanks for trusting me with this. We\'ll work through it together, one step at a time. 🤝'
-        };
-
-        const moodDescription = document.getElementById('mood-description');
-        moodDescription.innerHTML = `<p>${descriptions[mood]}</p>`;
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    const dashboardTab = document.getElementById('dashboard-tab');
+    if (dashboardTab) {
+        dashboardTab.classList.add('active');
         
-        // Update background gradient based on mood
-        const moodModal = document.querySelector('.mood-modal');
-        if (moodModal) {
-            moodModal.style.background = `linear-gradient(135deg, ${color}20 0%, #764ba2 100%)`;
-        }
+        // Refresh dashboard data
+        setTimeout(() => {
+            if (window.dashboardSystem) {
+                window.dashboardSystem.loadDashboardData();
+                window.dashboardSystem.animateProgressBars();
+            }
+        }, 300);
+    } else {
+        console.error('❌ Dashboard tab not found');
+        // Fallback to therapy tab
+        const therapyTab = document.getElementById('therapy-tab');
+        if (therapyTab) therapyTab.classList.add('active');
     }
-
-    saveMood() {
-        if (!this.currentMood) return;
-
-        const moodData = {
-            date: this.today,
-            mood: this.currentMood,
-            color: this.currentMoodColor,
-            timestamp: Date.now()
-        };
-
-        // Add to history
-        this.moodHistory.push(moodData);
-        
-        // Keep only last 90 days
-        if (this.moodHistory.length > 90) {
-            this.moodHistory = this.moodHistory.slice(-90);
-        }
-
-        // Save to localStorage
-        localStorage.setItem('lumaCare_moodHistory', JSON.stringify(this.moodHistory));
-
-        // Update garden
-        gardenSystem.addPlant('checkin', this.currentMoodColor);
-
-        // Hide mood modal
-        const moodModal = document.getElementById('mood-modal');
-        if (moodModal) {
-            moodModal.classList.remove('active');
-        }
-
-        // Update chat greeting based on mood
+    
+    // Still show the welcome greeting (optional)
+    setTimeout(() => {
         this.updateChatGreeting();
-
-        console.log('Mood saved:', moodData);
-        
-        // Track completion
-        this.trackEvent('daily_checkin_completed', { mood: this.currentMood });
-    }
-
-    updateChatGreeting() {
-        const greetings = {
-            'great': 'Your positive energy is contagious! 🌟 I\'m excited to work with you today.',
-            'good': 'Great to see you in good spirits! 🌈 How can I support you today?',
-            'okay': 'Thanks for checking in today. 🌱 What would you like to focus on?',
-            'neutral': 'Welcome. Every step counts. 💭 What\'s on your mind today?',
-            'heavy': 'Thank you for sharing how you feel. 🤝 I\'m here with you. Where would you like to start?'
-        };
-
-        if (greetings[this.currentMood]) {
-            // Add a mood-based message to chat
-            setTimeout(() => {
-                this.addMoodMessageToChat(greetings[this.currentMood]);
-            }, 500);
-        }
-    }
+    }, 1000);
+}
 
     addMoodMessageToChat(message) {
         const chatMessages = document.getElementById('chat-messages');
