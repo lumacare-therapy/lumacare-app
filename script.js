@@ -1,3 +1,95 @@
+// =================== //
+// TIMEZONE & DATE SYSTEM //
+// =================== //
+
+class TimeSystem {
+    constructor() {
+        this.userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        this.init();
+    }
+    
+    init() {
+        console.log('⏰ TimeSystem initialized for timezone:', this.userTimezone);
+    }
+    
+    // Get current date in user's timezone
+    getToday() {
+        const now = new Date();
+        return now.toLocaleDateString('en-US', { timeZone: this.userTimezone });
+    }
+    
+    // Get start of week (Monday) in user's timezone
+    getWeekStart() {
+        const now = new Date();
+        const day = now.getDay();
+        const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
+        const monday = new Date(now.setDate(diff));
+        return monday.toLocaleDateString('en-US', { timeZone: this.userTimezone });
+    }
+    
+    // Get start of month in user's timezone
+    getMonthStart() {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        return firstDay.toLocaleDateString('en-US', { timeZone: this.userTimezone });
+    }
+    
+    // Check if date is today in user's timezone
+    isToday(dateString) {
+        const date = new Date(dateString);
+        const dateInUserTZ = date.toLocaleDateString('en-US', { timeZone: this.userTimezone });
+        const todayInUserTZ = this.getToday();
+        return dateInUserTZ === todayInUserTZ;
+    }
+    
+    // Get current time
+    getCurrentTime() {
+        return new Date().toLocaleTimeString('en-US', { 
+            timeZone: this.userTimezone,
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    
+    // Get day of week
+    getDayOfWeek() {
+        return new Date().toLocaleDateString('en-US', { 
+            timeZone: this.userTimezone,
+            weekday: 'long'
+        });
+    }
+    
+    // Get formatted date for display
+    getFormattedDate() {
+        return new Date().toLocaleDateString('en-US', {
+            timeZone: this.userTimezone,
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+}
+
+// Initialize time system globally
+let timeSystem;
+document.addEventListener('DOMContentLoaded', function() {
+    timeSystem = new TimeSystem();
+    
+    // Update dashboard date with timezone
+    const dateElement = document.getElementById('current-date');
+    if (dateElement) {
+        dateElement.textContent = timeSystem.getFormattedDate();
+    }
+    
+    // Update time every minute
+    setInterval(() => {
+        if (window.dashboardSystem) {
+            window.dashboardSystem.updateCurrentDate();
+        }
+    }, 60000);
+});
+
 // Error prevention - add at top of script.js
 (function() {
     // Safe initialization wrapper
@@ -1681,17 +1773,23 @@ class AuthSystem {
     const today = new Date().toISOString().split('T')[0];
     const user = this.currentUser;
     
+    // Initialize missing properties
+    if (!user.lastSessionDate) user.lastSessionDate = '';
+    if (!user.sessionHistory) user.sessionHistory = [];
+    if (!user.sessions) user.sessions = 0;
+    if (!user.purchasedSessions) user.purchasedSessions = 0;
+    
     console.log('User session data:', {
         isPremium: user.isPremium,
         lastSessionDate: user.lastSessionDate,
         today: today,
-        purchasedSessions: user.purchasedSessions || 0
+        purchasedSessions: user.purchasedSessions
     });
     
     // Only check for non-premium users
     if (!user.isPremium) {
         // Check if user already used free session today
-        if (user.lastSessionDate === today && (user.purchasedSessions || 0) <= 0) {
+        if (user.lastSessionDate === today && user.purchasedSessions <= 0) {
             console.log('Daily session limit reached');
             this.showSessionLimitWarning();
             return false;
@@ -1699,11 +1797,23 @@ class AuthSystem {
     }
     
     // Track the session
-    user.sessions = (user.sessions || 0) + 1;
+    user.sessions = user.sessions + 1;
     user.lastSessionDate = today;
     
+    // Add to session history
+    user.sessionHistory.push({
+        date: today,
+        timestamp: Date.now(),
+        type: 'therapy'
+    });
+    
+    // Keep only last 30 days of history
+    if (user.sessionHistory.length > 30) {
+        user.sessionHistory = user.sessionHistory.slice(-30);
+    }
+    
     // Deduct purchased session if applicable
-    if (user.purchasedSessions && user.purchasedSessions > 0) {
+    if (user.purchasedSessions > 0) {
         user.purchasedSessions--;
         console.log('Used purchased session, remaining:', user.purchasedSessions);
     }
@@ -2445,8 +2555,25 @@ hideMoodModal() {
     }
 }
 
-// Update showDailyMoodCheck to only show if needed
 showDailyMoodCheck() {
+    // Get user's timezone
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const now = new Date();
+    const today = now.toLocaleDateString('en-US', { timeZone: userTimezone });
+    
+    // Check if mood was already selected today in user's timezone
+    const todayMood = this.moodHistory.find(mood => {
+        const moodDate = new Date(mood.date);
+        const moodDateStr = moodDate.toLocaleDateString('en-US', { timeZone: userTimezone });
+        return moodDateStr === today;
+    });
+    
+    if (todayMood) {
+        this.currentMood = todayMood.mood;
+        console.log("Today's mood already selected:", this.currentMood);
+        return; // Don't show mood modal
+    }
+    
     // Check if user is logged in and hasn't selected mood today
     if (authSystem && authSystem.isLoggedIn && !this.currentMood) {
         // Check if modal is already showing
@@ -2499,16 +2626,23 @@ selectMood(option) {
     }, 1500);
 }
 
-// Also update the saveMood method to properly close
-// KEEP THIS ONE (lines 1-35) and UPDATE IT:
 saveMood() {
     if (!this.currentMood) return;
 
+    // Get today's date with timezone
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const now = new Date();
+    const todayDate = now.toLocaleDateString('en-US', { timeZone: userTimezone });
+    
+    // Convert back to ISO format for storage
+    const todayISO = now.toISOString().split('T')[0];
+
     const moodData = {
-        date: this.today,
+        date: todayISO, // Use ISO format for consistency
         mood: this.currentMood,
         color: this.currentMoodColor,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        localDate: todayDate // Store local date for easy comparison
     };
 
     // Add to history
@@ -6773,15 +6907,8 @@ class DashboardSystem {
 
     updateCurrentDate() {
         const dateElement = document.getElementById('current-date');
-        if (dateElement) {
-            const now = new Date();
-            const options = { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            };
-            dateElement.textContent = now.toLocaleDateString('en-US', options);
+        if (dateElement && window.timeSystem) {
+            dateElement.textContent = window.timeSystem.getFormattedDate();
         }
     }
 
@@ -6791,11 +6918,39 @@ class DashboardSystem {
         const moodHistory = JSON.parse(localStorage.getItem('lumaCare_moodHistory')) || [];
         const gardenData = JSON.parse(localStorage.getItem('lumaCare_garden')) || { plants: [] };
         
-        // Update stats from garden
+        // Update current date
+        this.updateCurrentDate();
+        
+        // Get today's date for calculations
+        const today = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+        
+        // Update stats from garden with time filtering
         const plants = gardenData.plants || [];
-        const aiSessions = plants.filter(p => p.type === 'session').length;
-        const breathingExercises = plants.filter(p => p.type === 'breathing').length;
-        const journalEntries = plants.filter(p => p.type === 'journal').length;
+        
+        // This week's stats (last 7 days)
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        const aiSessions = plants.filter(p => 
+            p.type === 'session' && new Date(p.date) >= oneWeekAgo
+        ).length;
+        
+        const breathingExercises = plants.filter(p => 
+            p.type === 'breathing' && new Date(p.date) >= oneWeekAgo
+        ).length;
+        
+        const journalEntries = plants.filter(p => 
+            p.type === 'journal' && new Date(p.date) >= oneWeekAgo
+        ).length;
+        
+        // This month's stats
+        const thisMonthStart = new Date(currentYear, currentMonth, 1);
+        const sessionsThisMonth = plants.filter(p => 
+            p.type === 'session' && new Date(p.date) >= thisMonthStart
+        ).length;
         
         // Update UI
         this.updateStat('ai-sessions-count', aiSessions);
