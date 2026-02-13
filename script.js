@@ -713,9 +713,8 @@ class PaymentSystem {
     }
 
     redirectToYoco(amount, plan) {
-        const amountInDollars = (amount / 100).toFixed(2);
-        const description = plan === 'monthly' ? 'LumaCare Monthly Premium' : 'LumaCare Single Session';
-        const paymentId = 'pay_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        // THIS IS NOW PAYFAST - IGNORE THE FUNCTION NAME
+        const paymentId = 'pf_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         
         // Store pending payment
         this.pendingPayments.set(paymentId, {
@@ -724,19 +723,23 @@ class PaymentSystem {
             timestamp: Date.now(),
             status: 'pending'
         });
-
-        // Save to localStorage for persistence
         this.savePendingPayments();
-
-        const yocoLinks = {
-            999: 'https://pay.yoco.com/r/mexvR5',
-            299: 'https://pay.yoco.com/r/2JVqYJ'
+    
+        // YOUR LIVE PAYFAST LINKS
+        const payfastLinks = {
+            999: 'https://payf.st/bk8we',  // $9.99 monthly
+            299: 'https://payf.st/1frnc'    // $2.99 session
         };
         
-        const yocoUrl = yocoLinks[amount] || 'https://pay.yoco.com/r/mexvR5';
+        const payfastUrl = payfastLinks[amount];
         
-        // Open Yoco in new tab
-        window.open(yocoUrl, '_blank', 'width=600,height=700');
+        if (!payfastUrl) {
+            console.error('Invalid amount:', amount);
+            return;
+        }
+        
+        // Open PayFast in new tab
+        window.open(payfastUrl, '_blank');
         
         // Show verification screen
         this.showPaymentVerification(paymentId, amount, plan);
