@@ -72,16 +72,6 @@ navItem: {
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
-  navItem: {
-    padding: '8px 16px',
-    borderRadius: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    color: '#cbd5e0',
-    textDecoration: 'none',
-    cursor: 'pointer',
-  },
   navItemActive: {
     color: '#f7fafc',
     background: 'rgba(159, 122, 234, 0.1)',
