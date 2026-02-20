@@ -32,6 +32,20 @@ const styles = {
     borderRadius: '100px',
     boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
   },
+  // Update the nav item style in your styles object
+navItem: {
+  padding: window.innerWidth <= 768 ? '8px 10px' : '8px 16px',
+  borderRadius: '40px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  color: '#cbd5e0',
+  textDecoration: 'none',
+  cursor: 'pointer',
+  minHeight: '44px', // Better touch target
+  minWidth: '44px',
+},
+
   navContent: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -211,7 +225,7 @@ const AuthProvider = ({ children }) => {
 
 const useAuth = () => React.useContext(AuthContext);
 
-// ==================== LOGIN PAGE WITH SEO CONTENT ====================
+// ==================== LOGIN PAGE - FULLY RESPONSIVE ====================
 const LoginPage = ({ onLogin }) => {
   const handleGoogleSuccess = (credentialResponse) => {
     const decoded = jwtDecode(credentialResponse.credential);
@@ -276,6 +290,18 @@ const LoginPage = ({ onLogin }) => {
     onLogin(guestUser);
   };
 
+  // Responsive styles based on screen size
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth <= 768;
+  const isSmallMobile = windowWidth <= 480;
+
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -287,6 +313,8 @@ const LoginPage = ({ onLogin }) => {
         justifyContent: 'center',
         background: 'linear-gradient(135deg, #0a0a1a 0%, #1a0b2e 50%, #2d1b4a 100%)',
         position: 'relative',
+        padding: isMobile ? '16px' : '24px',
+        overflowY: 'auto',
       }}
     >
       {/* Background Effects */}
@@ -297,7 +325,7 @@ const LoginPage = ({ onLogin }) => {
         width: '100%',
         height: '100%',
         background: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.6) 1px, transparent 1px)',
-        backgroundSize: '200px 200px',
+        backgroundSize: isMobile ? '100px 100px' : '200px 200px',
         opacity: 0.3,
         animation: 'twinkle 4s ease-in-out infinite',
         pointerEvents: 'none',
@@ -311,7 +339,7 @@ const LoginPage = ({ onLogin }) => {
         width: '100%',
         height: '100%',
         background: 'radial-gradient(circle at 30% 40%, rgba(138,43,226,0.2) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(75,0,130,0.2) 0%, transparent 50%)',
-        filter: 'blur(60px)',
+        filter: 'blur(40px)',
         pointerEvents: 'none',
         zIndex: 0
       }} />
@@ -319,144 +347,195 @@ const LoginPage = ({ onLogin }) => {
       <motion.div 
         style={{
           ...styles.card,
-          maxWidth: '700px',
-          width: '90%',
+          maxWidth: '800px',
+          width: '100%',
           position: 'relative',
           zIndex: 1,
           textAlign: 'center',
-          padding: '48px 32px',
+          padding: isMobile ? '32px 20px' : '48px 32px',
+          maxHeight: '90vh',
+          overflowY: 'auto',
         }}
         initial={{ y: 20 }}
         animate={{ y: 0 }}
       >
         {/* Brain Icon */}
         <div style={{ 
-          fontSize: '5rem', 
-          marginBottom: '8px',
+          fontSize: isSmallMobile ? '3.5rem' : isMobile ? '4rem' : '5rem', 
+          marginBottom: isMobile ? '4px' : '8px',
           filter: 'drop-shadow(0 0 20px #9f7aea)',
           animation: 'float 3s ease-in-out infinite'
         }}>
           🧠
         </div>
         
-        {/* ✅ NEW: No Login Badge */}
+        {/* No Login Badge */}
         <div style={{
           backgroundColor: 'rgba(46, 125, 50, 0.15)',
           color: '#4fd1c5',
-          padding: '6px 16px',
+          padding: isMobile ? '4px 12px' : '6px 16px',
           borderRadius: '30px',
-          fontSize: '0.9rem',
+          fontSize: isMobile ? '0.8rem' : '0.9rem',
           fontWeight: 600,
           display: 'inline-block',
-          marginBottom: '20px',
+          marginBottom: isMobile ? '12px' : '20px',
           border: '1px solid #4fd1c5',
-          backdropFilter: 'blur(5px)'
+          backdropFilter: 'blur(5px)',
+          whiteSpace: 'nowrap',
         }}>
           ⚡ No login required. Start for free.
         </div>
         
-        {/* ✅ UPDATED: H1 Tag */}
+        {/* H1 Tag */}
         <h1 style={{ 
-          fontSize: '2.5rem',
+          fontSize: isSmallMobile ? '1.6rem' : isMobile ? '1.8rem' : '2.5rem',
           fontWeight: 700,
           background: 'linear-gradient(135deg, #fff, #9f7aea, #4fd1c5)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          marginBottom: '24px',
-          lineHeight: 1.3
+          marginBottom: isMobile ? '16px' : '24px',
+          lineHeight: 1.3,
+          padding: isMobile ? '0 5px' : '0',
         }}>
-          End Task Overwhelm for<br />Freelancers & Remote Workers
+          End Task Overwhelm for<br />{isMobile ? 'Freelancers' : 'Freelancers & Remote Workers'}
         </h1>
         
-        <p style={{ color: '#cbd5e0', marginBottom: '32px', fontSize: '1.1rem' }}>
+        <p style={{ 
+          color: '#cbd5e0', 
+          marginBottom: isMobile ? '24px' : '32px', 
+          fontSize: isMobile ? '0.95rem' : '1.1rem',
+          padding: isMobile ? '0 10px' : '0',
+        }}>
           Your daily system for mental clarity and focus
         </p>
 
-        <div style={{ marginBottom: '32px' }}>
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', marginBottom: '24px' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', color: '#9f7aea' }}>📊</div>
-              <div style={{ color: '#cbd5e0', fontSize: '0.9rem' }}>Dashboard</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', color: '#4fd1c5' }}>📌</div>
-              <div style={{ color: '#cbd5e0', fontSize: '0.9rem' }}>Priority Matrix</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', color: '#f687b3' }}>🧘</div>
-              <div style={{ color: '#cbd5e0', fontSize: '0.9rem' }}>Techniques</div>
-            </div>
+        {/* Feature Icons - Stack on mobile */}
+        <div style={{ 
+          display: 'flex', 
+          gap: isMobile ? '8px' : '16px', 
+          justifyContent: 'center', 
+          marginBottom: isMobile ? '20px' : '24px',
+          flexWrap: isMobile ? 'wrap' : 'nowrap',
+        }}>
+          <div style={{ 
+            textAlign: 'center',
+            flex: isMobile ? '1 0 auto' : 'none',
+            minWidth: isMobile ? '80px' : 'auto',
+          }}>
+            <div style={{ fontSize: isMobile ? '1.5rem' : '2rem', color: '#9f7aea' }}>📊</div>
+            <div style={{ color: '#cbd5e0', fontSize: isMobile ? '0.8rem' : '0.9rem' }}>Dashboard</div>
           </div>
-
-          <div style={{ background: 'rgba(159,122,234,0.1)', borderRadius: '12px', padding: '16px', marginBottom: '24px' }}>
-            <p style={{ color: '#cbd5e0', marginBottom: '8px' }}>✨ Free Plan Includes:</p>
-            <ul style={{ listStyle: 'none', padding: 0 }}>
-              <li style={{ color: 'white', marginBottom: '4px' }}>✓ 1 session every 12 hours</li>
-              <li style={{ color: 'white', marginBottom: '4px' }}>✓ All techniques</li>
-              <li style={{ color: 'white' }}>✓ Progress tracking</li>
-            </ul>
+          <div style={{ 
+            textAlign: 'center',
+            flex: isMobile ? '1 0 auto' : 'none',
+            minWidth: isMobile ? '80px' : 'auto',
+          }}>
+            <div style={{ fontSize: isMobile ? '1.5rem' : '2rem', color: '#4fd1c5' }}>📌</div>
+            <div style={{ color: '#cbd5e0', fontSize: isMobile ? '0.8rem' : '0.9rem' }}>Priority Matrix</div>
+          </div>
+          <div style={{ 
+            textAlign: 'center',
+            flex: isMobile ? '1 0 auto' : 'none',
+            minWidth: isMobile ? '80px' : 'auto',
+          }}>
+            <div style={{ fontSize: isMobile ? '1.5rem' : '2rem', color: '#f687b3' }}>🧘</div>
+            <div style={{ color: '#cbd5e0', fontSize: isMobile ? '0.8rem' : '0.9rem' }}>Techniques</div>
           </div>
         </div>
 
-        {/* ✅ NEW: SEO Content Section */}
+        {/* Free Plan Box */}
+        <div style={{ 
+          background: 'rgba(159,122,234,0.1)', 
+          borderRadius: '12px', 
+          padding: isMobile ? '12px' : '16px', 
+          marginBottom: isMobile ? '20px' : '24px' 
+        }}>
+          <p style={{ color: '#cbd5e0', marginBottom: '8px', fontSize: isMobile ? '0.9rem' : '1rem' }}>✨ Free Plan Includes:</p>
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            <li style={{ color: 'white', marginBottom: '4px', fontSize: isMobile ? '0.85rem' : '0.95rem' }}>✓ 1 session every 12 hours</li>
+            <li style={{ color: 'white', marginBottom: '4px', fontSize: isMobile ? '0.85rem' : '0.95rem' }}>✓ All techniques</li>
+            <li style={{ color: 'white', fontSize: isMobile ? '0.85rem' : '0.95rem' }}>✓ Progress tracking</li>
+          </ul>
+        </div>
+
+        {/* SEO Content Section - Mobile Optimized */}
         <div style={{ 
           textAlign: 'left', 
-          marginTop: '40px', 
-          marginBottom: '40px',
-          padding: '24px',
+          marginTop: isMobile ? '24px' : '40px', 
+          marginBottom: isMobile ? '24px' : '40px',
+          padding: isMobile ? '16px' : '24px',
           background: 'rgba(0,0,0,0.2)',
           borderRadius: '16px',
-          border: '1px solid rgba(159,122,234,0.3)'
+          border: '1px solid rgba(159,122,234,0.3)',
         }}>
           <h2 style={{ 
-            fontSize: '1.8rem', 
+            fontSize: isMobile ? '1.4rem' : '1.8rem', 
             color: '#9f7aea', 
-            marginBottom: '16px',
-            fontWeight: 600
+            marginBottom: '12px',
+            fontWeight: 600,
           }}>
             For Freelancers Drowning in Task Overwhelm
           </h2>
-          <p style={{ color: '#cbd5e0', marginBottom: '16px', lineHeight: 1.6 }}>
+          <p style={{ 
+            color: '#cbd5e0', 
+            marginBottom: '12px', 
+            lineHeight: 1.6,
+            fontSize: isMobile ? '0.9rem' : '1rem',
+          }}>
             LumaCare is the daily operating system for freelancers and remote workers who are tired of chaos, missed deadlines, and burnout.
           </p>
-          <p style={{ color: '#cbd5e0', marginBottom: '24px', lineHeight: 1.6 }}>
+          <p style={{ 
+            color: '#cbd5e0', 
+            marginBottom: '20px', 
+            lineHeight: 1.6,
+            fontSize: isMobile ? '0.9rem' : '1rem',
+          }}>
             Most productivity apps add more noise. LumaCare subtracts it.
           </p>
 
           <h2 style={{ 
-            fontSize: '1.8rem', 
+            fontSize: isMobile ? '1.4rem' : '1.8rem', 
             color: '#9f7aea', 
-            marginBottom: '16px',
-            fontWeight: 600
+            marginBottom: '12px',
+            fontWeight: 600,
           }}>
             How It Works
           </h2>
           <ul style={{ 
             color: '#cbd5e0', 
-            marginBottom: '24px', 
+            marginBottom: '20px', 
             paddingLeft: '20px',
-            lineHeight: 1.8
+            lineHeight: 1.8,
+            fontSize: isMobile ? '0.9rem' : '1rem',
           }}>
-            <li><strong style={{ color: '#4fd1c5' }}>Priority Matrix:</strong> Drag tasks into Urgent vs. Important. Your brain stops spinning.</li>
-            <li><strong style={{ color: '#4fd1c5' }}>10-Second Logging:</strong> Track energy and stress without friction.</li>
-            <li><strong style={{ color: '#4fd1c5' }}>Burnout Timeline:</strong> Watch your crash patterns emerge so you can rest before you break.</li>
+            <li style={{ marginBottom: '8px' }}><strong style={{ color: '#4fd1c5' }}>Priority Matrix:</strong> Drag tasks into Urgent vs. Important. Your brain stops spinning.</li>
+            <li style={{ marginBottom: '8px' }}><strong style={{ color: '#4fd1c5' }}>10-Second Logging:</strong> Track energy and stress without friction.</li>
+            <li style={{ marginBottom: '8px' }}><strong style={{ color: '#4fd1c5' }}>Burnout Timeline:</strong> Watch your crash patterns emerge so you can rest before you break.</li>
           </ul>
 
           <h2 style={{ 
-            fontSize: '1.8rem', 
+            fontSize: isMobile ? '1.4rem' : '1.8rem', 
             color: '#9f7aea', 
-            marginBottom: '16px',
-            fontWeight: 600
+            marginBottom: '12px',
+            fontWeight: 600,
           }}>
             Why Freelancers Use LumaCare
           </h2>
-          <p style={{ color: '#cbd5e0', marginBottom: '16px', lineHeight: 1.6 }}>
+          <p style={{ 
+            color: '#cbd5e0', 
+            marginBottom: '8px', 
+            lineHeight: 1.6,
+            fontSize: isMobile ? '0.9rem' : '1rem',
+          }}>
             Client work is unpredictable. LumaCare gives you a single place to sort the chaos, without adding more admin. <strong style={{ color: '#4fd1c5' }}>No login required.</strong> Start in 5 seconds. Upgrade only if you need advanced analytics.
           </p>
         </div>
 
         {/* Google Sign-In */}
-        <div style={{ marginBottom: '16px' }}>
+        <div style={{ 
+          marginBottom: isMobile ? '12px' : '16px',
+          transform: isMobile ? 'scale(0.95)' : 'none',
+        }}>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={handleGoogleError}
@@ -476,26 +555,30 @@ const LoginPage = ({ onLogin }) => {
           onClick={handleGuestLogin}
           style={{
             width: '100%',
-            padding: '12px',
+            padding: isMobile ? '10px' : '12px',
             background: 'transparent',
             border: '2px solid #9f7aea',
             borderRadius: '40px',
             color: 'white',
-            fontSize: '1rem',
+            fontSize: isMobile ? '0.9rem' : '1rem',
             fontWeight: 500,
             cursor: 'pointer',
-            marginBottom: '24px',
+            marginBottom: isMobile ? '16px' : '24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px'
+            gap: '8px',
           }}
         >
           <span>👤</span>
           <span>Continue as Guest (3 free sessions)</span>
         </motion.button>
 
-        <p style={{ color: '#6b7280', fontSize: '0.85rem' }}>
+        <p style={{ 
+          color: '#6b7280', 
+          fontSize: isMobile ? '0.75rem' : '0.85rem',
+          padding: isMobile ? '0 10px' : '0',
+        }}>
           By continuing, you agree to our Terms of Service and Privacy Policy
         </p>
       </motion.div>
