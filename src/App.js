@@ -163,6 +163,18 @@ const styles = {
     color: 'white',
     border: '2px solid rgba(255,255,255,0.2)',
   },
+  badge: {
+    backgroundColor: 'rgba(46, 125, 50, 0.15)',
+    color: '#4fd1c5',
+    padding: '6px 16px',
+    borderRadius: '30px',
+    fontSize: '0.9rem',
+    fontWeight: 600,
+    display: 'inline-block',
+    marginBottom: '20px',
+    border: '1px solid #4fd1c5',
+    backdropFilter: 'blur(5px)',
+  },
 };
 
 // ==================== AUTH CONTEXT ====================
@@ -199,7 +211,7 @@ const AuthProvider = ({ children }) => {
 
 const useAuth = () => React.useContext(AuthContext);
 
-// ==================== LOGIN PAGE WITH BRAIN ICON ====================
+// ==================== LOGIN PAGE WITH SEO CONTENT ====================
 const LoginPage = ({ onLogin }) => {
   const handleGoogleSuccess = (credentialResponse) => {
     const decoded = jwtDecode(credentialResponse.credential);
@@ -277,6 +289,7 @@ const LoginPage = ({ onLogin }) => {
         position: 'relative',
       }}
     >
+      {/* Background Effects */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -306,7 +319,7 @@ const LoginPage = ({ onLogin }) => {
       <motion.div 
         style={{
           ...styles.card,
-          maxWidth: '500px',
+          maxWidth: '700px',
           width: '90%',
           position: 'relative',
           zIndex: 1,
@@ -316,22 +329,40 @@ const LoginPage = ({ onLogin }) => {
         initial={{ y: 20 }}
         animate={{ y: 0 }}
       >
+        {/* Brain Icon */}
         <div style={{ 
           fontSize: '5rem', 
-          marginBottom: '16px',
+          marginBottom: '8px',
           filter: 'drop-shadow(0 0 20px #9f7aea)',
           animation: 'float 3s ease-in-out infinite'
         }}>
           🧠
         </div>
         
+        {/* ✅ NEW: No Login Badge */}
+        <div style={{
+          backgroundColor: 'rgba(46, 125, 50, 0.15)',
+          color: '#4fd1c5',
+          padding: '6px 16px',
+          borderRadius: '30px',
+          fontSize: '0.9rem',
+          fontWeight: 600,
+          display: 'inline-block',
+          marginBottom: '20px',
+          border: '1px solid #4fd1c5',
+          backdropFilter: 'blur(5px)'
+        }}>
+          ⚡ No login required. Start for free.
+        </div>
+        
+        {/* ✅ UPDATED: H1 Tag */}
         <h1 style={{ 
-          fontSize: '2.2rem',
+          fontSize: '2.5rem',
           fontWeight: 700,
           background: 'linear-gradient(135deg, #fff, #9f7aea, #4fd1c5)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          marginBottom: '16px',
+          marginBottom: '24px',
           lineHeight: 1.3
         }}>
           End Task Overwhelm for<br />Freelancers & Remote Workers
@@ -367,6 +398,64 @@ const LoginPage = ({ onLogin }) => {
           </div>
         </div>
 
+        {/* ✅ NEW: SEO Content Section */}
+        <div style={{ 
+          textAlign: 'left', 
+          marginTop: '40px', 
+          marginBottom: '40px',
+          padding: '24px',
+          background: 'rgba(0,0,0,0.2)',
+          borderRadius: '16px',
+          border: '1px solid rgba(159,122,234,0.3)'
+        }}>
+          <h2 style={{ 
+            fontSize: '1.8rem', 
+            color: '#9f7aea', 
+            marginBottom: '16px',
+            fontWeight: 600
+          }}>
+            For Freelancers Drowning in Task Overwhelm
+          </h2>
+          <p style={{ color: '#cbd5e0', marginBottom: '16px', lineHeight: 1.6 }}>
+            LumaCare is the daily operating system for freelancers and remote workers who are tired of chaos, missed deadlines, and burnout.
+          </p>
+          <p style={{ color: '#cbd5e0', marginBottom: '24px', lineHeight: 1.6 }}>
+            Most productivity apps add more noise. LumaCare subtracts it.
+          </p>
+
+          <h2 style={{ 
+            fontSize: '1.8rem', 
+            color: '#9f7aea', 
+            marginBottom: '16px',
+            fontWeight: 600
+          }}>
+            How It Works
+          </h2>
+          <ul style={{ 
+            color: '#cbd5e0', 
+            marginBottom: '24px', 
+            paddingLeft: '20px',
+            lineHeight: 1.8
+          }}>
+            <li><strong style={{ color: '#4fd1c5' }}>Priority Matrix:</strong> Drag tasks into Urgent vs. Important. Your brain stops spinning.</li>
+            <li><strong style={{ color: '#4fd1c5' }}>10-Second Logging:</strong> Track energy and stress without friction.</li>
+            <li><strong style={{ color: '#4fd1c5' }}>Burnout Timeline:</strong> Watch your crash patterns emerge so you can rest before you break.</li>
+          </ul>
+
+          <h2 style={{ 
+            fontSize: '1.8rem', 
+            color: '#9f7aea', 
+            marginBottom: '16px',
+            fontWeight: 600
+          }}>
+            Why Freelancers Use LumaCare
+          </h2>
+          <p style={{ color: '#cbd5e0', marginBottom: '16px', lineHeight: 1.6 }}>
+            Client work is unpredictable. LumaCare gives you a single place to sort the chaos, without adding more admin. <strong style={{ color: '#4fd1c5' }}>No login required.</strong> Start in 5 seconds. Upgrade only if you need advanced analytics.
+          </p>
+        </div>
+
+        {/* Google Sign-In */}
         <div style={{ marginBottom: '16px' }}>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
@@ -380,6 +469,7 @@ const LoginPage = ({ onLogin }) => {
           />
         </div>
 
+        {/* Guest Login Option */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
