@@ -2882,6 +2882,14 @@ function App() {
   const [currentTechnique, setCurrentTechnique] = useState(null);
   const { userData, trackSession, upgradeUser } = useSessionTracking();
   const [showPremium, setShowPremium] = useState(false);
+  // Add this inside your App component, right after the useState declarations
+const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+useEffect(() => {
+  const handleResize = () => setWindowWidth(window.innerWidth);
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -2993,46 +3001,55 @@ function App() {
             zIndex: -1
           }} />
 
-          <motion.nav style={{...styles.nav, ...(scrolled ? { background: 'rgba(10,10,26,0.8)', backdropFilter: 'blur(20px)' } : {})}} initial={{ y: -100 }} animate={{ y: 0 }}>
-            <div style={styles.navContent}>
-              <div style={styles.logo} onClick={() => navigateTo('/')}>
-                <span style={{ fontSize: '2rem', marginRight: '8px' }}>🧠</span>
-                <span style={styles.logoText}>LumaCare</span>
-              </div>
-              
-              <div style={styles.navLinks}>
-                {navItems.map((item) => (
-                  <NavLink key={item.path} to={item.path} style={({ isActive }) => ({...styles.navItem, ...(isActive ? styles.navItemActive : {})})}>
-                    <motion.div style={{display: 'flex', alignItems: 'center', gap: '8px'}} whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
-                      <span>{item.icon}</span>
-                      <span style={{display: 'inline'}} className="nav-label">{item.label}</span>
-                    </motion.div>
-                  </NavLink>
-                ))}
-              </div>
+// Find this section around line 2200-2300
+<motion.nav style={{...styles.nav, ...(scrolled ? { background: 'rgba(10,10,26,0.8)', backdropFilter: 'blur(20px)' } : {})}} initial={{ y: -100 }} animate={{ y: 0 }}>
+  <div style={styles.navContent}>
+    <div style={styles.logo} onClick={() => navigateTo('/')}>
+      <span style={{ fontSize: window.innerWidth <= 480 ? '1.4rem' : '1.8rem', marginRight: '8px' }}>🧠</span>
+      <span style={{ fontSize: window.innerWidth <= 480 ? '1rem' : '1.4rem', ...styles.logoText }}>LumaCare</span>
+    </div>
+    
+    <div style={styles.navLinks}>
+      {navItems.map((item) => (
+        <NavLink key={item.path} to={item.path} style={({ isActive }) => ({
+          ...styles.navItem,
+          ...(isActive ? styles.navItemActive : {}),
+          padding: window.innerWidth <= 480 ? '6px 8px' : '8px 16px',
+        })}>
+          <motion.div style={{display: 'flex', alignItems: 'center', gap: window.innerWidth <= 480 ? '4px' : '8px'}} whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+            <span style={{ fontSize: window.innerWidth <= 480 ? '1rem' : '1.2rem' }}>{item.icon}</span>
+            <span style={{ display: 'inline' }} className="nav-label">{item.label}</span>
+          </motion.div>
+        </NavLink>
+      ))}
+    </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowPremium(true)}
-                  style={styles.premiumButton}
-                >
-                  ⭐ Premium
-                </motion.button>
+    <div style={{ display: 'flex', alignItems: 'center', gap: window.innerWidth <= 480 ? '4px' : '12px' }}>
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setShowPremium(true)}
+        style={{
+          ...styles.premiumButton,
+          padding: window.innerWidth <= 480 ? '6px 12px' : '8px 20px',
+          fontSize: window.innerWidth <= 480 ? '0.8rem' : '0.95rem',
+        }}
+      >
+        ⭐ {window.innerWidth <= 480 ? '' : 'Premium'}
+      </motion.button>
 
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => navigateTo('/settings')} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '8px'}}>
-                  {user.picture ? (
-                    <img src={user.picture} alt="profile" style={styles.profileImage} />
-                  ) : (
-                    <div style={styles.profilePlaceholder}>
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </motion.button>
-              </div>
-            </div>
-          </motion.nav>
+      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => navigateTo('/settings')} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '8px'}}>
+        {user.picture ? (
+          <img src={user.picture} alt="profile" style={{...styles.profileImage, width: window.innerWidth <= 480 ? '28px' : '36px', height: window.innerWidth <= 480 ? '28px' : '36px'}} />
+        ) : (
+          <div style={{...styles.profilePlaceholder, width: window.innerWidth <= 480 ? '28px' : '36px', height: window.innerWidth <= 480 ? '28px' : '36px', fontSize: window.innerWidth <= 480 ? '0.9rem' : '1.2rem'}}>
+            {user.name.charAt(0).toUpperCase()}
+          </div>
+        )}
+      </motion.button>
+    </div>
+  </div>
+</motion.nav>
 
           {showPremium && (
             <PremiumModal onClose={() => setShowPremium(false)} onUpgrade={handleUpgrade} />
