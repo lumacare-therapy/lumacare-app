@@ -280,7 +280,6 @@ const LoginPage = ({ onLogin }) => {
     onLogin(guestUser);
   };
 
-  // Responsive styles based on screen size
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   useEffect(() => {
@@ -307,7 +306,7 @@ const LoginPage = ({ onLogin }) => {
         overflowY: 'auto',
       }}
     >
-      {/* Background Effects */}
+      {/* Background Effects - These are fine because they're inside style tags */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -399,7 +398,7 @@ const LoginPage = ({ onLogin }) => {
           Your daily system for mental clarity and focus
         </p>
 
-        {/* Feature Icons - Stack on mobile */}
+        {/* Feature Icons */}
         <div style={{ 
           display: 'flex', 
           gap: isMobile ? '8px' : '16px', 
@@ -448,7 +447,7 @@ const LoginPage = ({ onLogin }) => {
           </ul>
         </div>
 
-        {/* SEO Content Section - Mobile Optimized */}
+        {/* SEO Content Section */}
         <div style={{ 
           textAlign: 'left', 
           marginTop: isMobile ? '24px' : '40px', 
@@ -558,6 +557,7 @@ const LoginPage = ({ onLogin }) => {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
+            minHeight: '44px',
           }}
         >
           <span>👤</span>
