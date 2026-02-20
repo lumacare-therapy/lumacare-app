@@ -3001,7 +3001,6 @@ useEffect(() => {
             zIndex: -1
           }} />
 
-// Find this section around line 2200-2300
 <motion.nav style={{...styles.nav, ...(scrolled ? { background: 'rgba(10,10,26,0.8)', backdropFilter: 'blur(20px)' } : {})}} initial={{ y: -100 }} animate={{ y: 0 }}>
   <div style={styles.navContent}>
     <div style={styles.logo} onClick={() => navigateTo('/')}>
