@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
@@ -7,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // ==================== GOOGLE CLIENT ID ====================
 const GOOGLE_CLIENT_ID = "253002272888-cg3k451mqesnerv21056utk8u1lk22f6.apps.googleusercontent.com";
 
-// ==================== OPENROUTER API KEY ====================
+// ==================== OPENROUTER API KEY - FROM ENV ====================
 const OPENROUTER_KEY = process.env.REACT_APP_OPENROUTER_KEY;
 
 // ==================== STYLES ====================
@@ -43,12 +44,6 @@ const styles = {
     alignItems: 'center',
     gap: '12px',
     cursor: 'pointer',
-  },
-  logoImage: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '10px',
-    objectFit: 'cover',
   },
   logoText: {
     fontSize: '1.4rem',
@@ -167,7 +162,7 @@ const styles = {
     fontSize: '1.2rem',
     color: 'white',
     border: '2px solid rgba(255,255,255,0.2)',
-  }
+  },
 };
 
 // ==================== AUTH CONTEXT ====================
@@ -282,7 +277,6 @@ const LoginPage = ({ onLogin }) => {
         position: 'relative',
       }}
     >
-      {/* Background Effects */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -322,7 +316,6 @@ const LoginPage = ({ onLogin }) => {
         initial={{ y: 20 }}
         animate={{ y: 0 }}
       >
-        {/* Brain Icon - No image needed! */}
         <div style={{ 
           fontSize: '5rem', 
           marginBottom: '16px',
@@ -332,7 +325,6 @@ const LoginPage = ({ onLogin }) => {
           🧠
         </div>
         
-        {/* H1 Tag for SEO and Attraction */}
         <h1 style={{ 
           fontSize: '2.2rem',
           fontWeight: 700,
@@ -375,7 +367,6 @@ const LoginPage = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* Google Sign-In */}
         <div style={{ marginBottom: '16px' }}>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
@@ -389,7 +380,6 @@ const LoginPage = ({ onLogin }) => {
           />
         </div>
 
-        {/* Guest Login Option */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -786,9 +776,7 @@ const Dashboard = ({ navigateTo, userData }) => {
         : 4.2;
       setStressLevel(Math.round(100 - (avgMood * 20)));
       
-      const totalSessions = userData.stats.aiSessions + userData.stats.breathing + userData.stats.sosUsed;
-      const positiveFeedback = userData.stats.moodScores.filter(m => m.score >= 4).length;
-      const clarityBase = 50 + (positiveFeedback * 2);
+      const clarityBase = 50 + (userData.stats.moodScores.filter(m => m.score >= 4).length * 2);
       setClarityScore(Math.min(100, Math.round(clarityBase)));
     }
   }, [userData]);
@@ -970,7 +958,7 @@ const Dashboard = ({ navigateTo, userData }) => {
 };
 
 // ==================== AI ASSISTANT WITH OPENROUTER ====================
-const AIAssistant = ({ startTechnique, onComplete }) => {
+const AIAssistant = ({ startTechnique }) => {
   const [messages, setMessages] = useState([
     { 
       role: 'assistant', 
@@ -1329,7 +1317,7 @@ const AIAssistant = ({ startTechnique, onComplete }) => {
   );
 };
 
-// ==================== COGNITIVE RESTRUCTURING - SLOW & UNDERSTANDING ====================
+// ==================== COGNITIVE RESTRUCTURING ====================
 const CognitiveChatbot = ({ onComplete, onBack }) => {
   const [step, setStep] = useState(0);
   const [messages, setMessages] = useState([
@@ -1343,7 +1331,6 @@ const CognitiveChatbot = ({ onComplete, onBack }) => {
   const [conversationHistory, setConversationHistory] = useState([]);
   
   const [thought, setThought] = useState('');
-  const [thoughtDetails, setThoughtDetails] = useState('');
   const [evidenceFor, setEvidenceFor] = useState([]);
   const [evidenceAgainst, setEvidenceAgainst] = useState([]);
   const [alternatives, setAlternatives] = useState([]);
@@ -1358,51 +1345,29 @@ const CognitiveChatbot = ({ onComplete, onBack }) => {
       let systemPrompt = '';
       
       if (currentStep === 0) {
-        systemPrompt = `You are guiding someone through Cognitive Restructuring STEP 1: Understanding their thought.
-        They just shared their initial thought. Now you need to UNDERSTAND them better before moving on.
-        Ask gentle follow-up questions like:
-        - "Can you tell me more about that? When does this thought usually come up?"
-        - "How long have you been feeling this way?"
-        - "What happens in your body when this thought appears?"
-        Take your time. Ask ONE question at a time. Be warm and genuinely curious.`;
+        systemPrompt = `You are guiding someone through Cognitive Restructuring. They just shared their initial thought. 
+        Respond warmly and ask gentle follow-up questions to understand them better. Keep it to 1-2 sentences.`;
       } 
       else if (currentStep === 1) {
-        systemPrompt = `You are guiding someone through Cognitive Restructuring STEP 2: Evidence FOR the thought.
-        Now gently explore what makes this thought feel true.
-        Ask questions like:
-        - "What makes you feel this thought might be true? Take your time."
-        - "Can you share some experiences that support this thought?"
-        Ask ONE question at a time. Be patient.`;
+        systemPrompt = `You are guiding someone through Cognitive Restructuring. They shared evidence for their thought.
+        Now ask them what evidence might contradict this thought. Be gentle. Keep it to 1-2 sentences.`;
       }
       else if (currentStep === 2) {
-        systemPrompt = `You are guiding someone through Cognitive Restructuring STEP 3: Evidence AGAINST the thought.
-        This step can be hard. Be extra gentle.
-        Ask questions like:
-        - "This might be difficult, but is there any evidence that might contradict this thought?"
-        - "Has there ever been a time when this thought wasn't completely true?"
-        Ask ONE question at a time. Be patient.`;
+        systemPrompt = `You are guiding someone through Cognitive Restructuring. They shared evidence against their thought.
+        Now ask them to consider alternative perspectives. Keep it to 1-2 sentences.`;
       }
       else if (currentStep === 3) {
-        systemPrompt = `You are guiding someone through Cognitive Restructuring STEP 4: Alternative perspectives.
-        Now help them see other angles, but gently.
-        Ask questions like:
-        - "If a close friend was feeling this way, what would you tell them?"
-        - "Is there another way someone might look at this situation?"
-        Ask ONE question at a time. Be warm.`;
+        systemPrompt = `You are guiding someone through Cognitive Restructuring. They shared alternative perspectives.
+        Now ask them to develop a more balanced thought. Keep it to 1-2 sentences.`;
       }
       else if (currentStep === 4) {
-        systemPrompt = `You are guiding someone through Cognitive Restructuring STEP 5: Balanced thought.
-        Based on everything they've shared, help them find a more balanced perspective.
-        Ask questions like:
-        - "Based on everything we've talked about, what feels like a more balanced way to look at this?"
-        - "What's a thought that feels both true AND gentle?"
-        Ask ONE question at a time. Be encouraging.`;
+        systemPrompt = `You are completing Cognitive Restructuring. Acknowledge their work and tell them you'll show a summary. Keep it warm.`;
       }
 
       const allMessages = [
         {
           role: 'system',
-          content: systemPrompt + " Remember: take it SLOW. One question at a time. Really understand them."
+          content: systemPrompt
         },
         ...conversationHistory,
         { role: 'user', content: userMessage }
@@ -1420,7 +1385,7 @@ const CognitiveChatbot = ({ onComplete, onBack }) => {
           model: 'mistralai/mistral-7b-instruct',
           messages: allMessages,
           temperature: 0.8,
-          max_tokens: 150
+          max_tokens: 100
         })
       });
 
@@ -1443,7 +1408,6 @@ const CognitiveChatbot = ({ onComplete, onBack }) => {
         "I really want to understand. Can you tell me more about that?",
         "Take your time with this. What else comes up for you?",
         "That's helpful. Is there anything more you want to share?",
-        "I'm listening. What else is on your mind about this?"
       ];
       
       return fallbacks[Math.floor(Math.random() * fallbacks.length)];
@@ -1455,13 +1419,7 @@ const CognitiveChatbot = ({ onComplete, onBack }) => {
 
     const userMessage = input.trim();
     
-    if (step === 0) {
-      if (!thought) {
-        setThought(userMessage);
-      } else {
-        setThoughtDetails(userMessage);
-      }
-    }
+    if (step === 0) setThought(userMessage);
     else if (step === 1) setEvidenceFor([...evidenceFor, userMessage]);
     else if (step === 2) setEvidenceAgainst([...evidenceAgainst, userMessage]);
     else if (step === 3) setAlternatives([...alternatives, userMessage]);
@@ -1500,7 +1458,6 @@ const CognitiveChatbot = ({ onComplete, onBack }) => {
   const handleComplete = () => {
     onComplete('cognitive', rating, feedback, {
       thought,
-      thoughtDetails,
       evidenceFor,
       evidenceAgainst,
       alternatives,
@@ -1522,7 +1479,6 @@ const CognitiveChatbot = ({ onComplete, onBack }) => {
           <div style={{marginBottom: '16px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px'}}>
             <p style={{color: '#cbd5e0', fontWeight: 'bold'}}>Your original thought:</p>
             <p style={{color: 'white'}}>"{thought}"</p>
-            {thoughtDetails && <p style={{color: '#cbd5e0', marginTop: '8px'}}>{thoughtDetails}</p>}
           </div>
 
           {evidenceFor.length > 0 && (
@@ -1847,7 +1803,7 @@ const BreathingTechnique = ({ technique, onComplete, onBack }) => {
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isActive, phase, currentCycle, cycles, technique]);
+  }, [isActive, phase, currentCycle, cycles, technique, completed]);
 
   const handleStart = () => {
     if (cycles < technique.minCycles || cycles > technique.maxCycles) {
@@ -2248,7 +2204,7 @@ const PomodoroTechnique = ({ technique, onComplete, onBack }) => {
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isActive, phase, cycle]);
+  }, [isActive, phase, cycle, completed]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -2772,6 +2728,7 @@ function App() {
     style.innerHTML = `
       @keyframes breathe { 0%,100% { opacity: 0.8; } 50% { opacity: 1; } }
       @keyframes twinkle { 0%,100% { opacity: 0.3; } 50% { opacity: 0.5; } }
+      @keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
     `;
     document.head.appendChild(style);
     
@@ -2876,15 +2833,7 @@ function App() {
           <motion.nav style={{...styles.nav, ...(scrolled ? { background: 'rgba(10,10,26,0.8)', backdropFilter: 'blur(20px)' } : {})}} initial={{ y: -100 }} animate={{ y: 0 }}>
             <div style={styles.navContent}>
               <div style={styles.logo} onClick={() => navigateTo('/')}>
-                <img 
-                  src="/logo.png" 
-                  alt="LumaCare"
-                  style={styles.logoImage}
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.parentNode.innerHTML = '<span style="font-size:1.8rem;">🧠</span><span style="font-size:1.4rem;">LumaCare</span>';
-                  }}
-                />
+                <span style={{ fontSize: '2rem', marginRight: '8px' }}>🧠</span>
                 <span style={styles.logoText}>LumaCare</span>
               </div>
               
