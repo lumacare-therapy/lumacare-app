@@ -32,20 +32,6 @@ const styles = {
     borderRadius: '100px',
     boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
   },
-  // Update the nav item style in your styles object
-navItem: {
-  padding: window.innerWidth <= 768 ? '8px 10px' : '8px 16px',
-  borderRadius: '40px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  color: '#cbd5e0',
-  textDecoration: 'none',
-  cursor: 'pointer',
-  minHeight: '44px', // Better touch target
-  minWidth: '44px',
-},
-
   navContent: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -71,6 +57,18 @@ navItem: {
     gap: '8px',
     flexWrap: 'wrap',
     justifyContent: 'center',
+  },
+  navItem: {
+    padding: '8px 16px',
+    borderRadius: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    color: '#cbd5e0',
+    textDecoration: 'none',
+    cursor: 'pointer',
+    minHeight: '44px',
+    minWidth: '44px',
   },
   navItemActive: {
     color: '#f7fafc',
@@ -306,7 +304,6 @@ const LoginPage = ({ onLogin }) => {
         overflowY: 'auto',
       }}
     >
-      {/* Background Effects - These are fine because they're inside style tags */}
       <div style={{
         position: 'fixed',
         top: 0,
@@ -348,7 +345,6 @@ const LoginPage = ({ onLogin }) => {
         initial={{ y: 20 }}
         animate={{ y: 0 }}
       >
-        {/* Brain Icon */}
         <div style={{ 
           fontSize: isSmallMobile ? '3.5rem' : isMobile ? '4rem' : '5rem', 
           marginBottom: isMobile ? '4px' : '8px',
@@ -358,7 +354,6 @@ const LoginPage = ({ onLogin }) => {
           🧠
         </div>
         
-        {/* No Login Badge */}
         <div style={{
           backgroundColor: 'rgba(46, 125, 50, 0.15)',
           color: '#4fd1c5',
@@ -375,7 +370,6 @@ const LoginPage = ({ onLogin }) => {
           ⚡ No login required. Start for free.
         </div>
         
-        {/* H1 Tag */}
         <h1 style={{ 
           fontSize: isSmallMobile ? '1.6rem' : isMobile ? '1.8rem' : '2.5rem',
           fontWeight: 700,
@@ -398,7 +392,6 @@ const LoginPage = ({ onLogin }) => {
           Your daily system for mental clarity and focus
         </p>
 
-        {/* Feature Icons */}
         <div style={{ 
           display: 'flex', 
           gap: isMobile ? '8px' : '16px', 
@@ -432,7 +425,6 @@ const LoginPage = ({ onLogin }) => {
           </div>
         </div>
 
-        {/* Free Plan Box */}
         <div style={{ 
           background: 'rgba(159,122,234,0.1)', 
           borderRadius: '12px', 
@@ -447,7 +439,6 @@ const LoginPage = ({ onLogin }) => {
           </ul>
         </div>
 
-        {/* SEO Content Section */}
         <div style={{ 
           textAlign: 'left', 
           marginTop: isMobile ? '24px' : '40px', 
@@ -520,7 +511,6 @@ const LoginPage = ({ onLogin }) => {
           </p>
         </div>
 
-        {/* Google Sign-In */}
         <div style={{ 
           marginBottom: isMobile ? '12px' : '16px',
           transform: isMobile ? 'scale(0.95)' : 'none',
@@ -537,7 +527,6 @@ const LoginPage = ({ onLogin }) => {
           />
         </div>
 
-        {/* Guest Login Option */}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -927,10 +916,20 @@ const useSessionTracking = () => {
   return { userData, canUseSession, trackSession, upgradeUser };
 };
 
-// ==================== DASHBOARD ====================
+// ==================== DASHBOARD - MOBILE OPTIMIZED ====================
 const Dashboard = ({ navigateTo, userData }) => {
   const [stressLevel, setStressLevel] = useState(42);
   const [clarityScore, setClarityScore] = useState(68);
+  
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth <= 768;
 
   useEffect(() => {
     if (userData?.stats) {
@@ -979,22 +978,27 @@ const Dashboard = ({ navigateTo, userData }) => {
       </div>
       <p style={styles.subtitle}>Your mind is clear. Let's keep it that way.</p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '32px' }}>
-        <div style={{...styles.card, textAlign: 'center'}}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: isMobile ? 'column' : 'row', 
+        gap: '24px', 
+        marginTop: '32px' 
+      }}>
+        <div style={{...styles.card, textAlign: 'center', flex: 1}}>
           <h3 style={{color: '#cbd5e0', marginBottom: '20px'}}>Stress Level</h3>
           <div style={{
-            width: '200px',
-            height: '200px',
+            width: isMobile ? '180px' : '200px',
+            height: isMobile ? '180px' : '200px',
             borderRadius: '50%',
-            background: `conic-gradient(#9f7aea 0deg ${stressLevel * 3.6}deg, #2d1b4a ${stressLevel * 3.6}deg 360deg)`,
             margin: '0 auto',
+            background: `conic-gradient(#9f7aea 0deg ${stressLevel * 3.6}deg, #2d1b4a ${stressLevel * 3.6}deg 360deg)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
             <div style={{
-              width: '160px',
-              height: '160px',
+              width: isMobile ? '140px' : '160px',
+              height: isMobile ? '140px' : '160px',
               borderRadius: '50%',
               background: '#1a0b2e',
               display: 'flex',
@@ -1002,7 +1006,7 @@ const Dashboard = ({ navigateTo, userData }) => {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <span style={{fontSize: '2.5rem', fontWeight: 'bold'}}>{stressLevel}%</span>
+              <span style={{fontSize: isMobile ? '2rem' : '2.5rem', fontWeight: 'bold'}}>{stressLevel}%</span>
               <span style={{color: '#cbd5e0'}}>
                 {stressLevel < 30 ? 'low' : stressLevel < 60 ? 'moderate' : 'high'}
               </span>
@@ -1010,21 +1014,21 @@ const Dashboard = ({ navigateTo, userData }) => {
           </div>
         </div>
 
-        <div style={{...styles.card, textAlign: 'center'}}>
+        <div style={{...styles.card, textAlign: 'center', flex: 1}}>
           <h3 style={{color: '#cbd5e0', marginBottom: '20px'}}>Task Clarity</h3>
           <div style={{
-            width: '200px',
-            height: '200px',
+            width: isMobile ? '180px' : '200px',
+            height: isMobile ? '180px' : '200px',
             borderRadius: '50%',
-            background: `conic-gradient(#4fd1c5 0deg ${clarityScore * 3.6}deg, #2d1b4a ${clarityScore * 3.6}deg 360deg)`,
             margin: '0 auto',
+            background: `conic-gradient(#4fd1c5 0deg ${clarityScore * 3.6}deg, #2d1b4a ${clarityScore * 3.6}deg 360deg)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
             <div style={{
-              width: '160px',
-              height: '160px',
+              width: isMobile ? '140px' : '160px',
+              height: isMobile ? '140px' : '160px',
               borderRadius: '50%',
               background: '#1a0b2e',
               display: 'flex',
@@ -1032,7 +1036,7 @@ const Dashboard = ({ navigateTo, userData }) => {
               alignItems: 'center',
               justifyContent: 'center'
             }}>
-              <span style={{fontSize: '2.5rem', fontWeight: 'bold'}}>{clarityScore}%</span>
+              <span style={{fontSize: isMobile ? '2rem' : '2.5rem', fontWeight: 'bold'}}>{clarityScore}%</span>
               <span style={{color: '#cbd5e0'}}>
                 {clarityScore < 40 ? 'unclear' : clarityScore < 70 ? 'moderate' : 'clear'}
               </span>
@@ -1055,7 +1059,7 @@ const Dashboard = ({ navigateTo, userData }) => {
           </div>
         </div>
 
-        <div style={{display: 'flex', gap: '16px'}}>
+        <div style={{display: 'flex', gap: '16px', overflowX: isMobile ? 'auto' : 'visible'}}>
           <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingRight: '8px', minWidth: '30px'}}>
             <span style={{color: '#cbd5e0', fontSize: '0.8rem'}}>100</span>
             <span style={{color: '#cbd5e0', fontSize: '0.8rem'}}>75</span>
@@ -1064,7 +1068,7 @@ const Dashboard = ({ navigateTo, userData }) => {
             <span style={{color: '#cbd5e0', fontSize: '0.8rem'}}>0</span>
           </div>
 
-          <div style={{flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', height: '200px'}}>
+          <div style={{flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', height: '200px', minWidth: isMobile ? '500px' : 'auto'}}>
             {userData.stats.weeklyData.map((data, i) => (
               <div key={i} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '40px'}}>
                 <div style={{
@@ -1091,7 +1095,7 @@ const Dashboard = ({ navigateTo, userData }) => {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginTop: '24px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '16px', marginTop: '24px' }}>
         <div style={{...styles.card, textAlign: 'center', padding: '20px'}}>
           <div style={{fontSize: '2.5rem', marginBottom: '8px'}}>🤖</div>
           <div style={{fontSize: '2rem', fontWeight: 'bold', color: '#9f7aea'}}>{userData.stats.aiSessions}</div>
@@ -2538,7 +2542,7 @@ const PomodoroTechnique = ({ technique, onComplete, onBack }) => {
   );
 };
 
-// ==================== PRIORITY MATRIX ====================
+// ==================== PRIORITY MATRIX - MOBILE OPTIMIZED (SMALLER) ====================
 const PriorityMatrix = () => {
   const [tasks, setTasks] = useState(() => {
     const saved = localStorage.getItem('lumacare_matrix_tasks');
@@ -2551,6 +2555,16 @@ const PriorityMatrix = () => {
 
   const [newTask, setNewTask] = useState('');
   const [selectedQuadrant, setSelectedQuadrant] = useState('urgent-important');
+  
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth <= 768;
 
   useEffect(() => {
     localStorage.setItem('lumacare_matrix_tasks', JSON.stringify(tasks));
@@ -2583,52 +2597,171 @@ const PriorityMatrix = () => {
       <h1 style={styles.title}>Priority Matrix</h1>
       <p style={styles.subtitle}>Sort tasks by urgency and importance.</p>
 
-      <div style={{...styles.card, marginBottom: '24px'}}>
-        <div style={{display: 'flex', gap: '16px', flexWrap: 'wrap'}}>
+      {/* Add Task Section - Fixed dropdown visibility */}
+      <div style={{...styles.card, marginBottom: '16px', padding: isMobile ? '16px' : '24px'}}>
+        <div style={{display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '12px'}}>
           <input
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && addTask()}
             placeholder="Add a new task..."
-            style={{flex: 1, padding: '12px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'white'}}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '12px',
+              color: 'white',
+              fontSize: isMobile ? '14px' : '1rem',
+            }}
           />
           <select
             value={selectedQuadrant}
             onChange={(e) => setSelectedQuadrant(e.target.value)}
-            style={{padding: '12px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: 'white', minWidth: '180px'}}
+            style={{
+              padding: '12px 16px',
+              background: '#2d1b4a', // Dark purple background
+              border: '1px solid #9f7aea',
+              borderRadius: '12px',
+              color: 'white',
+              fontSize: isMobile ? '14px' : '1rem',
+              width: isMobile ? '100%' : '200px',
+              cursor: 'pointer',
+              WebkitAppearance: 'menulist', // Force native dropdown on iOS
+              MozAppearance: 'menulist',
+              appearance: 'menulist',
+            }}
           >
-            {quadrants.map(q => <option key={q.id} value={q.id}>{q.title}</option>)}
+            {quadrants.map(q => (
+              <option 
+                key={q.id} 
+                value={q.id} 
+                style={{ 
+                  background: '#1a0b2e', 
+                  color: 'white',
+                  padding: '10px'
+                }}
+              >
+                {q.title}
+              </option>
+            ))}
           </select>
           <motion.button
             whileHover={{scale: 1.02}}
             whileTap={{scale: 0.98}}
             onClick={addTask}
-            style={{padding: '12px 32px', background: 'linear-gradient(135deg, #9f7aea, #4fd1c5)', border: 'none', borderRadius: '12px', color: 'white', cursor: 'pointer'}}
+            style={{
+              padding: '12px 24px',
+              background: 'linear-gradient(135deg, #9f7aea, #4fd1c5)',
+              border: 'none',
+              borderRadius: '12px',
+              color: 'white',
+              cursor: 'pointer',
+              width: isMobile ? '100%' : 'auto',
+              fontSize: isMobile ? '14px' : '1rem',
+              fontWeight: 600,
+            }}
           >
             Add
           </motion.button>
         </div>
       </div>
 
-      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px'}}>
+      {/* Quadrants - Smaller and no horizontal scroll */}
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '12px',
+        width: '100%',
+      }}>
         {quadrants.map((q) => (
-          <div key={q.id} style={{...styles.card, background: `linear-gradient(135deg, ${q.color}20, rgba(0,0,0,0.2))`, borderColor: q.color + '80'}}>
-            <h3 style={{color: q.color, marginBottom: '4px'}}>{q.title}</h3>
-            <p style={{fontSize: '0.85rem', color: '#cbd5e0', marginBottom: '16px'}}>{q.subtitle}</p>
-            {tasks.filter(t => t.quadrant === q.id).map(task => (
-              <div key={task.id} style={{display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', marginBottom: '8px'}}>
-                <span
-                  onClick={() => toggleTask(task.id)}
-                  style={{width: '20px', height: '20px', border: '2px solid rgba(255,255,255,0.2)', borderRadius: '6px', cursor: 'pointer', background: task.completed ? q.color : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
-                >
-                  {task.completed && '✓'}
-                </span>
-                <span style={{flex: 1, textDecoration: task.completed ? 'line-through' : 'none', opacity: task.completed ? 0.5 : 1}}>{task.text}</span>
-                <span onClick={() => deleteTask(task.id)} style={{cursor: 'pointer', color: '#ef4444'}}>✕</span>
-              </div>
-            ))}
+          <div key={q.id} style={{
+            ...styles.card,
+            padding: isMobile ? '12px' : '20px',
+            background: `linear-gradient(135deg, ${q.color}15, rgba(0,0,0,0.2))`,
+            borderColor: q.color + '60',
+            borderWidth: '1px',
+            width: '100%',
+          }}>
+            <h3 style={{
+              color: q.color,
+              marginBottom: '2px',
+              fontSize: isMobile ? '1rem' : '1.2rem',
+              fontWeight: 600,
+            }}>{q.title}</h3>
+            <p style={{
+              fontSize: '0.75rem',
+              color: '#cbd5e0',
+              marginBottom: '12px',
+              opacity: 0.8,
+            }}>{q.subtitle}</p>
+            
+            {/* Tasks container - compact */}
+            <div style={{ marginBottom: '4px' }}>
+              {tasks.filter(t => t.quadrant === q.id).map(task => (
+                <div key={task.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '6px 8px',
+                  background: 'rgba(255,255,255,0.03)',
+                  borderRadius: '6px',
+                  marginBottom: '6px',
+                  fontSize: isMobile ? '0.85rem' : '0.95rem',
+                }}>
+                  <span
+                    onClick={() => toggleTask(task.id)}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      border: '2px solid rgba(255,255,255,0.2)',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      background: task.completed ? q.color : 'transparent',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {task.completed && '✓'}
+                  </span>
+                  <span style={{
+                    flex: 1,
+                    textDecoration: task.completed ? 'line-through' : 'none',
+                    opacity: task.completed ? 0.5 : 1,
+                    wordBreak: 'break-word',
+                  }}>{task.text}</span>
+                  <span
+                    onClick={() => deleteTask(task.id)}
+                    style={{
+                      cursor: 'pointer',
+                      color: '#ef4444',
+                      fontSize: '16px',
+                      flexShrink: 0,
+                      padding: '0 4px',
+                    }}
+                  >
+                    ✕
+                  </span>
+                </div>
+              ))}
+            </div>
+            
+            {/* Empty state */}
             {tasks.filter(t => t.quadrant === q.id).length === 0 && (
-              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100px', color: '#6b7280', border: '2px dashed rgba(255,255,255,0.1)', borderRadius: '8px'}}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: '40px',
+                color: '#6b7280',
+                border: '1px dashed rgba(255,255,255,0.1)',
+                borderRadius: '6px',
+                fontSize: isMobile ? '0.8rem' : '0.85rem',
+                padding: '8px',
+              }}>
                 Drop tasks here
               </div>
             )}
@@ -2882,14 +3015,15 @@ function App() {
   const [currentTechnique, setCurrentTechnique] = useState(null);
   const { userData, trackSession, upgradeUser } = useSessionTracking();
   const [showPremium, setShowPremium] = useState(false);
-  // Add this inside your App component, right after the useState declarations
-const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
-useEffect(() => {
-  const handleResize = () => setWindowWidth(window.innerWidth);
-  window.addEventListener('resize', handleResize);
-  return () => window.removeEventListener('resize', handleResize);
-}, []);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowWidth <= 768;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -2972,6 +3106,13 @@ useEffect(() => {
     { path: '/settings', label: 'Settings', icon: '⚙️' },
   ];
 
+  const mobileNavItems = [
+    { path: '/', label: 'Home', icon: '🏠' },
+    { path: '/techniques', label: 'Tools', icon: '🧘' },
+    { path: '/assistant', label: 'AI', icon: '🤖' },
+    { path: '/settings', label: 'Profile', icon: '👤' },
+  ];
+
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Router future={routerFutureConfig}>
@@ -2983,7 +3124,7 @@ useEffect(() => {
             width: '100%',
             height: '100%',
             background: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 1px, transparent 1px), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.6) 1px, transparent 1px)',
-            backgroundSize: '200px 200px',
+            backgroundSize: isMobile ? '100px 100px' : '200px 200px',
             opacity: 0.3,
             animation: 'twinkle 4s ease-in-out infinite',
             pointerEvents: 'none',
@@ -3001,60 +3142,106 @@ useEffect(() => {
             zIndex: -1
           }} />
 
-<motion.nav style={{...styles.nav, ...(scrolled ? { background: 'rgba(10,10,26,0.8)', backdropFilter: 'blur(20px)' } : {})}} initial={{ y: -100 }} animate={{ y: 0 }}>
-  <div style={styles.navContent}>
-    <div style={styles.logo} onClick={() => navigateTo('/')}>
-      <span style={{ fontSize: window.innerWidth <= 480 ? '1.4rem' : '1.8rem', marginRight: '8px' }}>🧠</span>
-      <span style={{ fontSize: window.innerWidth <= 480 ? '1rem' : '1.4rem', ...styles.logoText }}>LumaCare</span>
-    </div>
-    
-    <div style={styles.navLinks}>
-      {navItems.map((item) => (
-        <NavLink key={item.path} to={item.path} style={({ isActive }) => ({
-          ...styles.navItem,
-          ...(isActive ? styles.navItemActive : {}),
-          padding: window.innerWidth <= 480 ? '6px 8px' : '8px 16px',
-        })}>
-          <motion.div style={{display: 'flex', alignItems: 'center', gap: window.innerWidth <= 480 ? '4px' : '8px'}} whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
-            <span style={{ fontSize: window.innerWidth <= 480 ? '1rem' : '1.2rem' }}>{item.icon}</span>
-            <span style={{ display: 'inline' }} className="nav-label">{item.label}</span>
-          </motion.div>
-        </NavLink>
-      ))}
-    </div>
+          {!isMobile && (
+            <motion.nav style={{...styles.nav, ...(scrolled ? { background: 'rgba(10,10,26,0.8)', backdropFilter: 'blur(20px)' } : {})}} initial={{ y: -100 }} animate={{ y: 0 }}>
+              <div style={styles.navContent}>
+                <div style={styles.logo} onClick={() => navigateTo('/')}>
+                  <span style={{ fontSize: '1.8rem', marginRight: '8px' }}>🧠</span>
+                  <span style={styles.logoText}>LumaCare</span>
+                </div>
+                
+                <div style={styles.navLinks}>
+                  {navItems.map((item) => (
+                    <NavLink key={item.path} to={item.path} style={({ isActive }) => ({
+                      ...styles.navItem,
+                      ...(isActive ? styles.navItemActive : {}),
+                    })}>
+                      <motion.div style={{display: 'flex', alignItems: 'center', gap: '8px'}} whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+                        <span>{item.icon}</span>
+                        <span>{item.label}</span>
+                      </motion.div>
+                    </NavLink>
+                  ))}
+                </div>
 
-    <div style={{ display: 'flex', alignItems: 'center', gap: window.innerWidth <= 480 ? '4px' : '12px' }}>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setShowPremium(true)}
-        style={{
-          ...styles.premiumButton,
-          padding: window.innerWidth <= 480 ? '6px 12px' : '8px 20px',
-          fontSize: window.innerWidth <= 480 ? '0.8rem' : '0.95rem',
-        }}
-      >
-        ⭐ {window.innerWidth <= 480 ? '' : 'Premium'}
-      </motion.button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowPremium(true)}
+                    style={styles.premiumButton}
+                  >
+                    ⭐ Premium
+                  </motion.button>
 
-      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => navigateTo('/settings')} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '8px'}}>
-        {user.picture ? (
-          <img src={user.picture} alt="profile" style={{...styles.profileImage, width: window.innerWidth <= 480 ? '28px' : '36px', height: window.innerWidth <= 480 ? '28px' : '36px'}} />
-        ) : (
-          <div style={{...styles.profilePlaceholder, width: window.innerWidth <= 480 ? '28px' : '36px', height: window.innerWidth <= 480 ? '28px' : '36px', fontSize: window.innerWidth <= 480 ? '0.9rem' : '1.2rem'}}>
-            {user.name.charAt(0).toUpperCase()}
-          </div>
-        )}
-      </motion.button>
-    </div>
-  </div>
-</motion.nav>
+                  <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => navigateTo('/settings')} style={{background: 'none', border: 'none', cursor: 'pointer', padding: '8px'}}>
+                    {user.picture ? (
+                      <img src={user.picture} alt="profile" style={styles.profileImage} />
+                    ) : (
+                      <div style={styles.profilePlaceholder}>
+                        {user.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </motion.button>
+                </div>
+              </div>
+            </motion.nav>
+          )}
+
+          {isMobile && (
+            <header style={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 100,
+              padding: '12px 16px',
+              background: 'rgba(10, 10, 26, 0.8)',
+              backdropFilter: 'blur(10px)',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+              <div style={styles.logo} onClick={() => navigateTo('/')}>
+                <span style={{ fontSize: '1.8rem', marginRight: '8px' }}>🧠</span>
+                <span style={styles.logoText}>LumaCare</span>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowPremium(true)}
+                  style={{
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                    color: 'white',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  ⭐ Premium
+                </motion.button>
+
+                <div onClick={() => navigateTo('/settings')}>
+                  {user.picture ? (
+                    <img src={user.picture} alt="profile" style={{width: '36px', height: '36px', borderRadius: '50%', border: '2px solid #9f7aea'}} />
+                  ) : (
+                    <div style={{width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #9f7aea, #4fd1c5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', color: 'white'}}>
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </header>
+          )}
 
           {showPremium && (
             <PremiumModal onClose={() => setShowPremium(false)} onUpgrade={handleUpgrade} />
           )}
 
-          <motion.main style={styles.main} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <motion.main style={{...styles.main, paddingBottom: isMobile ? '80px' : '48px'}} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <AnimatePresence mode="wait">
               <Routes>
                 <Route path="/" element={<Dashboard navigateTo={navigateTo} userData={userData} />} />
@@ -3066,6 +3253,46 @@ useEffect(() => {
               </Routes>
             </AnimatePresence>
           </motion.main>
+
+          {isMobile && (
+            <nav style={{
+              position: 'fixed',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+              background: 'rgba(26, 11, 46, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+              padding: '8px 4px',
+              zIndex: 100,
+            }}>
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  style={({ isActive }) => ({
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '4px 0',
+                    flex: '0 0 auto',
+                    minWidth: '55px',
+                    color: isActive ? '#9f7aea' : '#cbd5e0',
+                    textDecoration: 'none',
+                    fontSize: '0.6rem',
+                    gap: '2px',
+                  })}
+                >
+                  <span style={{ fontSize: '1.2rem' }}>{item.icon}</span>
+                  <span style={{ whiteSpace: 'nowrap' }}>{item.label}</span>
+                </NavLink>
+              ))}
+            </nav>
+          )}
         </div>
       </Router>
     </GoogleOAuthProvider>
