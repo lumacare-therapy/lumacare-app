@@ -397,10 +397,12 @@ const LoadingWave = () => (
   </div>
 );
 
-// ==================== LOGIN PAGE - ENHANCED ====================
+// ==================== LOGIN PAGE - WITH LANGUAGE PREFERENCE ====================
 const LoginPage = ({ onLogin }) => {
   const handleGoogleSuccess = (credentialResponse) => {
     const decoded = jwtDecode(credentialResponse.credential);
+    const selectedLanguage = localStorage.getItem('preferred_language') || 'en';
+    
     const user = {
       name: decoded.name,
       email: decoded.email,
@@ -409,6 +411,7 @@ const LoginPage = ({ onLogin }) => {
       sessionsRemaining: 1,
       lastSessionTime: null,
       premiumExpiry: null,
+      language: selectedLanguage,
       stats: {
         aiSessions: 0,
         breathing: 0,
@@ -434,6 +437,8 @@ const LoginPage = ({ onLogin }) => {
   };
 
   const handleGuestLogin = () => {
+    const selectedLanguage = localStorage.getItem('preferred_language') || 'en';
+    
     const guestUser = {
       name: 'Guest User',
       email: 'guest@lumacare.app',
@@ -442,6 +447,7 @@ const LoginPage = ({ onLogin }) => {
       sessionsRemaining: 3,
       lastSessionTime: null,
       premiumExpiry: null,
+      language: selectedLanguage,
       stats: {
         aiSessions: 0,
         breathing: 0,
@@ -707,6 +713,53 @@ const LoginPage = ({ onLogin }) => {
               <p style={{ color: '#cbd5e0', fontSize: '0.9rem' }}>Track energy and stress without friction.</p>
             </div>
           </div>
+        </motion.div>
+
+        {/* Language Preference - Only for new users */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.65 }}
+          style={{
+            marginBottom: '20px',
+            textAlign: 'left',
+            padding: '16px',
+            background: 'rgba(255,255,255,0.03)',
+            borderRadius: '12px',
+            border: '1px solid rgba(159,122,234,0.2)'
+          }}
+        >
+          <label style={{ color: '#cbd5e0', fontSize: '0.9rem', display: 'block', marginBottom: '8px' }}>
+            🌍 Choose your language
+          </label>
+          <select
+            id="language-select"
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(159,122,234,0.3)',
+              borderRadius: '12px',
+              color: 'white',
+              fontSize: '1rem',
+              cursor: 'pointer'
+            }}
+            onChange={(e) => {
+              localStorage.setItem('preferred_language', e.target.value);
+            }}
+          >
+            <option value="en" style={{ background: '#1a0b2e' }}>🇬🇧 English</option>
+            <option value="es" style={{ background: '#1a0b2e' }}>🇪🇸 Español</option>
+            <option value="fr" style={{ background: '#1a0b2e' }}>🇫🇷 Français</option>
+            <option value="de" style={{ background: '#1a0b2e' }}>🇩🇪 Deutsch</option>
+            <option value="zh" style={{ background: '#1a0b2e' }}>🇨🇳 中文</option>
+            <option value="hi" style={{ background: '#1a0b2e' }}>🇮🇳 हिन्दी</option>
+            <option value="ar" style={{ background: '#1a0b2e' }}>🇸🇦 العربية</option>
+            <option value="pt" style={{ background: '#1a0b2e' }}>🇧🇷 Português</option>
+          </select>
+          <p style={{ color: '#6b7280', fontSize: '0.75rem', marginTop: '8px' }}>
+            You can change this anytime in Settings
+          </p>
         </motion.div>
 
         <motion.div 
@@ -1235,30 +1288,6 @@ const Dashboard = ({ navigateTo, userData }) => {
       animate={{ opacity: 1 }} 
       exit={{ opacity: 0 }}
     >
-      {/* TEST BUTTON - You can remove this later */}
-      <button 
-        onClick={async () => {
-          const response = await callOpenRouter([
-            { role: 'user', content: 'Say hello in one sentence' }
-          ], 'z-ai/glm-4.7-flash');
-          alert('AI says: ' + response);
-        }}
-        style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          padding: '15px 25px',
-          background: '#9f7aea',
-          color: 'white',
-          border: 'none',
-          borderRadius: '50px',
-          zIndex: 9999,
-          cursor: 'pointer',
-          fontSize: '16px'
-        }}
-      >
-        🧪 TEST AI
-      </button>
 
       <div style={{ 
         display: 'flex', 
@@ -1497,7 +1526,7 @@ const Dashboard = ({ navigateTo, userData }) => {
   );
 };
 
-// ==================== AI ASSISTANT - WORKING VERSION ====================
+// ==================== AI ASSISTANT - FIXED CHAT LAYOUT ====================
 const AIAssistant = ({ startTechnique }) => {
   const [messages, setMessages] = useState([
     { 
@@ -1607,8 +1636,9 @@ TECHNIQUES:
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
       exit={{ opacity: 0 }}
+      style={{ height: 'calc(100vh - 60px)', display: 'flex', flexDirection: 'column' }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px', flexShrink: 0 }}>
         <motion.div
           animate={{ rotate: [0, 10, -10, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
@@ -1622,17 +1652,19 @@ TECHNIQUES:
         </div>
       </div>
 
-      <div style={{...styles.card, minHeight: '550px', display: 'flex', flexDirection: 'column'}}>
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          marginBottom: '16px',
-          padding: '16px',
-          maxHeight: '400px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px',
-        }}>
+      <div style={{...styles.card, flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
+        {/* Messages area - fills available space, scrolls when needed */}
+        <div
+  id="chat-messages-container"
+  style={{
+    flex: 1,
+    overflowY: 'auto',
+    padding: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  }}
+>
           {messages.map((msg, i) => (
             <motion.div
               key={i}
@@ -1742,76 +1774,84 @@ TECHNIQUES:
           )}
         </div>
 
+        {/* Input area - fixed at bottom */}
         <div style={{
-          display: 'flex',
-          gap: '8px',
-          flexWrap: 'wrap',
-          marginBottom: '16px',
-          justifyContent: 'center'
+          borderTop: '1px solid rgba(255,255,255,0.1)',
+          padding: '20px',
+          background: 'rgba(0,0,0,0.2)',
+          flexShrink: 0
         }}>
-          {conversationStarters.map((item, i) => (
-            <motion.button
-              key={i}
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                setInput(item.query);
-                setTimeout(() => handleSend(), 100);
-              }}
+          <div style={{
+            display: 'flex',
+            gap: '8px',
+            flexWrap: 'wrap',
+            marginBottom: '16px',
+            justifyContent: 'center'
+          }}>
+            {conversationStarters.map((item, i) => (
+              <motion.button
+                key={i}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setInput(item.query);
+                  setTimeout(() => handleSend(), 100);
+                }}
+                style={{
+                  padding: '10px 18px',
+                  background: `linear-gradient(135deg, ${item.color}20, ${item.color}10)`,
+                  border: `1px solid ${item.color}40`,
+                  borderRadius: '30px',
+                  color: 'white',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span>{item.emoji}</span>
+                <span>{item.text}</span>
+              </motion.button>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="Type your message..."
+              disabled={isLoading}
               style={{
-                padding: '10px 18px',
-                background: `linear-gradient(135deg, ${item.color}20, ${item.color}10)`,
-                border: `1px solid ${item.color}40`,
+                ...styles.input,
+                marginBottom: 0,
                 borderRadius: '30px',
+                flex: 1
+              }}
+            />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSend}
+              disabled={isLoading || !input.trim()}
+              style={{
+                width: '52px',
+                height: '52px',
+                borderRadius: '50%',
+                background: isLoading || !input.trim() ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #9f7aea, #4fd1c5)',
+                border: 'none',
                 color: 'white',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
+                cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
+                fontSize: '1.2rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                justifyContent: 'center',
               }}
             >
-              <span>{item.emoji}</span>
-              <span>{item.text}</span>
+              ➤
             </motion.button>
-          ))}
-        </div>
-
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Type your message..."
-            disabled={isLoading}
-            style={{
-              ...styles.input,
-              marginBottom: 0,
-              borderRadius: '30px',
-              flex: 1
-            }}
-          />
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleSend}
-            disabled={isLoading || !input.trim()}
-            style={{
-              width: '52px',
-              height: '52px',
-              borderRadius: '50%',
-              background: isLoading || !input.trim() ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #9f7aea, #4fd1c5)',
-              border: 'none',
-              color: 'white',
-              cursor: isLoading || !input.trim() ? 'not-allowed' : 'pointer',
-              fontSize: '1.2rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            ➤
-          </motion.button>
+          </div>
         </div>
       </div>
     </motion.div>
