@@ -12,9 +12,9 @@ const GOOGLE_CLIENT_ID = "253002272888-cg3k451mqesnerv21056utk8u1lk22f6.apps.goo
 // ==================== OPENROUTER API KEY - FROM ENV ====================
 const OPENROUTER_KEY = process.env.REACT_APP_OPENROUTER_KEY;
 
-// ==================== OPENROUTER API - WORKING WITH EXTRACTION ====================
+// ==================== OPENROUTER API - STRICT EXTRACTION ====================
 const callOpenRouter = async (messages, model = 'z-ai/glm-4.7-flash') => {
-  console.log('🔑 Key exists:', OPENROUTER_KEY ? 'YES' : 'NO');
+  const OPENROUTER_KEY = process.env.REACT_APP_OPENROUTER_KEY;
   
   if (!OPENROUTER_KEY) {
     console.error('❌ OpenRouter API key is missing!');
@@ -22,7 +22,7 @@ const callOpenRouter = async (messages, model = 'z-ai/glm-4.7-flash') => {
   }
 
   try {
-    console.log('📡 Sending to OpenRouter with model:', model);
+    console.log('📡 Sending to OpenRouter...');
     
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -40,8 +40,6 @@ const callOpenRouter = async (messages, model = 'z-ai/glm-4.7-flash') => {
       })
     });
 
-    console.log('📥 Status:', response.status);
-    
     const data = await response.json();
     
     if (!response.ok) {
@@ -51,10 +49,9 @@ const callOpenRouter = async (messages, model = 'z-ai/glm-4.7-flash') => {
 
     const choice = data.choices?.[0];
     
-    // Handle reasoning models (like glm-4.7-flash)
+    // If there's reasoning, extract just the final answer
     if (choice?.message?.reasoning) {
       const reasoning = choice.message.reasoning;
-      console.log('🧠 Reasoning:', reasoning.substring(0, 100) + '...');
       
       // STRATEGY 1: Look for text after "Final Polish:"
       const finalPolishMatch = reasoning.match(/\*?Final Polish:\*?\s*"?([^"\n]+)"?/i);
@@ -62,33 +59,37 @@ const callOpenRouter = async (messages, model = 'z-ai/glm-4.7-flash') => {
         return finalPolishMatch[1].trim();
       }
       
-      // STRATEGY 2: Look for the last draft
+      // STRATEGY 2: Look for draft answers and pick the last one
       const draftMatches = reasoning.matchAll(/Draft \d+:\s*([^\n]+)/gi);
       const drafts = Array.from(draftMatches, match => match[1].trim());
       if (drafts.length > 0) {
         return drafts[drafts.length - 1];
       }
       
-      // STRATEGY 3: Return last meaningful sentence
+      // STRATEGY 3: Get the last sentence that looks like speech
       const sentences = reasoning.split('\n').filter(l => l.trim().length > 10);
-      if (sentences.length > 0) {
-        return sentences[sentences.length - 1].replace(/\*+/g, '').trim();
+      for (let i = sentences.length - 1; i >= 0; i--) {
+        const line = sentences[i].replace(/\*+/g, '').trim();
+        // Skip lines that look like instructions
+        if (!line.match(/^(Draft|Step|\d+\.)/i) && line.length > 10) {
+          return line;
+        }
       }
       
-      return reasoning;
-    }
-    else if (choice?.message?.content) {
-      return choice.message.content;
-    }
-    else if (choice?.text) {
-      return choice.text;
+      // STRATEGY 4: If all else fails, use a fallback
+      return "I'm here for you. What's on your mind? 💙";
     }
     
-    return null;
+    // Standard OpenAI format
+    if (choice?.message?.content) {
+      return choice.message.content;
+    }
+    
+    return "I'm here to help. What would you like to talk about?";
     
   } catch (error) {
     console.error('❌ Fetch Error:', error);
-    return null;
+    return "I'm here for you. Can you tell me more?";
   }
 };
 
