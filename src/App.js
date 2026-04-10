@@ -353,142 +353,188 @@ function App() {
   };
 
   // ==================== BREATHING TECHNIQUE ====================
-  const BreathingTechnique = ({ technique, onComplete, onBack }) => {
-    const [cycles, setCycles] = useState(technique.minCycles);
-    const [isActive, setIsActive] = useState(false);
-    const [phase, setPhase] = useState('inhale');
-    const [count, setCount] = useState(technique.inhale);
-    const [currentCycle, setCurrentCycle] = useState(1);
-    const [completed, setCompleted] = useState(false);
-    const [rating, setRating] = useState(0);
-    const [feedback, setFeedback] = useState('');
-    const [soundEnabled, setSoundEnabled] = useState(true);
-    const [hapticEnabled, setHapticEnabled] = useState(true);
-    const [customInhale, setCustomInhale] = useState(technique.inhale);
-    const [customHold1, setCustomHold1] = useState(technique.hold1);
-    const [customExhale, setCustomExhale] = useState(technique.exhale);
-    const [customHold2, setCustomHold2] = useState(technique.hold2);
-    const [useCustomTimes, setUseCustomTimes] = useState(false);
-    const inhaleTime = useCustomTimes ? customInhale : technique.inhale;
-    const hold1Time = useCustomTimes ? customHold1 : technique.hold1;
-    const exhaleTime = useCustomTimes ? customExhale : technique.exhale;
-    const hold2Time = useCustomTimes ? customHold2 : technique.hold2;
+const BreathingTechnique = ({ technique, onComplete, onBack }) => {
+  const [cycles, setCycles] = useState(technique.minCycles);
+  const [isActive, setIsActive] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const [phase, setPhase] = useState('inhale');
+  const [count, setCount] = useState(technique.inhale);
+  const [currentCycle, setCurrentCycle] = useState(1);
+  const [completed, setCompleted] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [feedback, setFeedback] = useState('');
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [hapticEnabled, setHapticEnabled] = useState(true);
+  const [customInhale, setCustomInhale] = useState(technique.inhale);
+  const [customHold1, setCustomHold1] = useState(technique.hold1);
+  const [customExhale, setCustomExhale] = useState(technique.exhale);
+  const [customHold2, setCustomHold2] = useState(technique.hold2);
+  const [useCustomTimes, setUseCustomTimes] = useState(false);
 
-    useEffect(() => {
-      let timer;
-      if (isActive && !completed) {
-        timer = setInterval(() => {
-          setCount(prev => {
-            if (prev <= 1) {
-              if (phase === 'inhale') { setPhase('hold1'); return hold1Time; }
-              if (phase === 'hold1') { setPhase('exhale'); return exhaleTime; }
-              if (phase === 'exhale') { setPhase('hold2'); return hold2Time; }
-              if (phase === 'hold2') {
-                if (currentCycle >= cycles) { setCompleted(true); setIsActive(false); return inhaleTime; }
-                setPhase('inhale'); setCurrentCycle(c => c + 1); return inhaleTime;
+  const inhaleTime = useCustomTimes ? customInhale : technique.inhale;
+  const hold1Time = useCustomTimes ? customHold1 : technique.hold1;
+  const exhaleTime = useCustomTimes ? customExhale : technique.exhale;
+  const hold2Time = useCustomTimes ? customHold2 : technique.hold2;
+
+  // Timer effect
+  useEffect(() => {
+    let timer;
+    if (isActive && !completed && !paused) {
+      timer = setInterval(() => {
+        setCount(prev => {
+          if (prev <= 1) {
+            if (phase === 'inhale') { setPhase('hold1'); return hold1Time; }
+            if (phase === 'hold1') { setPhase('exhale'); return exhaleTime; }
+            if (phase === 'exhale') { setPhase('hold2'); return hold2Time; }
+            if (phase === 'hold2') {
+              if (currentCycle >= cycles) {
+                setCompleted(true);
+                setIsActive(false);
+                return inhaleTime;
               }
+              setPhase('inhale');
+              setCurrentCycle(c => c + 1);
+              return inhaleTime;
             }
-            return prev - 1;
-          });
-        }, 1000);
-      }
-      return () => clearInterval(timer);
-    }, [isActive, completed, phase, currentCycle, cycles, inhaleTime, hold1Time, exhaleTime, hold2Time]);
-
-    useEffect(() => {
-      if (soundEnabled && isActive && !completed) {
-        try {
-          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          oscillator.type = 'sine';
-          let freq = 440;
-          if (phase === 'inhale') freq = 440;
-          else if (phase === 'hold1') freq = 330;
-          else if (phase === 'exhale') freq = 220;
-          else freq = 330;
-          oscillator.frequency.value = freq;
-          gainNode.gain.value = 0.15;
-          oscillator.start();
-          gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.2);
-          oscillator.stop(audioContext.currentTime + 0.2);
-          audioContext.resume().catch(e => {});
-        } catch (e) {}
-      }
-    }, [phase, soundEnabled, isActive, completed]);
-
-    useEffect(() => {
-      if (hapticEnabled && isActive && !completed && 'vibrate' in navigator) {
-        if (phase === 'inhale') navigator.vibrate(50);
-        else if (phase === 'hold1') navigator.vibrate(30);
-        else if (phase === 'exhale') navigator.vibrate(80);
-        else if (phase === 'hold2') navigator.vibrate(30);
-      }
-    }, [phase, hapticEnabled, isActive, completed]);
-
-    const handleStart = () => { setIsActive(true); setCurrentCycle(1); setPhase('inhale'); setCount(inhaleTime); setCompleted(false); };
-    const handleComplete = () => onComplete(technique.id, rating, feedback);
-
-    if (completed) {
-      return (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '4rem' }}>✨</div>
-          <h2 className="text-gradient">Session Complete!</h2>
-          <p>You completed {cycles} cycles.</p>
-          <div style={{ ...styles.card, border: `1px solid ${technique.color}40`, boxShadow: `0 0 30px ${technique.color}20` }}>
-            <h3>How do you feel?</h3>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : 'rgba(139,92,246,0.2)', border: `2px solid ${technique.color}`, color: 'white', cursor: 'pointer' }}>{n}</button>)}</div>
-            <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Share your experience..." style={styles.input} />
-            <button onClick={handleComplete} style={styles.button}>Save</button>
-            <button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '2px solid #94a3b8', marginTop: '10px' }}>Back</button>
-          </div>
-        </div>
-      );
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
+    return () => clearInterval(timer);
+  }, [isActive, completed, paused, phase, currentCycle, cycles, inhaleTime, hold1Time, exhaleTime, hold2Time]);
 
+  // Sound effect
+  useEffect(() => {
+    if (soundEnabled && isActive && !completed && !paused) {
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.type = 'sine';
+        let freq = 440;
+        if (phase === 'inhale') freq = 440;
+        else if (phase === 'hold1') freq = 330;
+        else if (phase === 'exhale') freq = 220;
+        else freq = 330;
+        oscillator.frequency.value = freq;
+        gainNode.gain.value = 0.15;
+        oscillator.start();
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.2);
+        oscillator.stop(audioContext.currentTime + 0.2);
+        audioContext.resume().catch(e => {});
+      } catch (e) {}
+    }
+  }, [phase, soundEnabled, isActive, completed, paused]);
+
+  // Haptic feedback
+  useEffect(() => {
+    if (hapticEnabled && isActive && !completed && !paused && 'vibrate' in navigator) {
+      if (phase === 'inhale') navigator.vibrate(50);
+      else if (phase === 'hold1') navigator.vibrate(30);
+      else if (phase === 'exhale') navigator.vibrate(80);
+      else if (phase === 'hold2') navigator.vibrate(30);
+    }
+  }, [phase, hapticEnabled, isActive, completed, paused]);
+
+  const handleStart = () => {
+    setIsActive(true);
+    setPaused(false);
+    setCurrentCycle(1);
+    setPhase('inhale');
+    setCount(inhaleTime);
+    setCompleted(false);
+  };
+
+  const handlePause = () => {
+    setIsActive(false);
+    setPaused(true);
+  };
+
+  const handleResume = () => {
+    setIsActive(true);
+    setPaused(false);
+  };
+
+  const handleComplete = () => {
+    onComplete(technique.id, rating, feedback);
+  };
+
+  if (completed) {
     return (
       <div style={{ textAlign: 'center' }}>
-        <button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '2px solid #94a3b8' }}>← Back</button>
-        <h1 className="text-gradient">{technique.name}</h1>
-        <p style={{ color: technique.color }}>Pattern: {technique.pattern}</p>
-        {!isActive ? (
-          <div style={{ ...styles.card, border: `1px solid ${technique.color}40`, boxShadow: `0 0 20px ${technique.color}10` }}>
-            <h3>Set Your Session</h3>
-            <p>Cycles: {cycles}</p>
-            <input type="range" min={technique.minCycles} max={technique.maxCycles} value={cycles} onChange={(e) => setCycles(parseInt(e.target.value))} style={{ width: '100%' }} />
-            <div style={{ marginTop: '16px', textAlign: 'left' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                <input type="checkbox" checked={useCustomTimes} onChange={(e) => setUseCustomTimes(e.target.checked)} />
-                <span>Customize breathing times</span>
-              </label>
-              {useCustomTimes && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div><label style={{ fontSize: '0.8rem' }}>Inhale: {customInhale}s</label><input type="range" min={2} max={8} step={1} value={customInhale} onChange={(e) => setCustomInhale(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
-                  <div><label style={{ fontSize: '0.8rem' }}>Hold: {customHold1}s</label><input type="range" min={2} max={8} step={1} value={customHold1} onChange={(e) => setCustomHold1(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
-                  <div><label style={{ fontSize: '0.8rem' }}>Exhale: {customExhale}s</label><input type="range" min={2} max={8} step={1} value={customExhale} onChange={(e) => setCustomExhale(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
-                  <div><label style={{ fontSize: '0.8rem' }}>Hold: {customHold2}s</label><input type="range" min={2} max={8} step={1} value={customHold2} onChange={(e) => setCustomHold2(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
-                </div>
-              )}
-            </div>
-            <button onClick={() => setSoundEnabled(!soundEnabled)} style={{ ...styles.button, marginTop: '12px', background: 'transparent', border: `2px solid ${technique.color}`, width: '100%' }}>{soundEnabled ? '🔊 Sound On' : '🔇 Sound Off'}</button>
-            <button onClick={() => setHapticEnabled(!hapticEnabled)} style={{ ...styles.button, marginTop: '12px', background: 'transparent', border: `2px solid ${technique.color}`, width: '100%' }}>{hapticEnabled ? '📳 Haptic On' : '📴 Haptic Off'}</button>
-            <button onClick={handleStart} style={{ ...styles.button, marginTop: '16px', width: '100%' }}>Begin</button>
+        <div style={{ fontSize: '4rem' }}>✨</div>
+        <h2 className="text-gradient">Session Complete!</h2>
+        <p>You completed {cycles} cycles.</p>
+        <div style={{ ...styles.card, border: `1px solid ${technique.color}40`, boxShadow: `0 0 30px ${technique.color}20` }}>
+          <h3>How do you feel?</h3>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>
+            {[1,2,3,4,5].map(n => (
+              <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : 'rgba(139,92,246,0.2)', border: `2px solid ${technique.color}`, color: 'white', cursor: 'pointer' }}>{n}</button>
+            ))}
           </div>
-        ) : (
-          <>
-            <div style={{ width: '250px', height: '250px', margin: '20px auto', background: technique.color, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `scale(${phase === 'inhale' || phase === 'hold1' ? 1.5 : 1})`, transition: 'transform 1s ease', boxShadow: `0 0 30px ${technique.color}80` }}>
-              <div><h2>{phase === 'inhale' ? '🌬️ Inhale' : phase === 'hold1' ? '⏸️ Hold' : phase === 'exhale' ? '💨 Exhale' : '⏸️ Hold'}</h2><p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{count}s</p></div>
-            </div>
-            <p>Cycle {currentCycle} of {cycles}</p>
-            <div className="progress-bar" style={{ width: '200px', margin: '16px auto' }}><div className="progress-fill" style={{ width: `${(currentCycle / cycles) * 100}%` }} /></div>
-            <button onClick={() => setIsActive(false)} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '40px', cursor: 'pointer', marginTop: '16px' }}>Pause</button>
-          </>
-        )}
+          <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Share your experience..." style={styles.input} />
+          <button onClick={handleComplete} style={styles.button}>Save</button>
+          <button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '2px solid #94a3b8', marginTop: '10px' }}>Back</button>
+        </div>
       </div>
     );
-  };
+  }
+
+  return (
+    <div style={{ textAlign: 'center' }}>
+      <button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '2px solid #94a3b8' }}>← Back</button>
+      <h1 className="text-gradient">{technique.name}</h1>
+      <p style={{ color: technique.color }}>Pattern: {technique.pattern}</p>
+      
+      {!isActive || paused ? (
+        <div style={{ ...styles.card, border: `1px solid ${technique.color}40`, boxShadow: `0 0 20px ${technique.color}10` }}>
+          <h3>Set Your Session</h3>
+          <p>Cycles: {cycles}</p>
+          <input type="range" min={technique.minCycles} max={technique.maxCycles} value={cycles} onChange={(e) => setCycles(parseInt(e.target.value))} style={{ width: '100%' }} />
+          
+          <div style={{ marginTop: '16px', textAlign: 'left' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <input type="checkbox" checked={useCustomTimes} onChange={(e) => setUseCustomTimes(e.target.checked)} />
+              <span>Customize breathing times</span>
+            </label>
+            {useCustomTimes && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div><label style={{ fontSize: '0.8rem' }}>Inhale: {customInhale}s</label><input type="range" min={2} max={8} step={1} value={customInhale} onChange={(e) => setCustomInhale(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
+                <div><label style={{ fontSize: '0.8rem' }}>Hold: {customHold1}s</label><input type="range" min={2} max={8} step={1} value={customHold1} onChange={(e) => setCustomHold1(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
+                <div><label style={{ fontSize: '0.8rem' }}>Exhale: {customExhale}s</label><input type="range" min={2} max={8} step={1} value={customExhale} onChange={(e) => setCustomExhale(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
+                <div><label style={{ fontSize: '0.8rem' }}>Hold: {customHold2}s</label><input type="range" min={2} max={8} step={1} value={customHold2} onChange={(e) => setCustomHold2(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
+              </div>
+            )}
+          </div>
+          
+          <button onClick={() => setSoundEnabled(!soundEnabled)} style={{ ...styles.button, marginTop: '12px', background: 'transparent', border: `2px solid ${technique.color}`, width: '100%' }}>{soundEnabled ? '🔊 Sound On' : '🔇 Sound Off'}</button>
+          <button onClick={() => setHapticEnabled(!hapticEnabled)} style={{ ...styles.button, marginTop: '12px', background: 'transparent', border: `2px solid ${technique.color}`, width: '100%' }}>{hapticEnabled ? '📳 Haptic On' : '📴 Haptic Off'}</button>
+          
+          {paused ? (
+            <button onClick={handleResume} style={{ ...styles.button, marginTop: '16px', width: '100%' }}>Resume</button>
+          ) : (
+            <button onClick={handleStart} style={{ ...styles.button, marginTop: '16px', width: '100%' }}>Begin</button>
+          )}
+        </div>
+      ) : (
+        <>
+          <div style={{ width: '250px', height: '250px', margin: '20px auto', background: technique.color, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `scale(${phase === 'inhale' || phase === 'hold1' ? 1.5 : 1})`, transition: 'transform 1s ease', boxShadow: `0 0 30px ${technique.color}80` }}>
+            <div>
+              <h2>{phase === 'inhale' ? '🌬️ Inhale' : phase === 'hold1' ? '⏸️ Hold' : phase === 'exhale' ? '💨 Exhale' : '⏸️ Hold'}</h2>
+              <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{count}s</p>
+            </div>
+          </div>
+          <p>Cycle {currentCycle} of {cycles}</p>
+          <div className="progress-bar" style={{ width: '200px', margin: '16px auto' }}><div className="progress-fill" style={{ width: `${(currentCycle / cycles) * 100}%` }} /></div>
+          <button onClick={handlePause} style={{ background: '#ef4444', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '40px', cursor: 'pointer', marginTop: '16px' }}>Pause</button>
+        </>
+      )}
+    </div>
+  );
+};
 
   // ==================== GROUNDING TECHNIQUE ====================
   const GroundingTechnique = ({ technique, onComplete, onBack }) => {
@@ -918,110 +964,141 @@ function App() {
   };
 
   // ==================== BREATHE TAB ====================
-  const BreatheTab = ({ technique, onComplete, onBack }) => {
-    const [showInstructions, setShowInstructions] = useState(true);
-    const [sessionStarted, setSessionStarted] = useState(false);
-    const handleStart = () => { setShowInstructions(false); setSessionStarted(true); };
+const BreatheTab = ({ technique, onComplete, onBack }) => {
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [sessionStarted, setSessionStarted] = useState(false);
+  const handleStart = () => { setShowInstructions(false); setSessionStarted(true); };
 
-    const ScrollableContainer = ({ children }) => (
-      <div style={{ height: 'calc(100vh - 140px)', overflowY: 'auto', padding: '20px', scrollBehavior: 'smooth' }}>
-        {children}
+  const ScrollableContainer = ({ children }) => (
+    <div style={{ height: 'calc(100vh - 140px)', overflowY: 'auto', padding: '20px', scrollBehavior: 'smooth' }}>
+      {children}
+    </div>
+  );
+
+  if (!technique) {
+    return (
+      <div style={{ textAlign: 'center', padding: '60px' }}>
+        <div style={{ fontSize: '4rem' }}>🌬️</div>
+        <h2 className="text-gradient">Select a technique first</h2>
+        <button onClick={onBack} style={styles.button}>Browse Techniques</button>
       </div>
     );
+  }
 
-    if (!technique) {
-      return (
-        <div style={{ textAlign: 'center', padding: '60px' }}>
-          <div style={{ fontSize: '4rem' }}>🌬️</div>
-          <h2 className="text-gradient">Select a technique first</h2>
-          <button onClick={onBack} style={styles.button}>Browse Techniques</button>
-        </div>
-      );
-    }
+  if (showInstructions && !sessionStarted) {
+    return <TechniqueInstructions technique={technique} onStart={handleStart} onBack={onBack} />;
+  }
 
-    if (showInstructions && !sessionStarted) {
-      return <TechniqueInstructions technique={technique} onStart={handleStart} onBack={onBack} />;
-    }
-
-    switch (technique.id) {
-      case 'box-breathing':
-      case '478-breathing':
-        return <ScrollableContainer><BreathingTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      case 'grounding':
-        return <ScrollableContainer><GroundingTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      case 'pomodoro':
-        return <ScrollableContainer><PomodoroTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      case 'cognitive-restructuring':
-        return <ScrollableContainer><CognitiveChatbot onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      case 'progressive-muscle-relaxation':
-        return <ScrollableContainer><ProgressiveMuscleRelaxation technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      case 'rain-method':
-        return <ScrollableContainer><RainMethod technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      case 'body-scan':
-        return <ScrollableContainer><BodyScan technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      case 'noting-practice':
-        return <ScrollableContainer><NotingPractice technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      case 'self-compassion-break':
-        return <ScrollableContainer><SelfCompassionBreak technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      case 'stop-technique':
-        return <ScrollableContainer><StopTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      case 'gratitude-log':
-        return <ScrollableContainer><GratitudeLog technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-      default:
-        return <ScrollableContainer><div><h2>Coming soon</h2><button onClick={onBack} style={styles.button}>Back</button></div></ScrollableContainer>;
-    }
-  };
+  switch (technique.id) {
+    case 'box-breathing':
+    case '478-breathing':
+      return <ScrollableContainer><BreathingTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    case 'grounding':
+      return <ScrollableContainer><GroundingTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    case 'pomodoro':
+      return <ScrollableContainer><PomodoroTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    case 'cognitive-restructuring':
+      return <ScrollableContainer><CognitiveChatbot onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    case 'progressive-muscle-relaxation':
+      return <ScrollableContainer><ProgressiveMuscleRelaxation technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    case 'rain-method':
+      return <ScrollableContainer><RainMethod technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    case 'body-scan':
+      return <ScrollableContainer><BodyScan technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    case 'noting-practice':
+      return <ScrollableContainer><NotingPractice technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    case 'self-compassion-break':
+      return <ScrollableContainer><SelfCompassionBreak technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    case 'stop-technique':
+      return <ScrollableContainer><StopTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    case 'gratitude-log':
+      return <ScrollableContainer><GratitudeLog technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
+    default:
+      return <ScrollableContainer><div><h2>Coming soon</h2><button onClick={onBack} style={styles.button}>Back</button></div></ScrollableContainer>;
+  }
+};
 
   // ==================== SETTINGS ====================
-  const Settings = ({ logout, user, darkMode, setDarkMode }) => {
-    const [name, setName] = useState(user?.name || '');
-    const handleSaveName = () => { const updated = { ...user, name }; localStorage.setItem('lumacare_user', JSON.stringify(updated)); window.location.reload(); };
-    const exportData = () => {
-      const data = localStorage.getItem('lumacare_user');
-      if (!data) return alert('No data to export');
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `lumacare_backup_${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    };
-    const importData = () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'application/json';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          try {
-            const data = JSON.parse(event.target.result);
-            localStorage.setItem('lumacare_user', JSON.stringify(data));
-            alert('Data imported! Page will reload.');
-            window.location.reload();
-          } catch (err) { alert('Invalid file'); }
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    };
-    return (
-      <div><h1 className="text-gradient">Settings</h1>
-        <div style={styles.card}>
-          <h3 style={{ color: '#c084fc' }}>Profile</h3>
-          <input value={name} onChange={(e) => setName(e.target.value)} style={styles.input} />
-          <button onClick={handleSaveName} style={styles.button}>Save Name</button>
-          <h3 style={{ color: '#c084fc', marginTop: '24px' }}>Appearance</h3>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><span>Dark Mode</span><button onClick={() => setDarkMode(!darkMode)} style={{ padding: '8px 16px', background: darkMode ? '#06b6d4' : '#8b5cf6', border: 'none', borderRadius: '30px', color: 'white', cursor: 'pointer' }}>{darkMode ? '🌙 Dark' : '☀️ Light'}</button></div>
-          <h3 style={{ color: '#c084fc', marginTop: '24px' }}>Data</h3>
-          <div style={{ display: 'flex', gap: '12px' }}><button onClick={exportData} style={{ ...styles.button, background: '#06b6d4' }}>📥 Export Data</button><button onClick={importData} style={{ ...styles.button, background: '#8b5cf6' }}>📤 Import Data</button></div>
-          <h3 style={{ color: '#c084fc', marginTop: '24px' }}>Account</h3>
-          <button onClick={logout} style={{ ...styles.button, background: '#ef4444', width: '100%' }}>Sign Out</button>
-        </div>
-      </div>
-    );
+const Settings = ({ logout, user, darkMode, setDarkMode }) => {
+  const [name, setName] = useState(user?.name || '');
+  
+  const handleSaveName = () => {
+    const updated = { ...user, name };
+    localStorage.setItem('lumacare_user', JSON.stringify(updated));
+    window.location.reload();
   };
+  
+  const exportData = () => {
+    const data = localStorage.getItem('lumacare_user');
+    if (!data) return alert('No data to export');
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `lumacare_backup_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  
+  const importData = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          localStorage.setItem('lumacare_user', JSON.stringify(data));
+          alert('Data imported! Page will reload.');
+          window.location.reload();
+        } catch (err) { alert('Invalid file'); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+  
+  return (
+    <div>
+      <h1 className="text-gradient">Settings</h1>
+      <div style={styles.card}>
+        <h3 style={{ color: '#c084fc' }}>Profile</h3>
+        <input value={name} onChange={(e) => setName(e.target.value)} style={styles.input} />
+        <button onClick={handleSaveName} style={styles.button}>Save Name</button>
+        
+        <h3 style={{ color: '#c084fc', marginTop: '24px' }}>Appearance</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span>Dark Mode</span>
+          <button 
+            onClick={() => setDarkMode(!darkMode)} 
+            style={{
+              padding: '8px 20px',
+              background: darkMode ? '#06b6d4' : '#8b5cf6',
+              border: 'none',
+              borderRadius: '40px',
+              color: 'white',
+              cursor: 'pointer',
+              fontWeight: '500'
+            }}
+          >
+            {darkMode ? '🌙 Dark' : '☀️ Light'}
+          </button>
+        </div>
+        
+        <h3 style={{ color: '#c084fc', marginTop: '24px' }}>Data</h3>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={exportData} style={{ ...styles.button, background: '#06b6d4' }}>📥 Export Data</button>
+          <button onClick={importData} style={{ ...styles.button, background: '#8b5cf6' }}>📤 Import Data</button>
+        </div>
+        
+        <h3 style={{ color: '#c084fc', marginTop: '24px' }}>Account</h3>
+        <button onClick={logout} style={{ ...styles.button, background: '#ef4444', width: '100%' }}>Sign Out</button>
+      </div>
+    </div>
+  );
+};
 
   // ==================== ROUTER ====================
   const routerFutureConfig = { v7_startTransition: true, v7_relativeSplatPath: true };
