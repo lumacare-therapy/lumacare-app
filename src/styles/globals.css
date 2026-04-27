@@ -1,14 +1,16 @@
-/* ==================== GLOBAL STYLES ==================== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-x: hidden;
-  background: #0f172a;
+/* ==================== CAT PAW BACKGROUND ==================== */
+.cat-paw-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.12;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath fill='%238B5CF6' d='M20,40c-3,0-5-2-5-5s2-5,5-5s5,2,5,5S23,40,20,40z M35,30c-3,0-5-2-5-5s2-5,5-5s5,2,5,5S38,30,35,30z M50,25c-3,0-5-2-5-5s2-5,5-5s5,2,5,5S53,25,50,25z M65,30c-3,0-5-2-5-5s2-5,5-5s5,2,5,5S68,30,65,30z M80,40c-3,0-5-2-5-5s2-5,5-5s5,2,5,5S83,40,80,40z'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 40px 40px;
 }
 
 /* ==================== FLOWING GRADIENT BACKGROUND ==================== */
@@ -25,15 +27,9 @@ body {
 }
 
 @keyframes flowGradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* ==================== SOFT GLOW PARTICLES ==================== */
@@ -46,84 +42,13 @@ body {
   z-index: -1;
   pointer-events: none;
   background: radial-gradient(circle at 30% 40%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
-              radial-gradient(circle at 70% 60%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
-              radial-gradient(circle at 50% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
+              radial-gradient(circle at 70% 60%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
   animation: breatheGlow 10s ease-in-out infinite;
 }
 
 @keyframes breatheGlow {
-  0%, 100% {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.02);
-  }
-}
-
-/* ==================== FLOATING PARTICLES ==================== */
-.floating-particle {
-  position: fixed;
-  width: 4px;
-  height: 4px;
-  background: rgba(139, 92, 246, 0.3);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: -1;
-  animation: floatParticle 12s ease-in-out infinite;
-}
-
-@keyframes floatParticle {
-  0% {
-    transform: translateY(0) translateX(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.4;
-  }
-  90% {
-    opacity: 0.4;
-  }
-  100% {
-    transform: translateY(-100px) translateX(30px);
-    opacity: 0;
-  }
-}
-
-/* ==================== GLASS CARD EFFECT ==================== */
-.glass-card {
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 32px;
-  transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-}
-
-.glass-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(139, 92, 246, 0.4);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-/* ==================== CUSTOM SCROLLBAR ==================== */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.5);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #a78bfa, #22d3ee);
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.02); }
 }
 
 /* ==================== PROGRESS BAR ==================== */
@@ -131,7 +56,7 @@ body {
   width: 100%;
   height: 6px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  borderRadius: 10px;
   overflow: hidden;
 }
 
@@ -140,33 +65,6 @@ body {
   background: linear-gradient(90deg, #8b5cf6, #06b6d4);
   border-radius: 10px;
   transition: width 0.3s ease;
-  position: relative;
-}
-
-/* ==================== LOADING WAVE ==================== */
-.loading-wave {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  height: 30px;
-}
-
-.loading-wave span {
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
-  border-radius: 4px;
-  animation: wave 1s ease-in-out infinite;
-}
-
-.loading-wave span:nth-child(2) { animation-delay: 0.1s; }
-.loading-wave span:nth-child(3) { animation-delay: 0.2s; }
-.loading-wave span:nth-child(4) { animation-delay: 0.3s; }
-.loading-wave span:nth-child(5) { animation-delay: 0.4s; }
-
-@keyframes wave {
-  0%, 100% { transform: scaleY(1); }
-  50% { transform: scaleY(1.8); }
 }
 
 /* ==================== LOADING SPINNER ==================== */
@@ -181,123 +79,4 @@ body {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-/* ==================== PULSE ANIMATION ==================== */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-}
-
-/* ==================== FADE IN ==================== */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in {
-  animation: fadeIn 0.5s ease-out;
-}
-
-/* ==================== TOGGLE SWITCH ==================== */
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 52px;
-  height: 28px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 34px;
-  transition: 0.3s;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 22px;
-  width: 22px;
-  left: 3px;
-  bottom: 3px;
-  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
-  border-radius: 50%;
-  transition: 0.3s;
-}
-
-input:checked + .toggle-slider {
-  background-color: rgba(139, 92, 246, 0.4);
-}
-
-input:checked + .toggle-slider:before {
-  transform: translateX(24px);
-  background: white;
-}
-
-/* ==================== BUTTON HOVER EFFECT ==================== */
-.btn-hover {
-  transition: all 0.3s ease;
-}
-
-.btn-hover:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.05);
-}
-
-/* ==================== TEXT GRADIENT ==================== */
-.text-gradient {
-  background: linear-gradient(135deg, #f0f9ff, #c084fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ==================== MOBILE OPTIMIZATIONS ==================== */
-@media (max-width: 768px) {
-  .glass-card {
-    border-radius: 24px;
-    padding: 20px;
-  }
-  
-  .progress-bar {
-    height: 4px;
-  }
-  
-  .toggle-switch {
-    width: 44px;
-    height: 24px;
-  }
-  
-  .toggle-slider:before {
-    height: 18px;
-    width: 18px;
-  }
-  
-  input:checked + .toggle-slider:before {
-    transform: translateX(20px);
-  }
 }
