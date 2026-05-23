@@ -1,11 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+const paypalClientId = 'AYkkL5gWX0Ipl01CqNjK5el4DwNNkzo9BHuI991fm8hmonNNlMtZ_2RBRISsJbsiMmgCwLJyJbwoP8eD';
+
 root.render(
   <React.StrictMode>
-    <App />
+    <PayPalScriptProvider options={{ 
+      "client-id": paypalClientId,
+      currency: "USD",
+      intent: "subscription",
+      vault: true
+    }}>
+      <App />
+    </PayPalScriptProvider>
   </React.StrictMode>
 );
 
