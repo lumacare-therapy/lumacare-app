@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-do
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import './styles/globals.css';
 
 // ==================== GOOGLE CLIENT ID ====================
@@ -46,12 +47,12 @@ const styles = {
   navItem: { padding: '8px 20px', borderRadius: '50px', display: 'flex', alignItems: 'center', gap: '10px', color: '#6B7280', textDecoration: 'none', cursor: 'pointer', transition: 'all 0.3s ease', fontSize: '0.95rem', fontWeight: 500 },
   navItemActive: { color: '#8B5CF6', background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.15)' },
   main: { maxWidth: '1200px', margin: '0 auto', padding: '40px 24px', position: 'relative', zIndex: 2 },
-  card: { background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(251,207,232,0.5)', borderRadius: '32px', padding: '28px', transition: 'all 0.3s ease', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' },
+  card: { background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(12px)', border: '1px solid rgba(251,207,232,0.5)', borderRadius: '32px', padding: '28px', transition: 'all 0.3s ease', boxShadow: '0 4px 12px rgba(0,0,0,0.02)', marginBottom: '24px' },
   title: { fontSize: '2rem', fontWeight: 600, letterSpacing: '-0.02em', color: '#4B5563', marginBottom: '8px' },
   subtitle: { fontSize: '1rem', color: '#9CA3AF', marginBottom: '24px', fontWeight: 400 },
   button: { padding: '12px 28px', borderRadius: '60px', border: 'none', background: 'linear-gradient(135deg, #FBCFE8, #D1FAE5)', color: '#4B5563', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 6px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' },
-  premiumButton: { padding: '8px 20px', borderRadius: '40px', border: 'none', background: 'linear-gradient(135deg, #FDE68A, #FCD34D)', color: '#92400E', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' },
-  input: { padding: '14px 20px', background: '#FFFFFF', border: '1px solid #FBCFE8', borderRadius: '28px', color: '#4B5563', fontSize: '0.95rem', width: '100%', marginBottom: '16px', transition: 'all 0.2s ease' },
+  premiumButton: { padding: '8px 20px', borderRadius: '40px', border: 'none', background: 'linear-gradient(135deg, #8B5CF6, #C4B5FD)', color: 'white', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' },
+  input: { padding: '14px 20px', background: '#FFFFFF', border: '1px solid #FBCFE8', borderRadius: '28px', color: '#4B5563', fontSize: '0.95rem', width: '100%', marginBottom: '16px', transition: 'all 0.2s ease', boxSizing: 'border-box' },
   select: { padding: '14px 20px', background: '#FFFFFF', border: '1px solid #FBCFE8', borderRadius: '28px', color: '#4B5563', fontSize: '0.95rem', width: '100%', marginBottom: '16px', cursor: 'pointer' },
   profileImage: { width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #FBCFE8' },
   profilePlaceholder: { width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #FBCFE8, #D1FAE5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', fontWeight: 600, color: '#4B5563' },
@@ -87,21 +88,16 @@ const useSessionTracking = () => {
   const { user } = useAuth();
   const [userData, setUserData] = useState(user);
   useEffect(() => { if (user) setUserData(user); }, [user]);
-  const canUseSession = () => {
-    if (!userData) return false;
-    if (userData.isPremium) return true;
-    if (!userData.lastSessionTime) return true;
-    return (Date.now() - userData.lastSessionTime) / (1000 * 60 * 60) >= 12;
-  };
+  
   const trackSession = (techniqueType, rating = null, feedback = '') => {
     if (!userData) return { success: false };
-    if (!canUseSession() && !userData.isPremium) return { success: false, message: 'Session limit reached' };
     const newStats = { ...userData.stats };
     const dayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
     if (techniqueType === 'breathing') newStats.breathing += 1;
     else if (techniqueType === 'cognitive') newStats.aiSessions += 1;
     else if (techniqueType === 'grounding') newStats.sosUsed += 1;
     else if (techniqueType === 'pomodoro') newStats.aiSessions += 1;
+    else if (techniqueType === 'journal') newStats.journal += 1;
     newStats.weeklyData[dayIndex].sessions += 1;
     if (rating) {
       newStats.moodScores.push({ score: rating, timestamp: Date.now(), feedback, technique: techniqueType });
@@ -109,24 +105,31 @@ const useSessionTracking = () => {
       const avgMood = todayMoods.reduce((sum, m) => sum + m.score, 0) / todayMoods.length || 0;
       newStats.weeklyData[dayIndex].mood = Math.round(avgMood * 20);
     }
-    const updatedUser = { ...userData, lastSessionTime: Date.now(), sessionsRemaining: userData.isPremium ? Infinity : userData.sessionsRemaining - 1, stats: newStats };
+    const updatedUser = { ...userData, lastSessionTime: Date.now(), stats: newStats };
     setUserData(updatedUser);
     localStorage.setItem('lumacare_user', JSON.stringify(updatedUser));
     return { success: true };
   };
+  
   const upgradeUser = (plan) => {
-    const updatedUser = { ...userData, isPremium: plan === 'monthly', sessionsRemaining: plan === 'session' ? userData.sessionsRemaining + 1 : Infinity, premiumExpiry: plan === 'monthly' ? Date.now() + (30 * 24 * 60 * 60 * 1000) : userData.premiumExpiry };
+    const updatedUser = { 
+      ...userData, 
+      isPremium: true, 
+      premiumPlan: plan,
+      premiumExpiry: plan === 'monthly' ? Date.now() + (30 * 24 * 60 * 60 * 1000) : Date.now() + (365 * 24 * 60 * 60 * 1000) 
+    };
     setUserData(updatedUser);
     localStorage.setItem('lumacare_user', JSON.stringify(updatedUser));
   };
-  return { userData, canUseSession, trackSession, upgradeUser };
+  
+  return { userData, trackSession, upgradeUser };
 };
 
+// ==================== LOGIN PAGE WITH ONBOARDING ====================
 const LoginPage = ({ onLogin }) => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [tempUser, setTempUser] = useState(null);
 
-  // Check if user has ALREADY completed onboarding before
   useEffect(() => {
     const hasCompleted = localStorage.getItem('lumacare_onboarding_complete');
     if (hasCompleted === 'true') {
@@ -141,9 +144,9 @@ const LoginPage = ({ onLogin }) => {
       email: decoded.email,
       picture: decoded.picture,
       isPremium: false,
-      sessionsRemaining: 1,
-      lastSessionTime: null,
+      premiumPlan: null,
       premiumExpiry: null,
+      lastSessionTime: null,
       stats: {
         aiSessions: 0,
         breathing: 0,
@@ -162,8 +165,6 @@ const LoginPage = ({ onLogin }) => {
       }
     };
     setTempUser(user);
-    
-    // Only show onboarding for NEW users who haven't completed it
     const hasCompleted = localStorage.getItem('lumacare_onboarding_complete');
     if (hasCompleted !== 'true') {
       setShowOnboarding(true);
@@ -178,9 +179,9 @@ const LoginPage = ({ onLogin }) => {
       email: 'guest@lumacare.app',
       picture: null,
       isPremium: false,
-      sessionsRemaining: 3,
-      lastSessionTime: null,
+      premiumPlan: null,
       premiumExpiry: null,
+      lastSessionTime: null,
       stats: {
         aiSessions: 0,
         breathing: 0,
@@ -199,8 +200,6 @@ const LoginPage = ({ onLogin }) => {
       }
     };
     setTempUser(guestUser);
-    
-    // Only show onboarding for NEW users who haven't completed it
     const hasCompleted = localStorage.getItem('lumacare_onboarding_complete');
     if (hasCompleted !== 'true') {
       setShowOnboarding(true);
@@ -217,7 +216,7 @@ const LoginPage = ({ onLogin }) => {
     setShowOnboarding(false);
   };
 
-  // ==================== RECOMMENDATION SCREEN ====================
+  // Recommendation Screen
   const RecommendationScreen = ({ answers, onContinue, onTryTechnique }) => {
     const techniqueMap = {
       anxiety: { name: 'Box Breathing', id: 'box-breathing' },
@@ -238,14 +237,12 @@ const LoginPage = ({ onLogin }) => {
         <p style={{ color: '#6B7280', marginBottom: '24px' }}>
           We recommend starting with <strong style={{ color: '#8B5CF6' }}>{technique.name}</strong>
         </p>
-        
         <div style={{ textAlign: 'left', marginBottom: '24px', background: 'rgba(139,92,246,0.1)', borderRadius: '16px', padding: '16px' }}>
           <p style={{ marginBottom: '8px' }}>📌 <strong>You said:</strong></p>
           <p style={{ fontSize: '0.9rem', color: '#4B5563' }}>• Main struggle: {answers.mainStruggle?.label}</p>
           <p style={{ fontSize: '0.9rem', color: '#4B5563' }}>• Frequency: {answers.frequency?.label}</p>
           <p style={{ fontSize: '0.9rem', color: '#4B5563' }}>• Goal: {answers.goal?.label}</p>
         </div>
-        
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <button onClick={onContinue} style={{ ...styles.button, background: 'transparent', border: '2px solid #cbd5e0', flex: 1 }}>
             Go to Dashboard
@@ -258,7 +255,7 @@ const LoginPage = ({ onLogin }) => {
     );
   };
 
-  // ==================== ONBOARDING SURVEY (FIXED) ====================
+  // Onboarding Survey
   const OnboardingSurvey = () => {
     const [step, setStep] = useState(0);
     const [answers, setAnswers] = useState({
@@ -269,7 +266,7 @@ const LoginPage = ({ onLogin }) => {
     });
     const [completed, setCompleted] = useState(false);
     const [finalAnswers, setFinalAnswers] = useState(null);
-    const [isProcessing, setIsProcessing] = useState(false); // PREVENT DOUBLE-TRIGGER
+    const [isProcessing, setIsProcessing] = useState(false);
 
     const questions = [
       {
@@ -324,7 +321,6 @@ const LoginPage = ({ onLogin }) => {
       : answers[currentQuestion.id] !== null;
 
     const handleSelect = (field, value, option) => {
-      // PREVENT double-clicks or processing during transition
       if (isProcessing) return;
       
       if (currentQuestion.multiple) {
@@ -335,22 +331,18 @@ const LoginPage = ({ onLogin }) => {
             : [...prev[field], value]
         }));
       } else {
-        // Single choice - set answer first
         const newAnswers = { ...answers, [field]: { value, label: option.label } };
         setAnswers(newAnswers);
         
-        // Check if this is the last question
         const isLastQuestion = step === questions.length - 1;
         
         if (!isLastQuestion) {
-          // Auto-advance to next question with a small delay to prevent loop
           setIsProcessing(true);
           setTimeout(() => {
             setStep(step + 1);
             setIsProcessing(false);
           }, 300);
         } else {
-          // Last question - complete the survey
           setIsProcessing(true);
           const final = {
             mainStruggle: newAnswers.mainStruggle,
@@ -379,7 +371,6 @@ const LoginPage = ({ onLogin }) => {
           setIsProcessing(false);
         }, 300);
       } else {
-        // Save and show recommendation
         setIsProcessing(true);
         const final = {
           mainStruggle: answers.mainStruggle,
@@ -422,7 +413,6 @@ const LoginPage = ({ onLogin }) => {
     return (
       <div style={{ ...styles.card, maxWidth: '500px', margin: '0 auto', textAlign: 'center', padding: '32px', position: 'relative', zIndex: 2 }}>
         <div className="cat-paw-bg" />
-        
         <div style={{ marginBottom: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#8B5CF6', fontSize: '0.8rem' }}>
             <span>Getting to know you</span>
@@ -451,7 +441,10 @@ const LoginPage = ({ onLogin }) => {
                 border: '1px solid rgba(139,92,246,0.3)',
                 justifyContent: 'flex-start',
                 gap: '12px',
-                opacity: isProcessing ? 0.7 : 1
+                opacity: isProcessing ? 0.7 : 1,
+                color: (currentQuestion.multiple 
+                  ? answers[currentQuestion.id]?.includes(option.value)
+                  : answers[currentQuestion.id]?.value === option.value) ? 'white' : '#4B5563'
               }}
             >
               {option.label}
@@ -501,45 +494,314 @@ const LoginPage = ({ onLogin }) => {
         <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.error('Google Failed')} useOneTap theme="filled_black" shape="pill" text="continue_with" size="large" width="100%" />
         <button onClick={handleGuestLogin} style={{ width: '100%', marginTop: '16px', padding: '12px', background: 'rgba(251,207,232,0.3)', border: '1px solid #fbcfe8', borderRadius: '40px', color: '#4b5563', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
           <img src="https://i.ibb.co/9mWTyK6F/Screenshot-2026-04-12-202309-removebg-preview.png" alt="LumaCare" style={{ width: '20px', height: '20px' }} />
-          Continue as Guest (3 free sessions)
+          Continue as Guest
         </button>
       </div>
     </div>
   );
 };
 
-// ==================== PREMIUM MODAL ====================
+// ==================== PREMIUM MODAL WITH PAYPAL SUBSCRIPTIONS ====================
 const PremiumModal = ({ onClose, onUpgrade }) => {
-  const [selectedPlan, setSelectedPlan] = useState('monthly');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const handlePayFast = (plan) => {
-    setIsProcessing(true);
-    window.open(plan === 'monthly' ? 'https://payf.st/bk8we' : 'https://payf.st/1frnc', '_blank');
-    setTimeout(() => { setIsProcessing(false); if (window.confirm('Did you complete the payment?')) { onUpgrade(plan); onClose(); } }, 3000);
+  const [selectedPlan, setSelectedPlan] = useState('yearly');
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [{ isPending }] = usePayPalScriptReducer();
+  
+  const planIds = {
+    monthly: 'P-72T62542XW549282SNII7GZY',
+    yearly: 'P-2XJ20656V8350534VNII7J3Q'
   };
+  
+  const handleSubscriptionComplete = (plan) => {
+    setPaymentSuccess(true);
+    onUpgrade(plan);
+    setTimeout(() => onClose(), 2000);
+  };
+  
+  const proFeatures = [
+    { icon: '🎯', title: 'Personalized Recommendations', desc: 'Tools based on how you\'re feeling today' },
+    { icon: '📊', title: 'Daily Check-ins', desc: 'Simple mood tracking with smart suggestions' },
+    { icon: '📈', title: 'Progress Tracking', desc: 'See streaks, most-used tools, visual progress' },
+    { icon: '🗺️', title: 'Guided Programs', desc: '7 & 30 day structured programs' },
+    { icon: '📱', title: 'Offline Access', desc: 'Works anywhere, anytime' },
+    { icon: '📝', title: 'Journal Vault', desc: 'Save and revisit all your entries' }
+  ];
+  
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
-      <div className="glass-card" style={{ maxWidth: '500px', width: '90%', position: 'relative', padding: '32px', background: '#FFF9F0' }} onClick={(e) => e.stopPropagation()}>
+      <div className="glass-card" style={{ maxWidth: '550px', width: '90%', position: 'relative', padding: '32px', background: '#FFF9F0', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
         <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: '#6b7280', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-        <h2 className="text-gradient" style={{ textAlign: 'center', fontSize: '1.8rem', marginBottom: '24px' }}>Upgrade Your Journey</h2>
-        <div style={{ display: 'grid', gap: '16px', marginBottom: '24px' }}>
-          <div onClick={() => setSelectedPlan('monthly')} style={{ padding: '20px', background: selectedPlan === 'monthly' ? '#fbcfe8' : '#fde4d6', borderRadius: '24px', border: '1px solid #e5e7eb', cursor: 'pointer' }}>
-            <h3 style={{ color: '#4b5563' }}>Premium Monthly — $9.99/mo</h3>
-            <p style={{ color: '#6b7280' }}>Unlimited sessions, all techniques, priority support</p>
+        
+        {paymentSuccess ? (
+          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+            <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🎉</div>
+            <h2 style={{ ...styles.title, color: '#8B5CF6' }}>Welcome to Pro!</h2>
+            <p style={{ color: '#6B7280', marginBottom: '24px' }}>
+              Your premium features are now unlocked. Enjoy!
+            </p>
+            <LoadingSpinner size="small" color="#8B5CF6" />
+            <p style={{ color: '#9CA3AF', fontSize: '0.8rem', marginTop: '12px' }}>Redirecting...</p>
           </div>
-          <div onClick={() => setSelectedPlan('session')} style={{ padding: '20px', background: selectedPlan === 'session' ? '#d1fae5' : '#fde4d6', borderRadius: '24px', border: '1px solid #e5e7eb', cursor: 'pointer' }}>
-            <h3 style={{ color: '#4b5563' }}>Single Session — $2.99</h3>
-            <p style={{ color: '#6b7280' }}>One additional session, all techniques</p>
-          </div>
-        </div>
-        <button onClick={() => handlePayFast(selectedPlan)} disabled={isProcessing} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #fbcfe8, #d1fae5)', border: 'none', borderRadius: '40px', color: '#4b5563', fontWeight: 'bold', cursor: 'pointer', opacity: isProcessing ? 0.6 : 1 }}>{isProcessing ? 'Processing...' : 'Upgrade'}</button>
+        ) : (
+          <>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <span style={{ ...styles.badge, marginBottom: '16px', background: '#8B5CF6', color: 'white' }}>✨ LumaCare Pro</span>
+              <h2 className="text-gradient" style={{ fontSize: '1.8rem', marginBottom: '8px' }}>Unlock Your Full Potential</h2>
+              <p style={{ color: '#6B7280', fontSize: '0.9rem' }}>All techniques are free. Pro gives you the full experience.</p>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+              {proFeatures.map((feature, idx) => (
+                <div key={idx} style={{ 
+                  padding: '14px', 
+                  background: 'rgba(139,92,246,0.05)', 
+                  borderRadius: '16px',
+                  border: '1px solid rgba(139,92,246,0.1)'
+                }}>
+                  <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{feature.icon}</div>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4B5563', marginBottom: '2px' }}>{feature.title}</h4>
+                  <p style={{ fontSize: '0.7rem', color: '#9CA3AF', lineHeight: '1.3' }}>{feature.desc}</p>
+                </div>
+              ))}
+            </div>
+            
+            <div style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}>
+              <div 
+                onClick={() => setSelectedPlan('yearly')} 
+                style={{ 
+                  padding: '16px 20px', 
+                  background: selectedPlan === 'yearly' ? '#fbcfe8' : '#fde4d6', 
+                  borderRadius: '20px', 
+                  border: selectedPlan === 'yearly' ? '2px solid #8B5CF6' : '1px solid #e5e7eb', 
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  position: 'relative'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h3 style={{ color: '#4b5563', fontSize: '1rem', marginBottom: '2px' }}>🌟 Yearly Plan</h3>
+                    <p style={{ color: '#6b7280', fontSize: '0.85rem' }}>$39/year — Save 35%</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#8B5CF6' }}>$3.25<span style={{ fontSize: '0.8rem' }}>/mo</span></div>
+                  </div>
+                </div>
+                {selectedPlan === 'yearly' && (
+                  <span style={{ 
+                    position: 'absolute', 
+                    top: '-8px', 
+                    right: '16px', 
+                    background: '#10B981', 
+                    color: 'white', 
+                    padding: '2px 10px', 
+                    borderRadius: '20px', 
+                    fontSize: '0.7rem',
+                    fontWeight: 600
+                  }}>
+                    BEST VALUE
+                  </span>
+                )}
+              </div>
+              
+              <div 
+                onClick={() => setSelectedPlan('monthly')} 
+                style={{ 
+                  padding: '16px 20px', 
+                  background: selectedPlan === 'monthly' ? '#d1fae5' : '#fde4d6', 
+                  borderRadius: '20px', 
+                  border: selectedPlan === 'monthly' ? '2px solid #8B5CF6' : '1px solid #e5e7eb', 
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h3 style={{ color: '#4b5563', fontSize: '1rem', marginBottom: '2px' }}>💫 Monthly Plan</h3>
+                    <p style={{ color: '#6b7280', fontSize: '0.85rem' }}>$4.99/month — Cancel anytime</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#8B5CF6' }}>$4.99<span style={{ fontSize: '0.8rem' }}>/mo</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {isPending ? (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <LoadingSpinner size="small" color="#8B5CF6" />
+                <p style={{ color: '#6B7280', marginTop: '12px', fontSize: '0.9rem' }}>Loading secure payment...</p>
+              </div>
+            ) : (
+              <PayPalButtons
+                style={{ 
+                  shape: 'pill',
+                  color: 'gold',
+                  layout: 'vertical',
+                  label: 'subscribe'
+                }}
+                createSubscription={(data, actions) => {
+                  return actions.subscription.create({
+                    plan_id: planIds[selectedPlan]
+                  });
+                }}
+                onApprove={(data) => {
+                  console.log('Subscription successful! ID:', data.subscriptionID);
+                  handleSubscriptionComplete(selectedPlan);
+                }}
+                onError={(err) => {
+                  console.error('PayPal error:', err);
+                  alert('Payment failed. Please try again.');
+                }}
+                onCancel={() => {
+                  console.log('Payment cancelled by user');
+                }}
+              />
+            )}
+            
+            <p style={{ textAlign: 'center', marginTop: '12px', fontSize: '0.75rem', color: '#9CA3AF' }}>
+              🔒 Secure payment via PayPal • Cancel anytime • All techniques remain free
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
 };
 
+// ==================== DAILY CHECK-IN (PRO FEATURE) ====================
+const DailyCheckIn = ({ onComplete, onStartTechnique }) => {
+  const [mood, setMood] = useState(null);
+  const [note, setNote] = useState('');
+  const [suggestedTechnique, setSuggestedTechnique] = useState(null);
+  
+  const moodOptions = [
+    { value: 'great', emoji: '😊', label: 'Great', color: '#10B981' },
+    { value: 'good', emoji: '🙂', label: 'Good', color: '#60A5FA' },
+    { value: 'okay', emoji: '😐', label: 'Okay', color: '#F59E0B' },
+    { value: 'low', emoji: '😔', label: 'Low', color: '#F97316' },
+    { value: 'struggling', emoji: '😢', label: 'Struggling', color: '#EF4444' }
+  ];
+  
+  const getSuggestion = (moodValue) => {
+    const suggestions = {
+      great: 'gratitude-log',
+      good: 'pomodoro',
+      okay: 'body-scan',
+      low: 'grounding',
+      struggling: 'box-breathing'
+    };
+    return techniquesData[suggestions[moodValue]];
+  };
+  
+  const handleMoodSelect = (moodValue) => {
+    setMood(moodValue);
+    const suggestion = getSuggestion(moodValue);
+    setSuggestedTechnique(suggestion);
+  };
+  
+  const handleSave = () => {
+    const checkIn = {
+      date: new Date().toISOString(),
+      mood,
+      note,
+      suggestedTechnique: suggestedTechnique?.id
+    };
+    
+    const checkIns = JSON.parse(localStorage.getItem('lumacare_checkins') || '[]');
+    checkIns.push(checkIn);
+    localStorage.setItem('lumacare_checkins', JSON.stringify(checkIns));
+    
+    const today = new Date().toDateString();
+    localStorage.setItem('lumacare_last_active', today);
+    const currentStreak = parseInt(localStorage.getItem('lumacare_streak') || '0');
+    localStorage.setItem('lumacare_streak', (currentStreak + 1).toString());
+    
+    onComplete(checkIn);
+  };
+  
+  return (
+    <div style={styles.card}>
+      <h2 style={{ ...styles.title, fontSize: '1.5rem', textAlign: 'center', marginBottom: '8px' }}>
+        How are you feeling today?
+      </h2>
+      <p style={{ textAlign: 'center', color: '#6B7280', marginBottom: '24px' }}>
+        This helps us recommend the right tool for you
+      </p>
+      
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+        {moodOptions.map(option => (
+          <button
+            key={option.value}
+            onClick={() => handleMoodSelect(option.value)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              padding: '12px 16px',
+              borderRadius: '20px',
+              border: mood === option.value ? `2px solid ${option.color}` : '1px solid #E5E7EB',
+              background: mood === option.value ? `${option.color}15` : 'white',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              minWidth: '65px'
+            }}
+          >
+            <span style={{ fontSize: '2rem' }}>{option.emoji}</span>
+            <span style={{ fontSize: '0.75rem', color: option.color, fontWeight: 600, marginTop: '4px' }}>
+              {option.label}
+            </span>
+          </button>
+        ))}
+      </div>
+      
+      {mood && (
+        <>
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Any thoughts you'd like to note? (optional)"
+            style={{ ...styles.input, minHeight: '80px' }}
+          />
+          
+          {suggestedTechnique && (
+            <div style={{ 
+              padding: '16px', 
+              background: 'rgba(139,92,246,0.05)', 
+              borderRadius: '16px', 
+              marginBottom: '16px',
+              border: '1px solid rgba(139,92,246,0.15)'
+            }}>
+              <p style={{ fontSize: '0.9rem', color: '#8B5CF6', fontWeight: 600, marginBottom: '8px' }}>
+                💡 We recommend:
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '2rem' }}>{suggestedTechnique.icon}</span>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: 600, color: '#4B5563' }}>{suggestedTechnique.name}</p>
+                  <p style={{ fontSize: '0.8rem', color: '#6B7280' }}>{suggestedTechnique.description}</p>
+                </div>
+                <button 
+                  onClick={() => onStartTechnique(suggestedTechnique.id)}
+                  style={{ ...styles.button, padding: '8px 16px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                >
+                  Try Now →
+                </button>
+              </div>
+            </div>
+          )}
+          
+          <button onClick={handleSave} style={{ ...styles.button, width: '100%' }}>
+            Save Check-in ✨
+          </button>
+        </>
+      )}
+    </div>
+  );
+};
+
 // ==================== STREAK TRACKER ====================
-const StreakTracker = () => {
+const StreakTracker = ({ isPremium }) => {
   const [streak, setStreak] = useState(0);
   useEffect(() => {
     const savedStreak = localStorage.getItem('lumacare_streak');
@@ -553,34 +815,57 @@ const StreakTracker = () => {
       else { setStreak(0); }
     }
   }, []);
+  
   return (
-    <div style={{ background: '#FDE4D6', borderRadius: '60px', padding: '12px 20px', textAlign: 'center', marginBottom: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+    <div style={{ 
+      background: isPremium ? 'linear-gradient(135deg, #8B5CF6, #C4B5FD)' : '#FDE4D6', 
+      borderRadius: '60px', 
+      padding: '12px 20px', 
+      textAlign: 'center', 
+      marginBottom: '24px', 
+      boxShadow: '0 2px 8px rgba(0,0,0,0.05)', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      gap: '12px' 
+    }}>
       <img src="https://i.ibb.co/8DYkzR18/4e4404e9-3353-4465-afeb-d09deedde8ee-removalai-preview.png" alt="streak" style={{ width: '28px', height: '28px' }} />
-      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#4B5563' }}>{streak} day streak</span>
+      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: isPremium ? 'white' : '#4B5563' }}>
+        {streak} day streak
+      </span>
+      {isPremium && <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.8)' }}>🔥</span>}
     </div>
   );
 };
 
 // ==================== TECHNIQUE INSTRUCTION MODAL ====================
 const TechniqueInstructions = ({ technique, onStart, onBack }) => {
-  const [showInstructions, setShowInstructions] = useState(true);
-  if (!showInstructions) return onStart();
   return (
     <div style={{ ...styles.card, maxWidth: '500px', margin: '0 auto', textAlign: 'center', padding: '32px' }}>
       <div style={{ fontSize: '4rem', marginBottom: '20px' }}>{technique.icon}</div>
       <h2 style={styles.title}>{technique.name}</h2>
-      <div style={{ textAlign: 'left', margin: '20px 0' }}><h3 style={{ color: '#8B5CF6' }}>📋 What it is:</h3><p style={{ color: '#6B7280' }}>{technique.description}</p><h3 style={{ color: '#8B5CF6', marginTop: '16px' }}>🎯 When to use:</h3><p style={{ color: '#6B7280' }}>{technique.whenToUse}</p></div>
-      <div style={{ display: 'flex', gap: '12px' }}><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', flex: 1 }}>Back</button><button onClick={() => { triggerHaptic('light'); setShowInstructions(false); }} style={{ ...styles.button, flex: 1 }}>Start Session →</button></div>
+      <div style={{ textAlign: 'left', margin: '20px 0' }}>
+        <h3 style={{ color: '#8B5CF6' }}>📋 What it is:</h3>
+        <p style={{ color: '#6B7280' }}>{technique.description}</p>
+        <h3 style={{ color: '#8B5CF6', marginTop: '16px' }}>🎯 When to use:</h3>
+        <p style={{ color: '#6B7280' }}>{technique.whenToUse}</p>
+      </div>
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', flex: 1 }}>Back</button>
+        <button onClick={() => { triggerHaptic('light'); onStart(); }} style={{ ...styles.button, flex: 1 }}>Start Session →</button>
+      </div>
     </div>
   );
 };
 
 // ==================== DASHBOARD ====================
-const Dashboard = ({ navigateTo, userData, startTechnique }) => {
+const Dashboard = ({ navigateTo, userData, startTechnique, setShowPremium }) => {
   const [stressLevel, setStressLevel] = useState(42);
   const [clarityScore, setClarityScore] = useState(68);
   const [greeting, setGreeting] = useState('');
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [showCheckIn, setShowCheckIn] = useState(false);
+  
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener('resize', handleResize);
@@ -588,21 +873,110 @@ const Dashboard = ({ navigateTo, userData, startTechnique }) => {
     if (hour < 12) setGreeting('morning');
     else if (hour < 17) setGreeting('afternoon');
     else setGreeting('evening');
+    
     if (userData?.stats) {
       const avgMood = userData.stats.moodScores.length > 0 ? userData.stats.moodScores.reduce((sum, m) => sum + m.score, 0) / userData.stats.moodScores.length : 4.2;
       setStressLevel(Math.round(100 - (avgMood * 20)));
       setClarityScore(Math.min(100, Math.round(50 + (userData.stats.moodScores.filter(m => m.score >= 4).length * 2))));
     }
+    
+    // Check if user already checked in today
+    if (userData?.isPremium) {
+      const checkIns = JSON.parse(localStorage.getItem('lumacare_checkins') || '[]');
+      const todayCheckIn = checkIns.find(ci => 
+        new Date(ci.date).toDateString() === new Date().toDateString()
+      );
+      if (!todayCheckIn) {
+        setShowCheckIn(true);
+      }
+    }
+    
     return () => window.removeEventListener('resize', handleResize);
   }, [userData]);
+  
   const isMobile = windowWidth <= 768;
   const formatTime = () => new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  
+  const handleCheckInComplete = (checkIn) => {
+    setShowCheckIn(false);
+    if (checkIn.suggestedTechnique) {
+      startTechnique(checkIn.suggestedTechnique);
+    }
+  };
+  
   if (!userData) return null;
+  
   return (
     <div>
-      <StreakTracker />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}><div><h1 style={styles.title}>Good {greeting}, {userData.name?.split(' ')[0] || 'there'}</h1><p style={styles.subtitle}>Your mind is clear. Let's keep it that way.</p></div><div style={{ background: '#FDE4D6', padding: '8px 20px', borderRadius: '40px', display: 'flex', gap: '16px' }}><div><span>🕐</span> {formatTime()}</div>{!userData.isPremium && <div>🎯 {userData.sessionsRemaining > 0 ? `${userData.sessionsRemaining} left` : 'No sessions'}</div>}{userData.isPremium && <div>✨ Premium</div>}</div></div>
-      <div style={{ display: 'flex', gap: '24px', flexDirection: isMobile ? 'column' : 'row', marginBottom: '24px' }}><div style={{ ...styles.card, textAlign: 'center', flex: 1 }}><h3 style={{ color: '#6B7280', marginBottom: '16px' }}>Stress Level</h3><div style={{ fontSize: '2.5rem', fontWeight: 500 }}>{stressLevel}%</div></div><div style={{ ...styles.card, textAlign: 'center', flex: 1 }}><h3 style={{ color: '#6B7280', marginBottom: '16px' }}>Task Clarity</h3><div style={{ fontSize: '2.5rem', fontWeight: 500 }}>{clarityScore}%</div></div></div>
+      <StreakTracker isPremium={userData.isPremium} />
+      
+      {/* Daily Check-in - Only for Pro users */}
+      {userData.isPremium && showCheckIn && (
+        <DailyCheckIn 
+          onComplete={handleCheckInComplete}
+          onStartTechnique={startTechnique}
+        />
+      )}
+      
+      {/* Already checked in message - Pro users */}
+      {userData.isPremium && !showCheckIn && (
+        <div style={{ ...styles.card, textAlign: 'center', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}>
+          <p style={{ color: '#10B981', fontWeight: 600 }}>✅ You've checked in today! Come back tomorrow.</p>
+        </div>
+      )}
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
+        <div>
+          <h1 style={styles.title}>Good {greeting}, {userData.name?.split(' ')[0] || 'there'}</h1>
+          <p style={styles.subtitle}>Your mind is clear. Let's keep it that way.</p>
+        </div>
+        <div style={{ background: userData.isPremium ? 'linear-gradient(135deg, #8B5CF6, #C4B5FD)' : '#FDE4D6', padding: '8px 20px', borderRadius: '40px', display: 'flex', gap: '16px', color: userData.isPremium ? 'white' : '#4B5563' }}>
+          <div><span>🕐</span> {formatTime()}</div>
+          <div>{userData.isPremium ? '💫 Pro' : '✨ Free'}</div>
+        </div>
+      </div>
+      
+      {/* Pro Progress Stats */}
+      {userData.isPremium && (
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ ...styles.card, textAlign: 'center', padding: '16px' }}>
+            <div style={{ fontSize: '2rem' }}>📊</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 500, marginTop: '8px' }}>{userData.stats.aiSessions + userData.stats.breathing + userData.stats.sosUsed + userData.stats.journal}</div>
+            <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>Total Sessions</div>
+          </div>
+          <div style={{ ...styles.card, textAlign: 'center', padding: '16px' }}>
+            <div style={{ fontSize: '2rem' }}>🔥</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 500, marginTop: '8px' }}>{localStorage.getItem('lumacare_streak') || 0}</div>
+            <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>Day Streak</div>
+          </div>
+          <div style={{ ...styles.card, textAlign: 'center', padding: '16px' }}>
+            <div style={{ fontSize: '2rem' }}>🎯</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 500, marginTop: '8px' }}>
+              {userData.stats.moodScores.length > 0 
+                ? (userData.stats.moodScores.reduce((sum, m) => sum + m.score, 0) / userData.stats.moodScores.length).toFixed(1) 
+                : '--'}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>Avg Mood</div>
+          </div>
+          <div style={{ ...styles.card, textAlign: 'center', padding: '16px' }}>
+            <div style={{ fontSize: '2rem' }}>⭐</div>
+            <div style={{ fontSize: '1.3rem', fontWeight: 500, marginTop: '8px' }}>{userData.stats.journal}</div>
+            <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>Journal Entries</div>
+          </div>
+        </div>
+      )}
+      
+      <div style={{ display: 'flex', gap: '24px', flexDirection: isMobile ? 'column' : 'row', marginBottom: '24px' }}>
+        <div style={{ ...styles.card, textAlign: 'center', flex: 1 }}>
+          <h3 style={{ color: '#6B7280', marginBottom: '16px' }}>Stress Level</h3>
+          <div style={{ fontSize: '2.5rem', fontWeight: 500 }}>{stressLevel}%</div>
+        </div>
+        <div style={{ ...styles.card, textAlign: 'center', flex: 1 }}>
+          <h3 style={{ color: '#6B7280', marginBottom: '16px' }}>Task Clarity</h3>
+          <div style={{ fontSize: '2.5rem', fontWeight: 500 }}>{clarityScore}%</div>
+        </div>
+      </div>
+      
       <div style={styles.card}>
         <h3 style={{ color: '#8B5CF6', marginBottom: '16px' }}>Quick Tools</h3>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
@@ -623,22 +997,40 @@ const Dashboard = ({ navigateTo, userData, startTechnique }) => {
             Racing thoughts
           </button>
         </div>
-        <button onClick={() => { triggerHaptic('light'); const keys = Object.keys(techniquesData); startTechnique(keys[Math.floor(Math.random() * keys.length)]); }} style={{ ...styles.button, width: '100%', background: '#FDE4D6', marginTop: '16px' }}>🎲 Surprise me</button>
+        <button onClick={() => { triggerHaptic('light'); const keys = Object.keys(techniquesData).filter(k => k !== 'priority-matrix'); startTechnique(keys[Math.floor(Math.random() * keys.length)]); }} style={{ ...styles.button, width: '100%', background: '#FDE4D6', marginTop: '16px' }}>🎲 Surprise me</button>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '16px', marginTop: '24px' }}>
-        {[
-          { icon: '🤖', label: 'AI Sessions', value: userData.stats.aiSessions },
-          { icon: '🌬️', label: 'Breathing', value: userData.stats.breathing },
-          { icon: '🆘', label: 'SOS', value: userData.stats.sosUsed },
-          { icon: '📝', label: 'Journal', value: userData.stats.journal }
-        ].map((stat, i) => (
-          <div key={i} style={{ ...styles.card, textAlign: 'center', padding: '16px' }}>
-            <div style={{ fontSize: '2rem' }}>{stat.icon}</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: 500, marginTop: '8px' }}>{stat.value}</div>
-            <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>{stat.label}</div>
-          </div>
-        ))}
-      </div>
+      
+      {/* Pro Upgrade Banner - Only for free users */}
+      {!userData.isPremium && (
+        <div style={{ ...styles.card, textAlign: 'center', marginTop: '24px', background: 'linear-gradient(135deg, rgba(139,92,246,0.05), rgba(196,181,253,0.05))', border: '1px solid rgba(139,92,246,0.2)' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '8px' }}>💫</div>
+          <h3 style={{ color: '#8B5CF6', marginBottom: '8px' }}>Ready for more?</h3>
+          <p style={{ color: '#6B7280', marginBottom: '16px', fontSize: '0.9rem' }}>
+            Get personalized check-ins, progress tracking, guided programs, and more.
+          </p>
+          <button onClick={() => setShowPremium(true)} style={styles.premiumButton}>
+            ✨ Unlock Pro — Starting at $4.99/mo
+          </button>
+        </div>
+      )}
+      
+      {/* Basic Stats for free users */}
+      {!userData.isPremium && (
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)', gap: '16px', marginTop: '24px' }}>
+          {[
+            { icon: '🤖', label: 'AI Sessions', value: userData.stats.aiSessions },
+            { icon: '🌬️', label: 'Breathing', value: userData.stats.breathing },
+            { icon: '🆘', label: 'SOS', value: userData.stats.sosUsed },
+            { icon: '📝', label: 'Journal', value: userData.stats.journal }
+          ].map((stat, i) => (
+            <div key={i} style={{ ...styles.card, textAlign: 'center', padding: '16px' }}>
+              <div style={{ fontSize: '2rem' }}>{stat.icon}</div>
+              <div style={{ fontSize: '1.3rem', fontWeight: 500, marginTop: '8px' }}>{stat.value}</div>
+              <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -1062,7 +1454,7 @@ const PriorityMatrix = () => {
   );
 };
 
-// ==================== TECHNIQUES ====================
+// ==================== TECHNIQUES PAGE ====================
 const Techniques = ({ navigateTo, startTechnique }) => {
   const techniques = Object.values(techniquesData);
   
@@ -1092,7 +1484,7 @@ const Techniques = ({ navigateTo, startTechnique }) => {
   return (
     <div>
       <h1 style={styles.title}>Techniques</h1>
-      <p style={styles.subtitle}>Tap any card to start</p>
+      <p style={styles.subtitle}>All techniques are free. Tap any card to start.</p>
       
       {Object.entries(grouped).map(([category, techs]) => (
         <div key={category} style={{ marginBottom: '40px' }}>
@@ -1149,12 +1541,7 @@ const BreatheTab = ({ technique, onComplete, onBack }) => {
         <div style={{ fontSize: '4rem', marginBottom: '20px' }}>🌬️</div>
         <h2 style={styles.title}>Select a technique first</h2>
         <p style={{ color: '#6B7280', marginBottom: '30px' }}>Choose a technique from the list below</p>
-        <button 
-          onClick={onBack} 
-          style={{ ...styles.button, margin: '0 auto', display: 'inline-block' }}
-        >
-          Browse Techniques
-        </button>
+        <button onClick={onBack} style={{ ...styles.button, margin: '0 auto', display: 'inline-block' }}>Browse Techniques</button>
       </div>
     );
   }
@@ -1204,9 +1591,13 @@ const Settings = ({ logout, user }) => {
   const [name, setName] = useState(user?.name || '');
   const handleSaveName = () => { const updated = { ...user, name }; localStorage.setItem('lumacare_user', JSON.stringify(updated)); window.location.reload(); };
   const exportData = () => {
-    const data = localStorage.getItem('lumacare_user');
-    if (!data) return alert('No data to export');
-    const blob = new Blob([data], { type: 'application/json' });
+    const data = {
+      user: localStorage.getItem('lumacare_user'),
+      checkins: localStorage.getItem('lumacare_checkins'),
+      gratitude: localStorage.getItem('gratitude_entries'),
+      streak: localStorage.getItem('lumacare_streak')
+    };
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -1224,7 +1615,10 @@ const Settings = ({ logout, user }) => {
       reader.onload = (event) => {
         try {
           const data = JSON.parse(event.target.result);
-          localStorage.setItem('lumacare_user', JSON.stringify(data));
+          if (data.user) localStorage.setItem('lumacare_user', data.user);
+          if (data.checkins) localStorage.setItem('lumacare_checkins', data.checkins);
+          if (data.gratitude) localStorage.setItem('gratitude_entries', data.gratitude);
+          if (data.streak) localStorage.setItem('lumacare_streak', data.streak);
           alert('Data imported! Page will reload.');
           window.location.reload();
         } catch (err) { alert('Invalid file'); }
@@ -1234,13 +1628,33 @@ const Settings = ({ logout, user }) => {
     input.click();
   };
   return (
-    <div><h1 style={styles.title}>Settings</h1>
+    <div>
+      <h1 style={styles.title}>Settings</h1>
       <div style={styles.card}>
         <h3 style={{ color: '#8B5CF6' }}>Profile</h3>
-        <input value={name} onChange={(e) => setName(e.target.value)} style={styles.input} />
+        <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" style={styles.input} />
         <button onClick={() => { triggerHaptic('light'); handleSaveName(); }} style={styles.button}>Save Name</button>
+        
+        <h3 style={{ color: '#8B5CF6', marginTop: '24px' }}>Subscription</h3>
+        {user?.isPremium ? (
+          <div style={{ padding: '16px', background: 'rgba(139,92,246,0.1)', borderRadius: '16px', marginBottom: '16px' }}>
+            <p style={{ color: '#8B5CF6', fontWeight: 600 }}>💫 Pro Member</p>
+            <p style={{ fontSize: '0.85rem', color: '#6B7280' }}>
+              Plan: {user.premiumPlan === 'yearly' ? 'Yearly ($39/year)' : 'Monthly ($4.99/mo)'}
+            </p>
+          </div>
+        ) : (
+          <div style={{ padding: '16px', background: 'rgba(251,207,232,0.3)', borderRadius: '16px', marginBottom: '16px' }}>
+            <p style={{ color: '#6B7280' }}>Free Plan — All techniques included</p>
+          </div>
+        )}
+        
         <h3 style={{ color: '#8B5CF6', marginTop: '24px' }}>Data</h3>
-        <div style={{ display: 'flex', gap: '12px' }}><button onClick={() => { triggerHaptic('light'); exportData(); }} style={{ ...styles.button, background: '#D1FAE5' }}>📥 Export Data</button><button onClick={() => { triggerHaptic('light'); importData(); }} style={{ ...styles.button, background: '#FBCFE8' }}>📤 Import Data</button></div>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <button onClick={() => { triggerHaptic('light'); exportData(); }} style={{ ...styles.button, background: '#D1FAE5' }}>📥 Export Data</button>
+          <button onClick={() => { triggerHaptic('light'); importData(); }} style={{ ...styles.button, background: '#FBCFE8' }}>📤 Import Data</button>
+        </div>
+        
         <h3 style={{ color: '#8B5CF6', marginTop: '24px' }}>Account</h3>
         <button onClick={() => { triggerHaptic('medium'); logout(); }} style={{ ...styles.button, background: '#EF4444', width: '100%' }}>Sign Out</button>
       </div>
@@ -1267,13 +1681,40 @@ function App() {
 
   const isMobile = windowWidth <= 768;
   const navigateTo = (path) => { window.history.pushState({}, '', path); window.dispatchEvent(new PopStateEvent('popstate')); };
-  const startTechnique = (techniqueId) => { const technique = techniquesData[techniqueId]; setCurrentTechnique(technique); localStorage.setItem('lumacare_current_technique', JSON.stringify(technique)); navigateTo(technique.location === 'matrix' ? '/matrix' : '/breathe'); };
-  const handleTechniqueComplete = (techniqueId, rating, feedback) => { const technique = techniquesData[techniqueId]; if (technique) trackSession(technique.type, rating, feedback); setCurrentTechnique(null); localStorage.removeItem('lumacare_current_technique'); navigateTo('/techniques'); };
-  const handleBack = () => { setCurrentTechnique(null); localStorage.removeItem('lumacare_current_technique'); navigateTo('/techniques'); };
+  
+  const startTechnique = (techniqueId) => { 
+    const technique = techniquesData[techniqueId]; 
+    setCurrentTechnique(technique); 
+    localStorage.setItem('lumacare_current_technique', JSON.stringify(technique)); 
+    navigateTo(technique.location === 'matrix' ? '/matrix' : '/breathe'); 
+  };
+  
+  const handleTechniqueComplete = (techniqueId, rating, feedback) => { 
+    const technique = techniquesData[techniqueId]; 
+    if (technique) trackSession(technique.type, rating, feedback); 
+    setCurrentTechnique(null); 
+    localStorage.removeItem('lumacare_current_technique'); 
+    navigateTo('/techniques'); 
+  };
+  
+  const handleBack = () => { 
+    setCurrentTechnique(null); 
+    localStorage.removeItem('lumacare_current_technique'); 
+    navigateTo('/techniques'); 
+  };
+  
   const handleUpgrade = (plan) => upgradeUser(plan);
-  useEffect(() => { const saved = localStorage.getItem('lumacare_current_technique'); if (saved && window.location.pathname === '/breathe') setCurrentTechnique(JSON.parse(saved)); }, []);
+  
+  useEffect(() => { 
+    const saved = localStorage.getItem('lumacare_current_technique'); 
+    if (saved && window.location.pathname === '/breathe') setCurrentTechnique(JSON.parse(saved)); 
+  }, []);
 
-  const routerFutureConfig = { v7_startTransition: true, v7_relativeSplatPath: true };
+  // Make startTechnique available globally for onboarding
+  useEffect(() => {
+    window.startTechniqueFromOnboarding = startTechnique;
+    return () => { delete window.startTechniqueFromOnboarding; };
+  }, []);
 
   if (!user) {
     return <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}><LoginPage onLogin={login} /></GoogleOAuthProvider>;
@@ -1289,7 +1730,7 @@ function App() {
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <Router future={routerFutureConfig}>
+      <Router>
         <div style={styles.container}>
           <div className="flowing-bg" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -2, background: 'linear-gradient(135deg, #FFF9F0 0%, #FDE4D6 50%, #E9D8FD 100%)', backgroundSize: '200% 200%', animation: 'softFlow 20s ease infinite' }} />
           <div className="particle-glow" style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, pointerEvents: 'none', background: 'radial-gradient(circle at 30% 40%, rgba(251,207,232,0.3) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(209,250,229,0.2) 0%, transparent 50%)' }} />
@@ -1310,10 +1751,12 @@ function App() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
-                  <button onClick={() => { triggerHaptic('light'); setShowPremium(true); }} style={styles.premiumButton}>
-                    <img src="https://i.ibb.co/Fb7zk3zC/12589570-6cba-463e-af2f-dd5ee100a546-removalai-preview.png" alt="premium" style={{ width: '20px', height: '20px' }} />
-                    Premium
-                  </button>
+                  {!userData?.isPremium && (
+                    <button onClick={() => { triggerHaptic('light'); setShowPremium(true); }} style={styles.premiumButton}>
+                      <img src="https://i.ibb.co/Fb7zk3zC/12589570-6cba-463e-af2f-dd5ee100a546-removalai-preview.png" alt="premium" style={{ width: '20px', height: '20px' }} />
+                      Pro
+                    </button>
+                  )}
                   <div onClick={() => navigateTo('/settings')} style={{ cursor: 'pointer' }}>
                     {user.picture ? <img src={user.picture} alt="profile" style={styles.profileImage} /> : <div style={styles.profilePlaceholder}>{user.name?.charAt(0).toUpperCase()}</div>}
                   </div>
@@ -1329,9 +1772,11 @@ function App() {
                 <span>LumaCare</span>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button onClick={() => { triggerHaptic('light'); setShowPremium(true); }} style={styles.premiumButton}>
-                  <img src="https://i.ibb.co/Fb7zk3zC/12589570-6cba-463e-af2f-dd5ee100a546-removalai-preview.png" alt="premium" style={{ width: '18px', height: '18px' }} />
-                </button>
+                {!userData?.isPremium && (
+                  <button onClick={() => { triggerHaptic('light'); setShowPremium(true); }} style={styles.premiumButton}>
+                    <img src="https://i.ibb.co/Fb7zk3zC/12589570-6cba-463e-af2f-dd5ee100a546-removalai-preview.png" alt="premium" style={{ width: '18px', height: '18px' }} />
+                  </button>
+                )}
                 <div onClick={() => navigateTo('/settings')}>
                   {user.picture ? <img src={user.picture} alt="profile" style={{ width: '36px', height: '36px', borderRadius: '50%' }} /> : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #FBCFE8, #D1FAE5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4B5563' }}>{user.name?.charAt(0).toUpperCase()}</div>}
                 </div>
@@ -1341,13 +1786,13 @@ function App() {
 
           {showPremium && <PremiumModal onClose={() => setShowPremium(false)} onUpgrade={handleUpgrade} />}
 
-          <main style={styles.main}>
+          <main style={{ ...styles.main, paddingBottom: isMobile ? '80px' : '40px' }}>
             <Routes>
-              <Route path="/" element={<Dashboard navigateTo={navigateTo} userData={userData} startTechnique={startTechnique} />} />
+              <Route path="/" element={<Dashboard navigateTo={navigateTo} userData={userData} startTechnique={startTechnique} setShowPremium={setShowPremium} />} />
               <Route path="/matrix" element={<PriorityMatrix />} />
               <Route path="/techniques" element={<Techniques navigateTo={navigateTo} startTechnique={startTechnique} />} />
               <Route path="/breathe" element={<BreatheTab technique={currentTechnique} onComplete={handleTechniqueComplete} onBack={handleBack} />} />
-              <Route path="/settings" element={<Settings logout={logout} user={user} />} />
+              <Route path="/settings" element={<Settings logout={logout} user={userData} />} />
             </Routes>
           </main>
 
