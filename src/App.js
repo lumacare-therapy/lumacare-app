@@ -487,12 +487,12 @@ const LoginPage = ({ onLogin }) => {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #FFF9F0 0%, #FDE4D6 50%, #E9D8FD 100%)', padding: '20px', position: 'relative' }}>
       <div className="cat-paw-bg" />
       <div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', padding: '40px 24px', position: 'relative', zIndex: 2 }}>
-        <img src="https://i.ibb.co/9mWTyK6F/Screenshot-2026-04-12-202309-removebg-preview.png" alt="LumaCare Logo" style={{ width: '80px', height: 'auto', marginBottom: '16px' }} />
+        <img src="https://i.ibb.co/BHGMgkxM/Screenshot-2026-04-12-202309-removebg-preview-1-removebg-preview.png" alt="LumaCare Logo" style={{ width: '80px', height: 'auto', marginBottom: '16px' }} />
         <h1 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '8px' }}>LumaCare</h1>
         <p style={{ color: '#6b7280', marginBottom: '24px' }}>Your daily system for mental clarity and focus</p>
         <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.error('Google Failed')} useOneTap theme="filled_black" shape="pill" text="continue_with" size="large" width="100%" />
         <button onClick={handleGuestLogin} style={{ width: '100%', marginTop: '16px', padding: '12px', background: 'rgba(251,207,232,0.3)', border: '1px solid #fbcfe8', borderRadius: '40px', color: '#4b5563', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          <img src="https://i.ibb.co/9mWTyK6F/Screenshot-2026-04-12-202309-removebg-preview.png" alt="LumaCare" style={{ width: '20px', height: '20px' }} />
+          <img src="https://i.ibb.co/BHGMgkxM/Screenshot-2026-04-12-202309-removebg-preview-1-removebg-preview.png" alt="LumaCare" style={{ width: '20px', height: '20px' }} />
           Continue as Guest
         </button>
       </div>
@@ -1722,7 +1722,7 @@ function App() {
             <nav style={{ ...styles.nav, ...(scrolled ? { background: 'rgba(255,255,255,0.9)' } : {}) }}>
               <div style={styles.navContent}>
                 <div style={styles.logo} onClick={() => navigateTo('/')}>
-                  <img src="https://i.ibb.co/9mWTyK6F/Screenshot-2026-04-12-202309-removebg-preview.png" alt="LumaCare Logo" style={{ height: '32px', width: 'auto', borderRadius: '8px' }} />
+                  <img src="https://i.ibb.co/BHGMgkxM/Screenshot-2026-04-12-202309-removebg-preview-1-removebg-preview.png" alt="LumaCare Logo" style={{ height: '32px', width: 'auto', borderRadius: '8px' }} />
                   <span style={styles.logoText}>LumaCare</span>
                 </div>
                 <div style={styles.navLinks}>
@@ -1751,7 +1751,7 @@ function App() {
           {isMobile && (
             <header style={{ position: 'sticky', top: 0, zIndex: 100, padding: '12px 16px', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #fbcfe8', display: 'flex', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigateTo('/')}>
-                <img src="https://i.ibb.co/9mWTyK6F/Screenshot-2026-04-12-202309-removebg-preview.png" alt="LumaCare Logo" style={{ height: '28px', width: 'auto', borderRadius: '6px' }} />
+                <img src="https://i.ibb.co/BHGMgkxM/Screenshot-2026-04-12-202309-removebg-preview-1-removebg-preview.png" alt="LumaCare Logo" style={{ height: '28px', width: 'auto', borderRadius: '6px' }} />
                 <span>LumaCare</span>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
