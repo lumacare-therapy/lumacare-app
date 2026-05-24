@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-do
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import './styles/globals.css';
 
 // ==================== GOOGLE CLIENT ID ====================
@@ -501,21 +500,67 @@ const LoginPage = ({ onLogin }) => {
   );
 };
 
-// ==================== PREMIUM MODAL WITH PAYPAL SUBSCRIPTIONS ====================
+// ==================== PREMIUM MODAL - NO NPM PACKAGE NEEDED ====================
 const PremiumModal = ({ onClose, onUpgrade }) => {
   const [selectedPlan, setSelectedPlan] = useState('yearly');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [{ isPending }] = usePayPalScriptReducer();
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [buttonRendered, setButtonRendered] = useState(false);
   
   const planIds = {
     monthly: 'P-72T62542XW549282SNII7GZY',
     yearly: 'P-2XJ20656V8350534VNII7J3Q'
   };
   
-  const handleSubscriptionComplete = (plan) => {
-    setPaymentSuccess(true);
-    onUpgrade(plan);
-    setTimeout(() => onClose(), 2000);
+  // Load PayPal script
+  useEffect(() => {
+    if (document.getElementById('paypal-sdk')) return;
+    
+    const script = document.createElement('script');
+    script.id = 'paypal-sdk';
+    script.src = 'https://www.paypal.com/sdk/js?client-id=AYkkL5gWX0Ipl01CqNjK5el4DwNNkzo9BHuI991fm8hmonNNlMtZ_2RBRISsJbsiMmgCwLJyJbwoP8eD&vault=true&intent=subscription';
+    script.onload = () => setScriptLoaded(true);
+    document.body.appendChild(script);
+  }, []);
+  
+  // Render PayPal buttons when script loads and plan changes
+  useEffect(() => {
+    if (scriptLoaded && window.paypal && !buttonRendered) {
+      const container = document.getElementById('paypal-button-container');
+      if (container) {
+        container.innerHTML = '';
+        window.paypal.Buttons({
+          style: { shape: 'pill', color: 'gold', layout: 'vertical', label: 'subscribe' },
+          createSubscription: (data, actions) => {
+            return actions.subscription.create({
+              plan_id: planIds[selectedPlan]
+            });
+          },
+          onApprove: (data) => {
+            console.log('Subscription ID:', data.subscriptionID);
+            setPaymentSuccess(true);
+            onUpgrade(selectedPlan);
+            setTimeout(() => onClose(), 2000);
+          },
+          onError: (err) => {
+            console.error('PayPal error:', err);
+            alert('Payment failed. Please try again.');
+          }
+        }).render('#paypal-button-container');
+        setButtonRendered(true);
+      }
+    }
+  }, [scriptLoaded, selectedPlan, buttonRendered]);
+  
+  // Reset button when plan changes
+  useEffect(() => {
+    setButtonRendered(false);
+  }, [selectedPlan]);
+  
+  const handleClose = () => {
+    setPaymentSuccess(false);
+    setButtonRendered(false);
+    onClose();
   };
   
   const proFeatures = [
@@ -528,9 +573,9 @@ const PremiumModal = ({ onClose, onUpgrade }) => {
   ];
   
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={handleClose}>
       <div className="glass-card" style={{ maxWidth: '550px', width: '90%', position: 'relative', padding: '32px', background: '#FFF9F0', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: '#6b7280', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+        <button onClick={handleClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: '#6b7280', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
         
         {paymentSuccess ? (
           <div style={{ textAlign: 'center', padding: '40px 20px' }}>
@@ -540,24 +585,18 @@ const PremiumModal = ({ onClose, onUpgrade }) => {
               Your premium features are now unlocked. Enjoy!
             </p>
             <LoadingSpinner size="small" color="#8B5CF6" />
-            <p style={{ color: '#9CA3AF', fontSize: '0.8rem', marginTop: '12px' }}>Redirecting...</p>
           </div>
         ) : (
           <>
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
               <span style={{ ...styles.badge, marginBottom: '16px', background: '#8B5CF6', color: 'white' }}>✨ LumaCare Pro</span>
-              <h2 className="text-gradient" style={{ fontSize: '1.8rem', marginBottom: '8px' }}>Unlock Your Full Potential</h2>
+              <h2 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>Unlock Your Full Potential</h2>
               <p style={{ color: '#6B7280', fontSize: '0.9rem' }}>All techniques are free. Pro gives you the full experience.</p>
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
               {proFeatures.map((feature, idx) => (
-                <div key={idx} style={{ 
-                  padding: '14px', 
-                  background: 'rgba(139,92,246,0.05)', 
-                  borderRadius: '16px',
-                  border: '1px solid rgba(139,92,246,0.1)'
-                }}>
+                <div key={idx} style={{ padding: '14px', background: 'rgba(139,92,246,0.05)', borderRadius: '16px', border: '1px solid rgba(139,92,246,0.1)' }}>
                   <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{feature.icon}</div>
                   <h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4B5563', marginBottom: '2px' }}>{feature.title}</h4>
                   <p style={{ fontSize: '0.7rem', color: '#9CA3AF', lineHeight: '1.3' }}>{feature.desc}</p>
@@ -566,18 +605,7 @@ const PremiumModal = ({ onClose, onUpgrade }) => {
             </div>
             
             <div style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}>
-              <div 
-                onClick={() => setSelectedPlan('yearly')} 
-                style={{ 
-                  padding: '16px 20px', 
-                  background: selectedPlan === 'yearly' ? '#fbcfe8' : '#fde4d6', 
-                  borderRadius: '20px', 
-                  border: selectedPlan === 'yearly' ? '2px solid #8B5CF6' : '1px solid #e5e7eb', 
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  position: 'relative'
-                }}
-              >
+              <div onClick={() => setSelectedPlan('yearly')} style={{ padding: '16px 20px', background: selectedPlan === 'yearly' ? '#fbcfe8' : '#fde4d6', borderRadius: '20px', border: selectedPlan === 'yearly' ? '2px solid #8B5CF6' : '1px solid #e5e7eb', cursor: 'pointer', transition: 'all 0.2s ease', position: 'relative' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <h3 style={{ color: '#4b5563', fontSize: '1rem', marginBottom: '2px' }}>🌟 Yearly Plan</h3>
@@ -588,33 +616,11 @@ const PremiumModal = ({ onClose, onUpgrade }) => {
                   </div>
                 </div>
                 {selectedPlan === 'yearly' && (
-                  <span style={{ 
-                    position: 'absolute', 
-                    top: '-8px', 
-                    right: '16px', 
-                    background: '#10B981', 
-                    color: 'white', 
-                    padding: '2px 10px', 
-                    borderRadius: '20px', 
-                    fontSize: '0.7rem',
-                    fontWeight: 600
-                  }}>
-                    BEST VALUE
-                  </span>
+                  <span style={{ position: 'absolute', top: '-8px', right: '16px', background: '#10B981', color: 'white', padding: '2px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 600 }}>BEST VALUE</span>
                 )}
               </div>
               
-              <div 
-                onClick={() => setSelectedPlan('monthly')} 
-                style={{ 
-                  padding: '16px 20px', 
-                  background: selectedPlan === 'monthly' ? '#d1fae5' : '#fde4d6', 
-                  borderRadius: '20px', 
-                  border: selectedPlan === 'monthly' ? '2px solid #8B5CF6' : '1px solid #e5e7eb', 
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
+              <div onClick={() => setSelectedPlan('monthly')} style={{ padding: '16px 20px', background: selectedPlan === 'monthly' ? '#d1fae5' : '#fde4d6', borderRadius: '20px', border: selectedPlan === 'monthly' ? '2px solid #8B5CF6' : '1px solid #e5e7eb', cursor: 'pointer', transition: 'all 0.2s ease' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <h3 style={{ color: '#4b5563', fontSize: '1rem', marginBottom: '2px' }}>💫 Monthly Plan</h3>
@@ -627,36 +633,13 @@ const PremiumModal = ({ onClose, onUpgrade }) => {
               </div>
             </div>
             
-            {isPending ? (
+            {!scriptLoaded ? (
               <div style={{ textAlign: 'center', padding: '20px' }}>
                 <LoadingSpinner size="small" color="#8B5CF6" />
-                <p style={{ color: '#6B7280', marginTop: '12px', fontSize: '0.9rem' }}>Loading secure payment...</p>
+                <p style={{ color: '#6B7280', marginTop: '12px' }}>Loading PayPal...</p>
               </div>
             ) : (
-              <PayPalButtons
-                style={{ 
-                  shape: 'pill',
-                  color: 'gold',
-                  layout: 'vertical',
-                  label: 'subscribe'
-                }}
-                createSubscription={(data, actions) => {
-                  return actions.subscription.create({
-                    plan_id: planIds[selectedPlan]
-                  });
-                }}
-                onApprove={(data) => {
-                  console.log('Subscription successful! ID:', data.subscriptionID);
-                  handleSubscriptionComplete(selectedPlan);
-                }}
-                onError={(err) => {
-                  console.error('PayPal error:', err);
-                  alert('Payment failed. Please try again.');
-                }}
-                onCancel={() => {
-                  console.log('Payment cancelled by user');
-                }}
-              />
+              <div id="paypal-button-container" style={{ minHeight: '150px' }}></div>
             )}
             
             <p style={{ textAlign: 'center', marginTop: '12px', fontSize: '0.75rem', color: '#9CA3AF' }}>
