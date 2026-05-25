@@ -8,8 +8,23 @@
   "theme_color": "#ffffff",
   "icons": [
     {
+      "src": "https://i.ibb.co/VYCVKhGt/launchericon-48x48.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/bMcPxPTg/launchericon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
       "src": "https://i.ibb.co/BHGMgkxM/Screenshot-2026-04-12-202309-removebg-preview-1-removebg-preview.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/TMYrwZb8/launchericon-144x144.png",
+      "sizes": "144x144",
       "type": "image/png"
     },
     {
