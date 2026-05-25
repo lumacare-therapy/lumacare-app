@@ -1722,7 +1722,7 @@ function App() {
             <nav style={{ ...styles.nav, ...(scrolled ? { background: 'rgba(255,255,255,0.9)' } : {}) }}>
               <div style={styles.navContent}>
                 <div style={styles.logo} onClick={() => navigateTo('/')}>
-                  <img src="https://i.ibb.co/BHGMgkxM/Screenshot-2026-04-12-202309-removebg-preview-1-removebg-preview.png" alt="LumaCare Logo" style={{ height: '32px', width: 'auto', borderRadius: '8px' }} />
+                  <img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="LumaCare Logo" style={{ height: '32px', width: 'auto', borderRadius: '8px' }} />
                   <span style={styles.logoText}>LumaCare</span>
                 </div>
                 <div style={styles.navLinks}>
@@ -1736,7 +1736,7 @@ function App() {
                 <div style={{ display: 'flex', gap: '12px' }}>
                   {!userData?.isPremium && (
                     <button onClick={() => { triggerHaptic('light'); setShowPremium(true); }} style={styles.premiumButton}>
-                      <img src="https://i.ibb.co/Fb7zk3zC/12589570-6cba-463e-af2f-dd5ee100a546-removalai-preview.png" alt="premium" style={{ width: '20px', height: '20px' }} />
+                      <img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="premium" style={{ width: '20px', height: '20px' }} />
                       Pro
                     </button>
                   )}
@@ -1751,13 +1751,13 @@ function App() {
           {isMobile && (
             <header style={{ position: 'sticky', top: 0, zIndex: 100, padding: '12px 16px', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #fbcfe8', display: 'flex', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigateTo('/')}>
-                <img src="https://i.ibb.co/BHGMgkxM/Screenshot-2026-04-12-202309-removebg-preview-1-removebg-preview.png" alt="LumaCare Logo" style={{ height: '28px', width: 'auto', borderRadius: '6px' }} />
+                <img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="LumaCare Logo" style={{ height: '28px', width: 'auto', borderRadius: '6px' }} />
                 <span>LumaCare</span>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 {!userData?.isPremium && (
                   <button onClick={() => { triggerHaptic('light'); setShowPremium(true); }} style={styles.premiumButton}>
-                    <img src="https://i.ibb.co/Fb7zk3zC/12589570-6cba-463e-af2f-dd5ee100a546-removalai-preview.png" alt="premium" style={{ width: '18px', height: '18px' }} />
+                    <img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="premium" style={{ width: '18px', height: '18px' }} />
                   </button>
                 )}
                 <div onClick={() => navigateTo('/settings')}>
