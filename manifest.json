@@ -1,0 +1,21 @@
+{
+  "name": "LumaCare",
+  "short_name": "LumaCare",
+  "description": "Free wellness toolkit for burnout, anxiety, ADHD and overwhelm.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/BHGMgkxM/Screenshot-2026-04-12-202309-removebg-preview-1-removebg-preview.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
