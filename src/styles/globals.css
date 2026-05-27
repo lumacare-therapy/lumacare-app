@@ -32,6 +32,12 @@
   100% { background-position: 0% 50%; }
 }
 
+@keyframes softFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* ==================== SOFT GLOW PARTICLES ==================== */
 .particle-glow {
   position: fixed;
@@ -56,7 +62,7 @@
   width: 100%;
   height: 6px;
   background: rgba(255, 255, 255, 0.1);
-  borderRadius: 10px;
+  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -79,4 +85,103 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ==================== LOADING WAVE ==================== */
+.loading-wave {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  padding: 20px;
+}
+
+.loading-wave span {
+  width: 6px;
+  height: 30px;
+  background: #8b5cf6;
+  border-radius: 3px;
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+.loading-wave span:nth-child(1) { animation-delay: 0s; }
+.loading-wave span:nth-child(2) { animation-delay: 0.1s; }
+.loading-wave span:nth-child(3) { animation-delay: 0.2s; }
+.loading-wave span:nth-child(4) { animation-delay: 0.3s; }
+.loading-wave span:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes wave {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(2); }
+}
+
+/* ==================== PULSE GLOW ==================== */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ==================== FADE IN OUT FOR DASHBOARD INDICATORS ==================== */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-5px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-5px); }
+}
+
+/* ==================== GLASS CARD ==================== */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(251, 207, 232, 0.5);
+  border-radius: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+/* ==================== TEXT GRADIENT ==================== */
+.text-gradient {
+  background: linear-gradient(135deg, #FBCFE8, #D1FAE5, #C4B5FD);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ==================== GLOBAL RESETS ==================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+input:focus, textarea:focus, select:focus, button:focus {
+  outline: none;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #8B5CF6 !important;
+}
+
+/* ==================== SCROLLBAR ==================== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
 }
