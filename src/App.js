@@ -55,851 +55,192 @@ const styles = {
 
 const AuthContext = React.createContext();
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const savedUser = localStorage.getItem('lumacare_user');
-    if (savedUser) setUser(JSON.parse(savedUser));
-    setLoading(false);
-  }, []);
-  const login = (userData) => { setUser(userData); localStorage.setItem('lumacare_user', JSON.stringify(userData)); };
+  const [user, setUser] = useState(null); const [loading, setLoading] = useState(true);
+  useEffect(() => { const s = localStorage.getItem('lumacare_user'); if (s) setUser(JSON.parse(s)); setLoading(false); }, []);
+  const login = (d) => { setUser(d); localStorage.setItem('lumacare_user', JSON.stringify(d)); };
   const logout = () => { setUser(null); localStorage.removeItem('lumacare_user'); };
   return (<AuthContext.Provider value={{ user, login, logout, loading }}>{children}</AuthContext.Provider>);
 };
 const useAuth = () => React.useContext(AuthContext);
 
 const LoadingSpinner = ({ size = 'medium', color = '#FBCFE8' }) => {
-  const sizes = { small: '24px', medium: '40px', large: '60px' };
-  return (<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}><div className="loading-spinner" style={{ width: sizes[size], height: sizes[size], borderTopColor: color }} /></div>);
+  const s = { small: '24px', medium: '40px', large: '60px' };
+  return (<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}><div className="loading-spinner" style={{ width: s[size], height: s[size], borderTopColor: color }} /></div>);
 };
 
 const useSessionTracking = () => {
-  const { user } = useAuth();
-  const [userData, setUserData] = useState(user);
-  useEffect(() => { if (user) setUserData(user); }, [user]);
-
-  const trackSession = (techniqueType, rating = null, feedback = '') => {
-    if (!userData) return { success: false };
-    const newStats = { ...userData.stats };
-    const dayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
-    if (techniqueType === 'breathing') newStats.breathing += 1;
-    else if (techniqueType === 'cognitive') newStats.aiSessions += 1;
-    else if (techniqueType === 'grounding') newStats.sosUsed += 1;
-    else if (techniqueType === 'pomodoro') newStats.aiSessions += 1;
-    else if (techniqueType === 'journal') newStats.journal += 1;
-    newStats.weeklyData[dayIndex].sessions += 1;
-    if (rating) {
-      newStats.moodScores.push({ score: rating, timestamp: Date.now(), feedback, technique: techniqueType });
-      const todayMoods = newStats.moodScores.filter(m => new Date(m.timestamp).toDateString() === new Date().toDateString());
-      const avgMood = todayMoods.reduce((sum, m) => sum + m.score, 0) / todayMoods.length || 0;
-      newStats.weeklyData[dayIndex].mood = Math.round(avgMood * 20);
-    }
-    const updatedUser = { ...userData, lastSessionTime: Date.now(), stats: newStats };
-    setUserData(updatedUser);
-    localStorage.setItem('lumacare_user', JSON.stringify(updatedUser));
-    return { success: true };
+  const { user } = useAuth(); const [ud, setUD] = useState(user);
+  useEffect(() => { if (user) setUD(user); }, [user]);
+  const track = (type, rating = null, feedback = '') => {
+    if (!ud) return { success: false };
+    const ns = { ...ud.stats }; const di = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+    if (type === 'breathing') ns.breathing += 1; else if (type === 'cognitive') ns.aiSessions += 1; else if (type === 'grounding') ns.sosUsed += 1; else if (type === 'pomodoro') ns.aiSessions += 1; else if (type === 'journal') ns.journal += 1;
+    ns.weeklyData[di].sessions += 1;
+    if (rating) { ns.moodScores.push({ score: rating, timestamp: Date.now(), feedback, technique: type }); const tm = ns.moodScores.filter(m => new Date(m.timestamp).toDateString() === new Date().toDateString()); ns.weeklyData[di].mood = Math.round((tm.reduce((s, m) => s + m.score, 0) / tm.length || 0) * 20); }
+    const uu = { ...ud, lastSessionTime: Date.now(), stats: ns }; setUD(uu); localStorage.setItem('lumacare_user', JSON.stringify(uu)); return { success: true };
   };
-
-  const upgradeUser = (plan) => {
-    const updatedUser = {
-      ...userData,
-      isPremium: true,
-      premiumPlan: plan,
-      premiumExpiry: plan === 'monthly' ? Date.now() + (30 * 24 * 60 * 60 * 1000) : Date.now() + (365 * 24 * 60 * 60 * 1000)
-    };
-    setUserData(updatedUser);
-    localStorage.setItem('lumacare_user', JSON.stringify(updatedUser));
-  };
-
-  return { userData, trackSession, upgradeUser };
+  const upgrade = (plan) => { const uu = { ...ud, isPremium: true, premiumPlan: plan, premiumExpiry: plan === 'monthly' ? Date.now() + 2592000000 : Date.now() + 31536000000 }; setUD(uu); localStorage.setItem('lumacare_user', JSON.stringify(uu)); };
+  return { userData: ud, trackSession: track, upgradeUser: upgrade };
 };
 
+// LOGIN PAGE
 const LoginPage = ({ onLogin }) => {
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [tempUser, setTempUser] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false); const [tempUser, setTempUser] = useState(null);
+  useEffect(() => { if (localStorage.getItem('lumacare_onboarding_complete') === 'true') setShowOnboarding(false); }, []);
 
-  useEffect(() => {
-    if (localStorage.getItem('lumacare_onboarding_complete') === 'true') setShowOnboarding(false);
-  }, []);
+  const mkUser = (o = {}) => ({ name: '', email: '', picture: null, isPremium: false, premiumPlan: null, premiumExpiry: null, lastSessionTime: null, stats: { aiSessions: 0, breathing: 0, sosUsed: 0, journal: 0, moodScores: [], weeklyData: [{ day: 'Mon', mood: 0, sessions: 0 },{ day: 'Tue', mood: 0, sessions: 0 },{ day: 'Wed', mood: 0, sessions: 0 },{ day: 'Thu', mood: 0, sessions: 0 },{ day: 'Fri', mood: 0, sessions: 0 },{ day: 'Sat', mood: 0, sessions: 0 },{ day: 'Sun', mood: 0, sessions: 0 }] }, ...o });
 
-  const handleGoogleSuccess = (credentialResponse) => {
-    const decoded = jwtDecode(credentialResponse.credential);
-    const user = {
-      name: decoded.name, email: decoded.email, picture: decoded.picture,
-      isPremium: false, premiumPlan: null, premiumExpiry: null, lastSessionTime: null,
-      stats: {
-        aiSessions: 0, breathing: 0, sosUsed: 0, journal: 0, moodScores: [],
-        weeklyData: [
-          { day: 'Mon', mood: 0, sessions: 0 }, { day: 'Tue', mood: 0, sessions: 0 },
-          { day: 'Wed', mood: 0, sessions: 0 }, { day: 'Thu', mood: 0, sessions: 0 },
-          { day: 'Fri', mood: 0, sessions: 0 }, { day: 'Sat', mood: 0, sessions: 0 },
-          { day: 'Sun', mood: 0, sessions: 0 }
-        ]
-      }
-    };
-    setTempUser(user);
-    if (localStorage.getItem('lumacare_onboarding_complete') !== 'true') setShowOnboarding(true);
-    else onLogin(user);
-  };
-
-  const handleGuestLogin = () => {
-    const guestUser = {
-      name: 'Guest User', email: 'guest@lumacare.app', picture: null,
-      isPremium: false, premiumPlan: null, premiumExpiry: null, lastSessionTime: null,
-      stats: {
-        aiSessions: 0, breathing: 0, sosUsed: 0, journal: 0, moodScores: [],
-        weeklyData: [
-          { day: 'Mon', mood: 0, sessions: 0 }, { day: 'Tue', mood: 0, sessions: 0 },
-          { day: 'Wed', mood: 0, sessions: 0 }, { day: 'Thu', mood: 0, sessions: 0 },
-          { day: 'Fri', mood: 0, sessions: 0 }, { day: 'Sat', mood: 0, sessions: 0 },
-          { day: 'Sun', mood: 0, sessions: 0 }
-        ]
-      }
-    };
-    setTempUser(guestUser);
-    if (localStorage.getItem('lumacare_onboarding_complete') !== 'true') setShowOnboarding(true);
-    else onLogin(guestUser);
-  };
-
-  const completeOnboarding = () => {
-    if (tempUser) { localStorage.setItem('lumacare_onboarding_complete', 'true'); onLogin(tempUser); }
-    setShowOnboarding(false);
-  };
+  const hgs = (cr) => { const d = jwtDecode(cr.credential); const u = mkUser({ name: d.name, email: d.email, picture: d.picture }); setTempUser(u); if (localStorage.getItem('lumacare_onboarding_complete') !== 'true') setShowOnboarding(true); else onLogin(u); };
+  const hgl = () => { const u = mkUser({ name: 'Guest User', email: 'guest@lumacare.app' }); setTempUser(u); if (localStorage.getItem('lumacare_onboarding_complete') !== 'true') setShowOnboarding(true); else onLogin(u); };
+  const completeOnboarding = () => { if (tempUser) { localStorage.setItem('lumacare_onboarding_complete', 'true'); onLogin(tempUser); } setShowOnboarding(false); };
 
   const RecommendationScreen = ({ answers, onContinue, onTryTechnique }) => {
-    const map = {
-      anxiety: { name: 'Box Breathing', id: 'box-breathing' },
-      overwhelm: { name: 'Priority Matrix', id: 'priority-matrix' },
-      sadness: { name: 'Grounding', id: 'grounding' },
-      racing: { name: 'Cognitive Restructuring', id: 'cognitive-restructuring' },
-      focus: { name: 'Pomodoro Technique', id: 'pomodoro' },
-      tension: { name: 'Progressive Muscle Relaxation', id: 'progressive-muscle-relaxation' }
-    };
+    const map = { anxiety: { name: 'Box Breathing', id: 'box-breathing' }, overwhelm: { name: 'Priority Matrix', id: 'priority-matrix' }, sadness: { name: 'Grounding', id: 'grounding' }, racing: { name: 'Cognitive Restructuring', id: 'cognitive-restructuring' }, focus: { name: 'Pomodoro Technique', id: 'pomodoro' }, tension: { name: 'Progressive Muscle Relaxation', id: 'progressive-muscle-relaxation' } };
     const t = map[answers.mainStruggle?.value] || map.anxiety;
-    return (
-      <div style={{ ...styles.card, maxWidth: '500px', margin: '0 auto', textAlign: 'center', padding: '32px', position: 'relative', zIndex: 2 }}>
-        <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🧠</div>
-        <h2 style={styles.title}>Based on your answers</h2>
-        <p style={{ color: '#6B7280', marginBottom: '24px' }}>We recommend starting with <strong style={{ color: '#8B5CF6' }}>{t.name}</strong></p>
-        <div style={{ textAlign: 'left', marginBottom: '24px', background: 'rgba(139,92,246,0.1)', borderRadius: '16px', padding: '16px' }}>
-          <p style={{ marginBottom: '8px' }}>📌 <strong>You said:</strong></p>
-          <p style={{ fontSize: '0.9rem', color: '#4B5563' }}>• Main struggle: {answers.mainStruggle?.label}</p>
-          <p style={{ fontSize: '0.9rem', color: '#4B5563' }}>• Frequency: {answers.frequency?.label}</p>
-          <p style={{ fontSize: '0.9rem', color: '#4B5563' }}>• Goal: {answers.goal?.label}</p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button onClick={onContinue} style={{ ...styles.button, background: 'transparent', border: '2px solid #cbd5e0', flex: 1 }}>Go to Dashboard</button>
-          <button onClick={() => onTryTechnique(t.id)} style={{ ...styles.button, flex: 1 }}>Try {t.name} →</button>
-        </div>
-      </div>
-    );
+    return (<div style={{ ...styles.card, maxWidth: '500px', margin: '0 auto', textAlign: 'center', padding: '32px', position: 'relative', zIndex: 2 }}><div style={{ fontSize: '4rem', marginBottom: '16px' }}>🧠</div><h2 style={styles.title}>Based on your answers</h2><p style={{ color: '#6B7280', marginBottom: '24px' }}>We recommend starting with <strong style={{ color: '#8B5CF6' }}>{t.name}</strong></p><div style={{ textAlign: 'left', marginBottom: '24px', background: 'rgba(139,92,246,0.1)', borderRadius: '16px', padding: '16px' }}><p style={{ marginBottom: '8px' }}>📌 <strong>You said:</strong></p><p style={{ fontSize: '0.9rem', color: '#4B5563' }}>• Main struggle: {answers.mainStruggle?.label}</p><p style={{ fontSize: '0.9rem', color: '#4B5563' }}>• Frequency: {answers.frequency?.label}</p><p style={{ fontSize: '0.9rem', color: '#4B5563' }}>• Goal: {answers.goal?.label}</p></div><div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}><button onClick={onContinue} style={{ ...styles.button, background: 'transparent', border: '2px solid #cbd5e0', flex: 1 }}>Go to Dashboard</button><button onClick={() => onTryTechnique(t.id)} style={{ ...styles.button, flex: 1 }}>Try {t.name} →</button></div></div>);
   };
 
   const OnboardingSurvey = () => {
-    const [step, setStep] = useState(0);
-    const [answers, setAnswers] = useState({ mainStruggle: null, frequency: null, wantsTechniques: [], goal: null });
-    const [completed, setCompleted] = useState(false);
-    const [finalAnswers, setFinalAnswers] = useState(null);
-    const [isProcessing, setIsProcessing] = useState(false);
-
-    const questions = [
-      { id: 'mainStruggle', question: "What's your main struggle right now?", options: [{ value: 'anxiety', label: '😰 Anxiety & Panic' }, { value: 'overwhelm', label: '😤 Overwhelm & Too Many Tasks' }, { value: 'sadness', label: '😔 Sadness & Low Mood' }, { value: 'racing', label: '🧠 Racing Thoughts' }, { value: 'focus', label: "⏰ Can't Focus" }, { value: 'tension', label: '🫂 Physical Tension' }] },
-      { id: 'frequency', question: "How often do you feel this way?", options: [{ value: 'daily', label: 'Daily' }, { value: 'few-times', label: 'A few times a week' }, { value: 'weekly', label: 'Once a week' }, { value: 'occasional', label: 'Occasionally' }] },
-      { id: 'wantsTechniques', question: "Which techniques sound helpful? (Select all)", multiple: true, options: [{ value: 'breathing', label: '🌬️ Breathing' }, { value: 'grounding', label: '🌱 Grounding' }, { value: 'cognitive', label: '🧠 Cognitive' }, { value: 'focus', label: '⏰ Focus' }, { value: 'journal', label: '📝 Journal' }] },
-      { id: 'goal', question: "What's your main goal?", options: [{ value: 'calm', label: 'Feel calmer' }, { value: 'productivity', label: 'Get more done' }, { value: 'sleep', label: 'Sleep better' }, { value: 'understand', label: 'Understand emotions' }] }
-    ];
-
-    const q = questions[step];
-    const canProceed = q.multiple ? answers[q.id]?.length > 0 : answers[q.id] !== null;
-
-    const handleSelect = (field, value, option) => {
-      if (isProcessing) return;
-      if (q.multiple) {
-        setAnswers(p => ({ ...p, [field]: p[field].includes(value) ? p[field].filter(v => v !== value) : [...p[field], value] }));
-      } else {
-        const na = { ...answers, [field]: { value, label: option.label } };
-        setAnswers(na);
-        if (step < questions.length - 1) {
-          setIsProcessing(true);
-          setTimeout(() => { setStep(step + 1); setIsProcessing(false); }, 300);
-        } else {
-          setIsProcessing(true);
-          const f = { mainStruggle: na.mainStruggle, frequency: na.frequency, wantsTechniques: na.wantsTechniques, goal: { value, label: option.label } };
-          localStorage.setItem('lumacare_onboarding_complete', 'true');
-          localStorage.setItem('lumacare_onboarding_answers', JSON.stringify(f));
-          setFinalAnswers(f);
-          setCompleted(true);
-          setIsProcessing(false);
-        }
-      }
-    };
-
-    const handleNext = () => {
-      if (isProcessing) return;
-      if (step < questions.length - 1) {
-        setIsProcessing(true);
-        setTimeout(() => { setStep(step + 1); setIsProcessing(false); }, 300);
-      } else {
-        setIsProcessing(true);
-        const f = { mainStruggle: answers.mainStruggle, frequency: answers.frequency, wantsTechniques: answers.wantsTechniques, goal: answers.goal };
-        localStorage.setItem('lumacare_onboarding_complete', 'true');
-        localStorage.setItem('lumacare_onboarding_answers', JSON.stringify(f));
-        setFinalAnswers(f);
-        setCompleted(true);
-        setIsProcessing(false);
-      }
-    };
-
-    if (completed && finalAnswers) {
-      return (
-        <RecommendationScreen
-          answers={finalAnswers}
-          onContinue={completeOnboarding}
-          onTryTechnique={(id) => {
-            completeOnboarding();
-            setTimeout(() => { if (window.startTechniqueFromOnboarding) window.startTechniqueFromOnboarding(id); }, 100);
-          }}
-        />
-      );
-    }
-
-    return (
-      <div style={{ ...styles.card, maxWidth: '500px', margin: '0 auto', textAlign: 'center', padding: '32px', position: 'relative', zIndex: 2 }}>
-        <div style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#8B5CF6', fontSize: '0.8rem' }}>
-            <span>Getting to know you</span>
-            <span>{step + 1} of {questions.length}</span>
-          </div>
-          <div className="progress-bar"><div className="progress-fill" style={{ width: `${((step + 1) / questions.length) * 100}%` }} /></div>
-        </div>
-        <h2 style={styles.title}>{q.question}</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px', marginBottom: '24px' }}>
-          {q.options.map(o => (
-            <button key={o.value} onClick={() => handleSelect(q.id, o.value, o)} disabled={isProcessing}
-              style={{
-                ...styles.button,
-                background: (q.multiple ? answers[q.id]?.includes(o.value) : answers[q.id]?.value === o.value) ? 'linear-gradient(135deg, #8B5CF6, #C4B5FD)' : styles.button.background,
-                border: '1px solid rgba(139,92,246,0.3)', justifyContent: 'flex-start', gap: '12px',
-                opacity: isProcessing ? 0.7 : 1,
-                color: (q.multiple ? answers[q.id]?.includes(o.value) : answers[q.id]?.value === o.value) ? 'white' : '#4B5563'
-              }}>
-              {o.label}
-            </button>
-          ))}
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={() => { localStorage.setItem('lumacare_onboarding_complete', 'true'); completeOnboarding(); }}
-            style={{ ...styles.button, background: 'transparent', border: '2px solid #cbd5e0', flex: 1 }} disabled={isProcessing}>
-            Skip
-          </button>
-          {q.multiple && (
-            <button onClick={handleNext} disabled={!canProceed || isProcessing}
-              style={{ ...styles.button, flex: 1, opacity: canProceed ? 1 : 0.5, cursor: canProceed ? 'pointer' : 'not-allowed' }}>
-              {step === questions.length - 1 ? 'Finish' : 'Next'}
-            </button>
-          )}
-        </div>
-      </div>
-    );
+    const [step, setStep] = useState(0); const [answers, setAnswers] = useState({ mainStruggle: null, frequency: null, wantsTechniques: [], goal: null }); const [completed, setCompleted] = useState(false); const [finalAnswers, setFinalAnswers] = useState(null); const [isProcessing, setIsProcessing] = useState(false);
+    const questions = [{ id: 'mainStruggle', question: "What's your main struggle right now?", options: [{ value: 'anxiety', label: '😰 Anxiety & Panic' },{ value: 'overwhelm', label: '😤 Overwhelm & Too Many Tasks' },{ value: 'sadness', label: '😔 Sadness & Low Mood' },{ value: 'racing', label: '🧠 Racing Thoughts' },{ value: 'focus', label: "⏰ Can't Focus" },{ value: 'tension', label: '🫂 Physical Tension' }] },{ id: 'frequency', question: "How often do you feel this way?", options: [{ value: 'daily', label: 'Daily' },{ value: 'few-times', label: 'A few times a week' },{ value: 'weekly', label: 'Once a week' },{ value: 'occasional', label: 'Occasionally' }] },{ id: 'wantsTechniques', question: "Which techniques sound helpful? (Select all)", multiple: true, options: [{ value: 'breathing', label: '🌬️ Breathing' },{ value: 'grounding', label: '🌱 Grounding' },{ value: 'cognitive', label: '🧠 Cognitive' },{ value: 'focus', label: '⏰ Focus' },{ value: 'journal', label: '📝 Journal' }] },{ id: 'goal', question: "What's your main goal?", options: [{ value: 'calm', label: 'Feel calmer' },{ value: 'productivity', label: 'Get more done' },{ value: 'sleep', label: 'Sleep better' },{ value: 'understand', label: 'Understand emotions' }] }];
+    const q = questions[step]; const canProceed = q.multiple ? answers[q.id]?.length > 0 : answers[q.id] !== null;
+    const handleSelect = (field, value, option) => { if (isProcessing) return; if (q.multiple) { setAnswers(p => ({ ...p, [field]: p[field].includes(value) ? p[field].filter(v => v !== value) : [...p[field], value] })); } else { const na = { ...answers, [field]: { value, label: option.label } }; setAnswers(na); if (step < questions.length - 1) { setIsProcessing(true); setTimeout(() => { setStep(p => p + 1); setIsProcessing(false); }, 300); } else { const f = { mainStruggle: na.mainStruggle, frequency: na.frequency, wantsTechniques: na.wantsTechniques, goal: { value, label: option.label } }; localStorage.setItem('lumacare_onboarding_complete', 'true'); localStorage.setItem('lumacare_onboarding_answers', JSON.stringify(f)); setFinalAnswers(f); setCompleted(true); } } };
+    const handleNext = () => { if (isProcessing) return; if (step < questions.length - 1) { setIsProcessing(true); setTimeout(() => { setStep(p => p + 1); setIsProcessing(false); }, 300); } else { const f = { mainStruggle: answers.mainStruggle, frequency: answers.frequency, wantsTechniques: answers.wantsTechniques, goal: answers.goal }; localStorage.setItem('lumacare_onboarding_complete', 'true'); localStorage.setItem('lumacare_onboarding_answers', JSON.stringify(f)); setFinalAnswers(f); setCompleted(true); } };
+    if (completed && finalAnswers) return <RecommendationScreen answers={finalAnswers} onContinue={completeOnboarding} onTryTechnique={(id) => { completeOnboarding(); setTimeout(() => { if (window.startTechniqueFromOnboarding) window.startTechniqueFromOnboarding(id); }, 100); }} />;
+    return (<div style={{ ...styles.card, maxWidth: '500px', margin: '0 auto', textAlign: 'center', padding: '32px', position: 'relative', zIndex: 2 }}><div style={{ marginBottom: '24px' }}><div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', color: '#8B5CF6', fontSize: '0.8rem' }}><span>Getting to know you</span><span>{step + 1} of {questions.length}</span></div><div className="progress-bar"><div className="progress-fill" style={{ width: `${((step + 1) / questions.length) * 100}%` }} /></div></div><h2 style={styles.title}>{q.question}</h2><div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px', marginBottom: '24px' }}>{q.options.map(o => <button key={o.value} onClick={() => handleSelect(q.id, o.value, o)} disabled={isProcessing} style={{ ...styles.button, background: (q.multiple ? answers[q.id]?.includes(o.value) : answers[q.id]?.value === o.value) ? 'linear-gradient(135deg, #8B5CF6, #C4B5FD)' : styles.button.background, border: '1px solid rgba(139,92,246,0.3)', justifyContent: 'flex-start', gap: '12px', opacity: isProcessing ? 0.7 : 1, color: (q.multiple ? answers[q.id]?.includes(o.value) : answers[q.id]?.value === o.value) ? 'white' : '#4B5563' }}>{o.label}</button>)}</div><div style={{ display: 'flex', gap: '12px' }}><button onClick={() => { localStorage.setItem('lumacare_onboarding_complete', 'true'); completeOnboarding(); }} style={{ ...styles.button, background: 'transparent', border: '2px solid #cbd5e0', flex: 1 }} disabled={isProcessing}>Skip</button>{q.multiple && <button onClick={handleNext} disabled={!canProceed || isProcessing} style={{ ...styles.button, flex: 1, opacity: canProceed ? 1 : 0.5, cursor: canProceed ? 'pointer' : 'not-allowed' }}>{step === questions.length - 1 ? 'Finish' : 'Next'}</button>}</div></div>);
   };
 
-  if (showOnboarding) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #FFF9F0 0%, #FDE4D6 50%, #E9D8FD 100%)', padding: '20px' }}>
-        <OnboardingSurvey />
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #FFF9F0 0%, #FDE4D6 50%, #E9D8FD 100%)', padding: '20px' }}>
-      <div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', padding: '40px 24px', position: 'relative', zIndex: 2 }}>
-        <img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="LumaCare Logo" style={{ width: '80px', height: 'auto', marginBottom: '16px' }} />
-        <h1 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '8px' }}>LumaCare</h1>
-        <p style={{ color: '#6b7280', marginBottom: '24px' }}>Your daily system for mental clarity and focus</p>
-        <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.error('Google Failed')} useOneTap theme="filled_black" shape="pill" text="continue_with" size="large" width="100%" />
-        <button onClick={handleGuestLogin} style={{ width: '100%', marginTop: '16px', padding: '12px', background: 'rgba(251,207,232,0.3)', border: '1px solid #fbcfe8', borderRadius: '40px', color: '#4b5563', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-          <img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="LumaCare" style={{ width: '20px', height: '20px' }} />
-          Continue as Guest
-        </button>
-      </div>
-    </div>
-  );
+  if (showOnboarding) return (<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #FFF9F0 0%, #FDE4D6 50%, #E9D8FD 100%)', padding: '20px' }}><OnboardingSurvey /></div>);
+  return (<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #FFF9F0 0%, #FDE4D6 50%, #E9D8FD 100%)', padding: '20px' }}><div className="glass-card" style={{ maxWidth: '400px', width: '100%', textAlign: 'center', padding: '40px 24px', position: 'relative', zIndex: 2 }}><img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="LumaCare Logo" style={{ width: '80px', height: 'auto', marginBottom: '16px' }} /><h1 className="text-gradient" style={{ fontSize: '2rem', marginBottom: '8px' }}>LumaCare</h1><p style={{ color: '#6b7280', marginBottom: '24px' }}>Your daily system for mental clarity and focus</p><GoogleLogin onSuccess={hgs} onError={() => console.error('Google Failed')} useOneTap theme="filled_black" shape="pill" text="continue_with" size="large" width="100%" /><button onClick={hgl} style={{ width: '100%', marginTop: '16px', padding: '12px', background: 'rgba(251,207,232,0.3)', border: '1px solid #fbcfe8', borderRadius: '40px', color: '#4b5563', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="LumaCare" style={{ width: '20px', height: '20px' }} />Continue as Guest</button></div></div>);
 };
-
 const PremiumModal = ({ onClose, onUpgrade }) => {
-  const [selectedPlan, setSelectedPlan] = useState('yearly');
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-  const [buttonRendered, setButtonRendered] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('yearly'); const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false); const [buttonRendered, setButtonRendered] = useState(false);
   const planIds = { monthly: 'P-72T62542XW549282SNII7GZY', yearly: 'P-2XJ20656V8350534VNII7J3Q' };
-
-  useEffect(() => {
-    if (document.getElementById('paypal-sdk')) return;
-    const script = document.createElement('script');
-    script.id = 'paypal-sdk';
-    script.src = 'https://www.paypal.com/sdk/js?client-id=AYkkL5gWX0Ipl01CqNjK5el4DwNNkzo9BHuI991fm8hmonNNlMtZ_2RBRISsJbsiMmgCwLJyJbwoP8eD&vault=true&intent=subscription';
-    script.onload = () => setScriptLoaded(true);
-    document.body.appendChild(script);
-  }, []);
-
-  useEffect(() => {
-    if (scriptLoaded && window.paypal && !buttonRendered) {
-      const container = document.getElementById('paypal-button-container');
-      if (container) {
-        container.innerHTML = '';
-        window.paypal.Buttons({
-          style: { shape: 'pill', color: 'gold', layout: 'vertical', label: 'subscribe' },
-          createSubscription: (data, actions) => actions.subscription.create({ plan_id: planIds[selectedPlan] }),
-          onApprove: (data) => { setPaymentSuccess(true); onUpgrade(selectedPlan); setTimeout(() => onClose(), 2000); },
-          onError: (err) => { console.error('PayPal error:', err); alert('Payment failed. Please try again.'); }
-        }).render('#paypal-button-container');
-        setButtonRendered(true);
-      }
-    }
-  }, [scriptLoaded, selectedPlan, buttonRendered]);
-
+  useEffect(() => { if (document.getElementById('paypal-sdk')) return; const s = document.createElement('script'); s.id = 'paypal-sdk'; s.src = 'https://www.paypal.com/sdk/js?client-id=AYkkL5gWX0Ipl01CqNjK5el4DwNNkzo9BHuI991fm8hmonNNlMtZ_2RBRISsJbsiMmgCwLJyJbwoP8eD&vault=true&intent=subscription'; s.onload = () => setScriptLoaded(true); document.body.appendChild(s); }, []);
+  useEffect(() => { if (scriptLoaded && window.paypal && !buttonRendered) { const c = document.getElementById('paypal-button-container'); if (c) { c.innerHTML = ''; window.paypal.Buttons({ style: { shape: 'pill', color: 'gold', layout: 'vertical', label: 'subscribe' }, createSubscription: (d, a) => a.subscription.create({ plan_id: planIds[selectedPlan] }), onApprove: (d) => { setPaymentSuccess(true); onUpgrade(selectedPlan); setTimeout(() => onClose(), 2000); }, onError: (e) => { console.error('PayPal error:', e); alert('Payment failed. Please try again.'); } }).render('#paypal-button-container'); setButtonRendered(true); } } }, [scriptLoaded, selectedPlan, buttonRendered]);
   useEffect(() => { setButtonRendered(false); }, [selectedPlan]);
-
-  const proFeatures = [
-    { icon: '🎯', title: 'Personalized', desc: 'Tools based on how you feel' },
-    { icon: '📊', title: 'Daily Check-ins', desc: 'Mood tracking with suggestions' },
-    { icon: '📈', title: 'Progress Tracking', desc: 'Streaks, stats, visual progress' },
-    { icon: '🗺️', title: 'Guided Programs', desc: '7 & 30 day programs' },
-    { icon: '📱', title: 'Offline Access', desc: 'Works anywhere, anytime' },
-    { icon: '📝', title: 'Journal Vault', desc: 'Save all your entries' }
-  ];
-
-  return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
-      <div className="glass-card" style={{ maxWidth: '550px', width: '90%', position: 'relative', padding: '32px', background: '#FFF9F0', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: '#6b7280', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-        {paymentSuccess ? (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🎉</div>
-            <h2 style={{ ...styles.title, color: '#8B5CF6' }}>Welcome to Pro!</h2>
-            <p style={{ color: '#6B7280', marginBottom: '24px' }}>Your premium features are now unlocked!</p>
-            <LoadingSpinner size="small" color="#8B5CF6" />
-          </div>
-        ) : (
-          <>
-            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-              <span style={{ ...styles.badge, marginBottom: '16px', background: '#8B5CF6', color: 'white' }}>✨ LumaCare Pro</span>
-              <h2 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>Unlock Your Full Potential</h2>
-              <p style={{ color: '#6B7280', fontSize: '0.9rem' }}>All techniques are free. Pro gives you the full experience.</p>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-              {proFeatures.map((f, i) => (
-                <div key={i} style={{ padding: '14px', background: 'rgba(139,92,246,0.05)', borderRadius: '16px', border: '1px solid rgba(139,92,246,0.1)' }}>
-                  <div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{f.icon}</div>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4B5563', marginBottom: '2px' }}>{f.title}</h4>
-                  <p style={{ fontSize: '0.7rem', color: '#9CA3AF', lineHeight: '1.3' }}>{f.desc}</p>
-                </div>
-              ))}
-            </div>
-            <div style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}>
-              <div onClick={() => setSelectedPlan('yearly')} style={{ padding: '16px 20px', background: selectedPlan === 'yearly' ? '#fbcfe8' : '#fde4d6', borderRadius: '20px', border: selectedPlan === 'yearly' ? '2px solid #8B5CF6' : '1px solid #e5e7eb', cursor: 'pointer', transition: 'all 0.2s ease', position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div><h3 style={{ color: '#4b5563', fontSize: '1rem', marginBottom: '2px' }}>🌟 Yearly Plan</h3><p style={{ color: '#6b7280', fontSize: '0.85rem' }}>$39/year — Save 35%</p></div>
-                  <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#8B5CF6' }}>$3.25<span style={{ fontSize: '0.8rem' }}>/mo</span></div>
-                </div>
-                {selectedPlan === 'yearly' && <span style={{ position: 'absolute', top: '-8px', right: '16px', background: '#10B981', color: 'white', padding: '2px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 600 }}>BEST VALUE</span>}
-              </div>
-              <div onClick={() => setSelectedPlan('monthly')} style={{ padding: '16px 20px', background: selectedPlan === 'monthly' ? '#d1fae5' : '#fde4d6', borderRadius: '20px', border: selectedPlan === 'monthly' ? '2px solid #8B5CF6' : '1px solid #e5e7eb', cursor: 'pointer', transition: 'all 0.2s ease' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div><h3 style={{ color: '#4b5563', fontSize: '1rem', marginBottom: '2px' }}>💫 Monthly Plan</h3><p style={{ color: '#6b7280', fontSize: '0.85rem' }}>$4.99/month — Cancel anytime</p></div>
-                  <div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#8B5CF6' }}>$4.99<span style={{ fontSize: '0.8rem' }}>/mo</span></div>
-                </div>
-              </div>
-            </div>
-            {!scriptLoaded ? (
-              <div style={{ textAlign: 'center', padding: '20px' }}><LoadingSpinner size="small" color="#8B5CF6" /><p style={{ color: '#6B7280', marginTop: '12px' }}>Loading PayPal...</p></div>
-            ) : (
-              <div id="paypal-button-container" style={{ minHeight: '150px' }}></div>
-            )}
-            <p style={{ textAlign: 'center', marginTop: '12px', fontSize: '0.75rem', color: '#9CA3AF' }}>🔒 Secure payment via PayPal • Cancel anytime • All techniques remain free</p>
-          </>
-        )}
-      </div>
-    </div>
-  );
+  const pf = [{ icon: '🎯', title: 'Personalized', desc: 'Tools based on how you feel' },{ icon: '📊', title: 'Daily Check-ins', desc: 'Mood tracking with suggestions' },{ icon: '📈', title: 'Progress Tracking', desc: 'Streaks, stats, visual progress' },{ icon: '🗺️', title: 'Guided Programs', desc: '7 & 30 day programs' },{ icon: '📱', title: 'Offline Access', desc: 'Works anywhere, anytime' },{ icon: '📝', title: 'Journal Vault', desc: 'Save all your entries' }];
+  return (<div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}><div className="glass-card" style={{ maxWidth: '550px', width: '90%', position: 'relative', padding: '32px', background: '#FFF9F0', maxHeight: '90vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}><button onClick={onClose} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: '#6b7280', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>{paymentSuccess ? (<div style={{ textAlign: 'center', padding: '40px 20px' }}><div style={{ fontSize: '4rem', marginBottom: '16px' }}>🎉</div><h2 style={{ ...styles.title, color: '#8B5CF6' }}>Welcome to Pro!</h2><p style={{ color: '#6B7280', marginBottom: '24px' }}>Your premium features are now unlocked!</p><LoadingSpinner size="small" color="#8B5CF6" /></div>) : (<><div style={{ textAlign: 'center', marginBottom: '24px' }}><span style={{ ...styles.badge, marginBottom: '16px', background: '#8B5CF6', color: 'white' }}>✨ LumaCare Pro</span><h2 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>Unlock Your Full Potential</h2><p style={{ color: '#6B7280', fontSize: '0.9rem' }}>All techniques are free. Pro gives you the full experience.</p></div><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>{pf.map((f, i) => (<div key={i} style={{ padding: '14px', background: 'rgba(139,92,246,0.05)', borderRadius: '16px', border: '1px solid rgba(139,92,246,0.1)' }}><div style={{ fontSize: '1.5rem', marginBottom: '4px' }}>{f.icon}</div><h4 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#4B5563', marginBottom: '2px' }}>{f.title}</h4><p style={{ fontSize: '0.7rem', color: '#9CA3AF', lineHeight: '1.3' }}>{f.desc}</p></div>))}</div><div style={{ display: 'grid', gap: '12px', marginBottom: '20px' }}><div onClick={() => setSelectedPlan('yearly')} style={{ padding: '16px 20px', background: selectedPlan === 'yearly' ? '#fbcfe8' : '#fde4d6', borderRadius: '20px', border: selectedPlan === 'yearly' ? '2px solid #8B5CF6' : '1px solid #e5e7eb', cursor: 'pointer', transition: 'all 0.2s ease', position: 'relative' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div><h3 style={{ color: '#4b5563', fontSize: '1rem', marginBottom: '2px' }}>🌟 Yearly Plan</h3><p style={{ color: '#6b7280', fontSize: '0.85rem' }}>$39/year — Save 35%</p></div><div style={{ textAlign: 'right' }}><div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#8B5CF6' }}>$39.00<span style={{ fontSize: '0.8rem' }}>/year</span></div></div></div>{selectedPlan === 'yearly' && <span style={{ position: 'absolute', top: '-8px', right: '16px', background: '#10B981', color: 'white', padding: '2px 10px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 600 }}>BEST VALUE</span>}</div><div onClick={() => setSelectedPlan('monthly')} style={{ padding: '16px 20px', background: selectedPlan === 'monthly' ? '#d1fae5' : '#fde4d6', borderRadius: '20px', border: selectedPlan === 'monthly' ? '2px solid #8B5CF6' : '1px solid #e5e7eb', cursor: 'pointer', transition: 'all 0.2s ease' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div><h3 style={{ color: '#4b5563', fontSize: '1rem', marginBottom: '2px' }}>💫 Monthly Plan</h3><p style={{ color: '#6b7280', fontSize: '0.85rem' }}>$4.99/month — Cancel anytime</p></div><div style={{ fontSize: '1.3rem', fontWeight: 700, color: '#8B5CF6' }}>$4.99<span style={{ fontSize: '0.8rem' }}>/mo</span></div></div></div></div>{!scriptLoaded ? (<div style={{ textAlign: 'center', padding: '20px' }}><LoadingSpinner size="small" color="#8B5CF6" /><p style={{ color: '#6B7280', marginTop: '12px' }}>Loading PayPal...</p></div>) : (<div id="paypal-button-container" style={{ minHeight: '150px' }}></div>)}<p style={{ textAlign: 'center', marginTop: '12px', fontSize: '0.75rem', color: '#9CA3AF' }}>🔒 Secure payment via PayPal • Cancel anytime • All techniques remain free</p></>)}</div></div>);
 };
 
 const DailyCheckIn = ({ onComplete, onStartTechnique }) => {
-  const [mood, setMood] = useState(null);
-  const [note, setNote] = useState('');
-  const [suggestedTechnique, setSuggestedTechnique] = useState(null);
-
-  const moodOptions = [
-    { value: 'great', emoji: '😊', label: 'Great', color: '#10B981' },
-    { value: 'good', emoji: '🙂', label: 'Good', color: '#60A5FA' },
-    { value: 'okay', emoji: '😐', label: 'Okay', color: '#F59E0B' },
-    { value: 'low', emoji: '😔', label: 'Low', color: '#F97316' },
-    { value: 'struggling', emoji: '😢', label: 'Struggling', color: '#EF4444' }
-  ];
-
-  const suggestions = { great: 'gratitude-log', good: 'pomodoro', okay: 'body-scan', low: 'grounding', struggling: 'box-breathing' };
-
-  const handleSave = () => {
-    const checkIn = { date: new Date().toISOString(), mood, note, suggestedTechnique: suggestedTechnique?.id };
-    const checkIns = JSON.parse(localStorage.getItem('lumacare_checkins') || '[]');
-    checkIns.push(checkIn);
-    localStorage.setItem('lumacare_checkins', JSON.stringify(checkIns));
-    localStorage.setItem('lumacare_last_active', new Date().toDateString());
-    localStorage.setItem('lumacare_streak', (parseInt(localStorage.getItem('lumacare_streak') || '0') + 1).toString());
-    onComplete(checkIn);
-  };
-
-  return (
-    <div style={styles.card}>
-      <h2 style={{ ...styles.title, fontSize: '1.5rem', textAlign: 'center', marginBottom: '8px' }}>How are you showing up today?</h2>
-      <p style={{ textAlign: 'center', color: '#6B7280', marginBottom: '24px' }}>One honest answer. No judgment.</p>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
-        {moodOptions.map(o => (
-          <button key={o.value} onClick={() => { setMood(o.value); setSuggestedTechnique(techniquesData[suggestions[o.value]]); }}
-            style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 16px',
-              borderRadius: '20px', border: mood === o.value ? `2px solid ${o.color}` : '1px solid #E5E7EB',
-              background: mood === o.value ? `${o.color}15` : 'white', cursor: 'pointer',
-              transition: 'all 0.2s ease', minWidth: '65px'
-            }}>
-            <span style={{ fontSize: '2rem' }}>{o.emoji}</span>
-            <span style={{ fontSize: '0.75rem', color: o.color, fontWeight: 600, marginTop: '4px' }}>{o.label}</span>
-          </button>
-        ))}
-      </div>
-      {mood && (
-        <>
-          <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Any thoughts? (optional)" style={{ ...styles.input, minHeight: '80px' }} />
-          {suggestedTechnique && (
-            <div style={{ padding: '16px', background: 'rgba(139,92,246,0.05)', borderRadius: '16px', marginBottom: '16px', border: '1px solid rgba(139,92,246,0.15)' }}>
-              <p style={{ fontSize: '0.9rem', color: '#8B5CF6', fontWeight: 600, marginBottom: '8px' }}>💡 We recommend:</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ fontSize: '2rem' }}>{suggestedTechnique.icon}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontWeight: 600, color: '#4B5563' }}>{suggestedTechnique.name}</p>
-                  <p style={{ fontSize: '0.8rem', color: '#6B7280' }}>{suggestedTechnique.description}</p>
-                </div>
-                <button onClick={() => onStartTechnique(suggestedTechnique.id)} style={{ ...styles.button, padding: '8px 16px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Try Now →</button>
-              </div>
-            </div>
-          )}
-          <button onClick={handleSave} style={{ ...styles.button, width: '100%' }}>Save Check-in ✨</button>
-        </>
-      )}
-    </div>
-  );
+  const [mood, setMood] = useState(null); const [note, setNote] = useState(''); const [st, setST] = useState(null);
+  const mo = [{ value: 'great', emoji: '😊', label: 'Great', color: '#10B981' },{ value: 'good', emoji: '🙂', label: 'Good', color: '#60A5FA' },{ value: 'okay', emoji: '😐', label: 'Okay', color: '#F59E0B' },{ value: 'low', emoji: '😔', label: 'Low', color: '#F97316' },{ value: 'struggling', emoji: '😢', label: 'Struggling', color: '#EF4444' }];
+  const sg = { great: 'gratitude-log', good: 'pomodoro', okay: 'body-scan', low: 'grounding', struggling: 'box-breathing' };
+  const hs = () => { const ci = { date: new Date().toISOString(), mood, note, suggestedTechnique: st?.id }; const cis = JSON.parse(localStorage.getItem('lumacare_checkins') || '[]'); cis.push(ci); localStorage.setItem('lumacare_checkins', JSON.stringify(cis)); localStorage.setItem('lumacare_last_active', new Date().toDateString()); localStorage.setItem('lumacare_streak', (parseInt(localStorage.getItem('lumacare_streak') || '0') + 1).toString()); onComplete(ci); };
+  return (<div style={styles.card}><h2 style={{ ...styles.title, fontSize: '1.5rem', textAlign: 'center', marginBottom: '8px' }}>How are you showing up today?</h2><p style={{ textAlign: 'center', color: '#6B7280', marginBottom: '24px' }}>One honest answer. No judgment.</p><div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>{mo.map(o => (<button key={o.value} onClick={() => { setMood(o.value); setST(techniquesData[sg[o.value]]); }} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '12px 16px', borderRadius: '20px', border: mood === o.value ? `2px solid ${o.color}` : '1px solid #E5E7EB', background: mood === o.value ? `${o.color}15` : 'white', cursor: 'pointer', transition: 'all 0.2s ease', minWidth: '65px' }}><span style={{ fontSize: '2rem' }}>{o.emoji}</span><span style={{ fontSize: '0.75rem', color: o.color, fontWeight: 600, marginTop: '4px' }}>{o.label}</span></button>))}</div>{mood && (<><textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Any thoughts? (optional)" style={{ ...styles.input, minHeight: '80px' }} />{st && (<div style={{ padding: '16px', background: 'rgba(139,92,246,0.05)', borderRadius: '16px', marginBottom: '16px', border: '1px solid rgba(139,92,246,0.15)' }}><p style={{ fontSize: '0.9rem', color: '#8B5CF6', fontWeight: 600, marginBottom: '8px' }}>💡 We recommend:</p><div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}><span style={{ fontSize: '2rem' }}>{st.icon}</span><div style={{ flex: 1 }}><p style={{ fontWeight: 600, color: '#4B5563' }}>{st.name}</p><p style={{ fontSize: '0.8rem', color: '#6B7280' }}>{st.description}</p></div><button onClick={() => onStartTechnique(st.id)} style={{ ...styles.button, padding: '8px 16px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Try Now →</button></div></div>)}<button onClick={hs} style={{ ...styles.button, width: '100%' }}>Save Check-in ✨</button></>)}</div>);
 };
 
 const StreakTracker = ({ isPremium }) => {
   const [streak, setStreak] = useState(0);
-  useEffect(() => {
-    const s = localStorage.getItem('lumacare_streak');
-    const la = localStorage.getItem('lumacare_last_active');
-    const today = new Date().toDateString();
-    if (la === today) setStreak(parseInt(s) || 0);
-    else if (la) {
-      const y = new Date(); y.setDate(y.getDate() - 1);
-      if (la === y.toDateString()) setStreak(parseInt(s) || 0);
-      else setStreak(0);
-    }
-  }, []);
-  return (
-    <div style={{ background: isPremium ? 'linear-gradient(135deg, #8B5CF6, #C4B5FD)' : '#FDE4D6', borderRadius: '60px', padding: '12px 20px', textAlign: 'center', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-      <img src="https://i.ibb.co/8DYkzR18/4e4404e9-3353-4465-afeb-d09deedde8ee-removalai-preview.png" alt="streak" style={{ width: '28px', height: '28px' }} />
-      <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: isPremium ? 'white' : '#4B5563' }}>{streak} day streak</span>
-    </div>
-  );
+  useEffect(() => { const s = localStorage.getItem('lumacare_streak'); const la = localStorage.getItem('lumacare_last_active'); const t = new Date().toDateString(); if (la === t) setStreak(parseInt(s) || 0); else if (la) { const y = new Date(); y.setDate(y.getDate() - 1); if (la === y.toDateString()) setStreak(parseInt(s) || 0); else setStreak(0); } }, []);
+  return (<div style={{ background: isPremium ? 'linear-gradient(135deg, #8B5CF6, #C4B5FD)' : '#FDE4D6', borderRadius: '60px', padding: '12px 20px', textAlign: 'center', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}><img src="https://i.ibb.co/8DYkzR18/4e4404e9-3353-4465-afeb-d09deedde8ee-removalai-preview.png" alt="streak" style={{ width: '28px', height: '28px' }} /><span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: isPremium ? 'white' : '#4B5563' }}>{streak} day streak</span></div>);
 };
 
-const TechniqueInstructions = ({ technique, onStart, onBack }) => (
-  <div style={{ ...styles.card, maxWidth: '500px', margin: '0 auto', textAlign: 'center', padding: '32px' }}>
-    <div style={{ fontSize: '4rem', marginBottom: '20px' }}>{technique.icon}</div>
-    <h2 style={styles.title}>{technique.name}</h2>
-    <div style={{ textAlign: 'left', margin: '20px 0' }}>
-      <h3 style={{ color: '#8B5CF6' }}>📋 What it is:</h3><p style={{ color: '#6B7280' }}>{technique.description}</p>
-      <h3 style={{ color: '#8B5CF6', marginTop: '16px' }}>🎯 When to use:</h3><p style={{ color: '#6B7280' }}>{technique.whenToUse}</p>
-    </div>
-    <div style={{ display: 'flex', gap: '12px' }}>
-      <button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', flex: 1 }}>Back</button>
-      <button onClick={() => { triggerHaptic('light'); onStart(); }} style={{ ...styles.button, flex: 1 }}>Start Session →</button>
-    </div>
-  </div>
-);
+const TechniqueInstructions = ({ technique, onStart, onBack }) => (<div style={{ ...styles.card, maxWidth: '500px', margin: '0 auto', textAlign: 'center', padding: '32px' }}><div style={{ fontSize: '4rem', marginBottom: '20px' }}>{technique.icon}</div><h2 style={styles.title}>{technique.name}</h2><div style={{ textAlign: 'left', margin: '20px 0' }}><h3 style={{ color: '#8B5CF6' }}>📋 What it is:</h3><p style={{ color: '#6B7280' }}>{technique.description}</p><h3 style={{ color: '#8B5CF6', marginTop: '16px' }}>🎯 When to use:</h3><p style={{ color: '#6B7280' }}>{technique.whenToUse}</p></div><div style={{ display: 'flex', gap: '12px' }}><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', flex: 1 }}>Back</button><button onClick={() => { triggerHaptic('light'); onStart(); }} style={{ ...styles.button, flex: 1 }}>Start Session →</button></div></div>);
 
-const Dashboard = ({ navigateTo, userData, startTechnique, setShowPremium }) => {
-  const [stressLevel, setStressLevel] = useState(42);
-  const [clarityScore, setClarityScore] = useState(68);
-  const [greeting, setGreeting] = useState('');
-  const [ww, setWW] = useState(window.innerWidth);
-  const [showCheckIn, setShowCheckIn] = useState(false);
-  const [stressChange, setStressChange] = useState(null);
-  const [clarityChange, setClarityChange] = useState(null);
-
-  useEffect(() => {
-    const hr = () => setWW(window.innerWidth);
-    window.addEventListener('resize', hr);
-    const h = new Date().getHours();
-    if (h < 12) setGreeting('morning');
-    else if (h < 17) setGreeting('afternoon');
-    else setGreeting('evening');
-    if (userData?.stats) {
-      const am = userData.stats.moodScores.length > 0 ? userData.stats.moodScores.reduce((s, m) => s + m.score, 0) / userData.stats.moodScores.length : 4.2;
-      setStressLevel(Math.round(100 - (am * 20)));
-      setClarityScore(Math.min(100, Math.round(50 + (userData.stats.moodScores.filter(m => m.score >= 4).length * 2))));
-    }
-    if (userData?.isPremium) {
-      const ci = JSON.parse(localStorage.getItem('lumacare_checkins') || '[]');
-      if (!ci.find(c => new Date(c.date).toDateString() === new Date().toDateString())) setShowCheckIn(true);
-    }
-    return () => window.removeEventListener('resize', hr);
-  }, [userData]);
-
-  useEffect(() => {
-    const handleTechniqueDone = (e) => {
-      const { type } = e.detail;
-      const effects = {
-        breathing: { stress: -15, clarity: 5 },
-        grounding: { stress: -20, clarity: 10 },
-        cognitive: { stress: -10, clarity: 15 },
-        pomodoro: { stress: -5, clarity: 20 },
-        journal: { stress: -8, clarity: 12 },
-        'body-scan': { stress: -18, clarity: 8 },
-        mindfulness: { stress: -12, clarity: 10 },
-        meditation: { stress: -15, clarity: 5 }
-      };
-      const effect = effects[type] || { stress: -5, clarity: 5 };
-      if (effect.stress) { setStressChange(effect.stress); setStressLevel(prev => Math.max(0, Math.min(100, prev + effect.stress))); setTimeout(() => setStressChange(null), 2500); }
-      if (effect.clarity) { setClarityChange(effect.clarity); setClarityScore(prev => Math.max(0, Math.min(100, prev + effect.clarity))); setTimeout(() => setClarityChange(null), 2500); }
-    };
-    window.addEventListener('techniqueCompleted', handleTechniqueDone);
-    return () => window.removeEventListener('techniqueCompleted', handleTechniqueDone);
-  }, []);
-
-  const isMobile = ww <= 768;
-  if (!userData) return null;
-
-  return (
-    <div>
-      <StreakTracker isPremium={userData.isPremium} />
-
-      {userData.isPremium && showCheckIn && (
-        <DailyCheckIn onComplete={(ci) => { setShowCheckIn(false); if (ci.suggestedTechnique) startTechnique(ci.suggestedTechnique); }} onStartTechnique={startTechnique} />
-      )}
-
-      {userData.isPremium && !showCheckIn && (
-        <div style={{ ...styles.card, textAlign: 'center', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}>
-          <p style={{ color: '#10B981', fontWeight: 600 }}>You showed up today. That matters. 🐾</p>
-        </div>
-      )}
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
-        <div>
-          <h1 style={styles.title}>
-            {userData.isPremium ? 'Welcome back. Your streak is alive. 🔥' : "Hey. Glad you're here. 🐾"}
-          </h1>
-        </div>
-        <div style={{ background: userData.isPremium ? 'linear-gradient(135deg, #8B5CF6, #C4B5FD)' : '#FDE4D6', padding: '8px 20px', borderRadius: '40px', display: 'flex', gap: '16px', color: userData.isPremium ? 'white' : '#4B5563' }}>
-          <div>🕐 {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>
-          <div>{userData.isPremium ? '💫 Pro' : '✨ Free'}</div>
-        </div>
-      </div>
-
-      {userData.isPremium && (
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
-          {[
-            { icon: '📊', label: 'Sessions completed', value: userData.stats.aiSessions + userData.stats.breathing + userData.stats.sosUsed + userData.stats.journal },
-            { icon: '🔥', label: 'Days in a row', value: localStorage.getItem('lumacare_streak') || 0 },
-            { icon: '🎯', label: 'Average mood this week', value: userData.stats.moodScores.length > 0 ? (userData.stats.moodScores.reduce((s, m) => s + m.score, 0) / userData.stats.moodScores.length).toFixed(1) : '--' },
-            { icon: '⭐', label: 'Thoughts logged', value: userData.stats.journal }
-          ].map((s, i) => (
-            <div key={i} style={{ ...styles.card, textAlign: 'center', padding: '16px' }}>
-              <div style={{ fontSize: '2rem' }}>{s.icon}</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: 500, marginTop: '8px' }}>{s.value}</div>
-              <div style={{ fontSize: '0.75rem', color: '#6B7280' }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div style={{ display: 'flex', gap: '24px', flexDirection: isMobile ? 'column' : 'row', marginBottom: '24px' }}>
-        <div style={{ ...styles.card, textAlign: 'center', flex: 1, position: 'relative' }}>
-          <h3 style={{ color: '#6B7280', marginBottom: '16px' }}>How's your stress right now?</h3>
-          <div style={{ fontSize: '2.5rem', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            {stressLevel}%
-            {stressChange && (
-              <span style={{ fontSize: '1rem', color: stressChange < 0 ? '#10B981' : '#EF4444', fontWeight: 600, animation: 'fadeInOut 2.5s ease' }}>
-                {stressChange > 0 ? '+' : ''}{stressChange}%
-              </span>
-            )}
-          </div>
-        </div>
-        <div style={{ ...styles.card, textAlign: 'center', flex: 1, position: 'relative' }}>
-          <h3 style={{ color: '#6B7280', marginBottom: '16px' }}>How clear does your head feel?</h3>
-          <div style={{ fontSize: '2.5rem', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-            {clarityScore}%
-            {clarityChange && (
-              <span style={{ fontSize: '1rem', color: clarityChange > 0 ? '#10B981' : '#EF4444', fontWeight: 600, animation: 'fadeInOut 2.5s ease' }}>
-                {clarityChange > 0 ? '+' : ''}{clarityChange}%
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div style={styles.card}>
-        <h3 style={{ color: '#8B5CF6', marginBottom: '16px' }}>Quick Tools</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
-          {[
-            { label: 'Help me calm down', tech: 'box-breathing', img: 'https://i.ibb.co/9m6MsjQ3/d9c8d387-86fb-42bd-89dc-c187f18619c6-removalai-preview.png' },
-            { label: 'Too much at once', tech: 'priority-matrix', img: 'https://i.ibb.co/ksvDshqx/78887fad-7305-4607-88d8-95c7434872b4-removalai-preview.png' },
-            { label: 'I need a moment', tech: 'grounding', img: 'https://i.ibb.co/m5j9K9Pq/cd4a51b8-ee94-4cd9-bd93-824ec8400b33-removalai-preview.png' },
-            { label: "Brain won't stop", tech: 'cognitive-restructuring', img: 'https://i.ibb.co/q3hvwqm6/d69a24e2-8ae3-4434-ac0e-b8906ae5532b-removalai-preview.png' }
-          ].map(b => (
-            <button key={b.tech} onClick={() => { triggerHaptic('light'); startTechnique(b.tech); }} style={styles.button}>
-              <img src={b.img} alt={b.label} style={{ width: '24px', height: '24px' }} />{b.label}
-            </button>
-          ))}
-        </div>
-        <button onClick={() => { const k = Object.keys(techniquesData).filter(x => x !== 'priority-matrix'); startTechnique(k[Math.floor(Math.random() * k.length)]); }}
-          style={{ ...styles.button, width: '100%', background: '#FDE4D6', marginTop: '16px' }}>
-          Let LumaCare pick for you 🎲
-        </button>
-      </div>
-
-      {!userData.isPremium && (
-        <div style={{ ...styles.card, textAlign: 'center', marginTop: '24px', background: 'linear-gradient(135deg, rgba(139,92,246,0.05), rgba(196,181,253,0.05))', border: '1px solid rgba(139,92,246,0.2)' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '8px' }}>💫</div>
-          <h3 style={{ color: '#8B5CF6', marginBottom: '8px' }}>Your mind deserves more than the basics.</h3>
-          <p style={{ color: '#6B7280', marginBottom: '16px', fontSize: '0.9rem' }}>Track your progress. See your patterns. Own your wellness.</p>
-          <button onClick={() => setShowPremium(true)} style={styles.premiumButton}>Upgrade to Pro — $4.99/month</button>
-        </div>
-      )}
-    </div>
-  );
+const Dashboard = ({ navigateTo, userData, startTechnique, setShowPremium, darkMode }) => {
+  const [sl, setSL] = useState(42); const [cs, setCS] = useState(68); const [gr, setGR] = useState(''); const [ww, setWW] = useState(window.innerWidth); const [sc, setSC] = useState(false); const [sch, setSCH] = useState(null); const [cch, setCCH] = useState(null);
+  useEffect(() => { const hr = () => setWW(window.innerWidth); window.addEventListener('resize', hr); const h = new Date().getHours(); if (h < 12) setGR('morning'); else if (h < 17) setGR('afternoon'); else setGR('evening'); if (userData?.stats) { const am = userData.stats.moodScores.length > 0 ? userData.stats.moodScores.reduce((s, m) => s + m.score, 0) / userData.stats.moodScores.length : 4.2; setSL(Math.round(100 - (am * 20))); setCS(Math.min(100, Math.round(50 + (userData.stats.moodScores.filter(m => m.score >= 4).length * 2)))); } if (userData?.isPremium) { const ci = JSON.parse(localStorage.getItem('lumacare_checkins') || '[]'); if (!ci.find(c => new Date(c.date).toDateString() === new Date().toDateString())) setSC(true); } return () => window.removeEventListener('resize', hr); }, [userData]);
+  useEffect(() => { const h = (e) => { const { type } = e.detail; const ef = { breathing: { stress: -15, clarity: 5 }, grounding: { stress: -20, clarity: 10 }, cognitive: { stress: -10, clarity: 15 }, pomodoro: { stress: -5, clarity: 20 }, journal: { stress: -8, clarity: 12 }, 'body-scan': { stress: -18, clarity: 8 }, mindfulness: { stress: -12, clarity: 10 }, meditation: { stress: -15, clarity: 5 } }; const eff = ef[type] || { stress: -5, clarity: 5 }; if (eff.stress) { setSCH(eff.stress); setSL(p => Math.max(0, Math.min(100, p + eff.stress))); setTimeout(() => setSCH(null), 2500); } if (eff.clarity) { setCCH(eff.clarity); setCS(p => Math.max(0, Math.min(100, p + eff.clarity))); setTimeout(() => setCCH(null), 2500); } }; window.addEventListener('techniqueCompleted', h); return () => window.removeEventListener('techniqueCompleted', h); }, []);
+  const isMobile = ww <= 768; if (!userData) return null;
+  return (<div><StreakTracker isPremium={userData.isPremium} />{userData.isPremium && sc && <DailyCheckIn onComplete={(ci) => { setSC(false); if (ci.suggestedTechnique) startTechnique(ci.suggestedTechnique); }} onStartTechnique={startTechnique} />}{userData.isPremium && !sc && <div style={{ ...styles.card, textAlign: 'center', background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}><p style={{ color: '#10B981', fontWeight: 600 }}>You showed up today. That matters. 🐾</p></div>}<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}><div><h1 style={styles.title}>{userData.isPremium ? 'Welcome back. Your streak is alive. 🔥' : "Hey. Glad you're here. 🐾"}</h1></div><div style={{ background: userData.isPremium ? 'linear-gradient(135deg, #8B5CF6, #C4B5FD)' : '#FDE4D6', padding: '8px 20px', borderRadius: '40px', display: 'flex', gap: '16px', color: userData.isPremium ? 'white' : '#4B5563' }}><div>🕐 {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</div><div>{userData.isPremium ? '💫 Pro' : '✨ Free'}</div></div></div>{userData.isPremium && (<div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>{[{ icon: '📊', label: 'Sessions completed', value: userData.stats.aiSessions + userData.stats.breathing + userData.stats.sosUsed + userData.stats.journal },{ icon: '🔥', label: 'Days in a row', value: localStorage.getItem('lumacare_streak') || 0 },{ icon: '🎯', label: 'Average mood this week', value: userData.stats.moodScores.length > 0 ? (userData.stats.moodScores.reduce((s, m) => s + m.score, 0) / userData.stats.moodScores.length).toFixed(1) : '--' },{ icon: '⭐', label: 'Thoughts logged', value: userData.stats.journal }].map((s, i) => (<div key={i} style={{ ...styles.card, textAlign: 'center', padding: '16px' }}><div style={{ fontSize: '2rem' }}>{s.icon}</div><div style={{ fontSize: '1.3rem', fontWeight: 500, marginTop: '8px' }}>{s.value}</div><div style={{ fontSize: '0.75rem', color: '#6B7280' }}>{s.label}</div></div>))}</div>)}<div style={{ display: 'flex', gap: '24px', flexDirection: isMobile ? 'column' : 'row', marginBottom: '24px' }}><div style={{ ...styles.card, textAlign: 'center', flex: 1, position: 'relative' }}><h3 style={{ color: '#6B7280', marginBottom: '16px' }}>How's your stress right now?</h3><div style={{ fontSize: '2.5rem', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>{sl}%{sch && (<span style={{ fontSize: '1rem', color: sch < 0 ? '#10B981' : '#EF4444', fontWeight: 600, animation: 'fadeInOut 2.5s ease' }}>{sch > 0 ? '+' : ''}{sch}%</span>)}</div></div><div style={{ ...styles.card, textAlign: 'center', flex: 1, position: 'relative' }}><h3 style={{ color: '#6B7280', marginBottom: '16px' }}>How clear does your head feel?</h3><div style={{ fontSize: '2.5rem', fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>{cs}%{cch && (<span style={{ fontSize: '1rem', color: cch > 0 ? '#10B981' : '#EF4444', fontWeight: 600, animation: 'fadeInOut 2.5s ease' }}>{cch > 0 ? '+' : ''}{cch}%</span>)}</div></div></div><div style={styles.card}><h3 style={{ color: '#8B5CF6', marginBottom: '16px' }}>Quick Tools</h3><div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>{[{ label: 'Help me calm down', tech: 'box-breathing', img: 'https://i.ibb.co/9m6MsjQ3/d9c8d387-86fb-42bd-89dc-c187f18619c6-removalai-preview.png' },{ label: 'Too much at once', tech: 'priority-matrix', img: 'https://i.ibb.co/ksvDshqx/78887fad-7305-4607-88d8-95c7434872b4-removalai-preview.png' },{ label: 'I need a moment', tech: 'grounding', img: 'https://i.ibb.co/m5j9K9Pq/cd4a51b8-ee94-4cd9-bd93-824ec8400b33-removalai-preview.png' },{ label: "Brain won't stop", tech: 'cognitive-restructuring', img: 'https://i.ibb.co/q3hvwqm6/d69a24e2-8ae3-4434-ac0e-b8906ae5532b-removalai-preview.png' }].map(b => (<button key={b.tech} onClick={() => { triggerHaptic('light'); startTechnique(b.tech); }} style={styles.button}><img src={b.img} alt={b.label} style={{ width: '24px', height: '24px' }} />{b.label}</button>))}</div><button onClick={() => { const k = Object.keys(techniquesData).filter(x => x !== 'priority-matrix'); startTechnique(k[Math.floor(Math.random() * k.length)]); }} style={{ ...styles.button, width: '100%', background: '#FDE4D6', marginTop: '16px' }}>Let LumaCare pick for you 🎲</button></div>{!userData.isPremium && (<div style={{ ...styles.card, textAlign: 'center', marginTop: '24px', background: 'linear-gradient(135deg, rgba(139,92,246,0.05), rgba(196,181,253,0.05))', border: '1px solid rgba(139,92,246,0.2)' }}><div style={{ fontSize: '2rem', marginBottom: '8px' }}>💫</div><h3 style={{ color: '#8B5CF6', marginBottom: '8px' }}>Your mind deserves more than the basics.</h3><p style={{ color: '#6B7280', marginBottom: '16px', fontSize: '0.9rem' }}>Track your progress. See your patterns. Own your wellness.</p><button onClick={() => setShowPremium(true)} style={styles.premiumButton}>Upgrade to Pro — $4.99/month</button></div>)}</div>);
 };
 
 const BreathingTechnique = ({ technique, onComplete, onBack }) => {
-  const [cycles, setCycles] = useState(technique.minCycles);
-  const [isActive, setIsActive] = useState(false);
-  const [paused, setPaused] = useState(false);
-  const [phase, setPhase] = useState('inhale');
-  const [count, setCount] = useState(technique.inhale);
-  const [currentCycle, setCurrentCycle] = useState(1);
-  const [completed, setCompleted] = useState(false);
-  const [rating, setRating] = useState(0);
-  const [feedback, setFeedback] = useState('');
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [hapticEnabled, setHapticEnabled] = useState(true);
-  const [customInhale, setCustomInhale] = useState(technique.inhale);
-  const [customHold1, setCustomHold1] = useState(technique.hold1);
-  const [customExhale, setCustomExhale] = useState(technique.exhale);
-  const [customHold2, setCustomHold2] = useState(technique.hold2);
-  const [useCustomTimes, setUseCustomTimes] = useState(false);
-  const inhaleTime = useCustomTimes ? customInhale : technique.inhale;
-  const hold1Time = useCustomTimes ? customHold1 : technique.hold1;
-  const exhaleTime = useCustomTimes ? customExhale : technique.exhale;
-  const hold2Time = useCustomTimes ? customHold2 : technique.hold2;
-
-  useEffect(() => {
-    let timer;
-    if (isActive && !completed && !paused) {
-      timer = setInterval(() => {
-        setCount(prev => {
-          if (prev <= 1) {
-            if (phase === 'inhale') { setPhase('hold1'); return hold1Time; }
-            if (phase === 'hold1') { setPhase('exhale'); return exhaleTime; }
-            if (phase === 'exhale') { setPhase('hold2'); return hold2Time; }
-            if (phase === 'hold2') {
-              if (currentCycle >= cycles) { setCompleted(true); setIsActive(false); return inhaleTime; }
-              setPhase('inhale'); setCurrentCycle(c => c + 1); return inhaleTime;
-            }
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [isActive, completed, paused, phase, currentCycle, cycles, inhaleTime, hold1Time, exhaleTime, hold2Time]);
-
-  useEffect(() => {
-    if (soundEnabled && isActive && !completed && !paused) {
-      try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode); gainNode.connect(audioContext.destination);
-        oscillator.type = 'sine';
-        oscillator.frequency.value = phase === 'inhale' ? 440 : phase === 'exhale' ? 220 : 330;
-        gainNode.gain.value = 0.15;
-        oscillator.start();
-        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.2);
-        oscillator.stop(audioContext.currentTime + 0.2);
-      } catch (e) {}
-    }
-  }, [phase, soundEnabled, isActive, completed, paused]);
-
-  const handleStart = () => { setIsActive(true); setPaused(false); setCurrentCycle(1); setPhase('inhale'); setCount(inhaleTime); setCompleted(false); };
-
-  if (completed) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '4rem' }}>✨</div>
-        <h2 style={styles.title}>Session Complete!</h2><p>You completed {cycles} cycles.</p>
-        <div style={styles.card}>
-          <h3>How do you feel?</h3>
-          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>
-            {[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}
-          </div>
-          <textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Share your experience..." style={styles.input} />
-          <button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button>
-          <button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', marginTop: '10px' }}>Back</button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button>
-      <h1 style={styles.title}>{technique.name}</h1><p style={{ color: technique.color }}>Pattern: {technique.pattern}</p>
-      {!isActive || paused ? (
-        <div style={styles.card}>
-          <h3>Set Your Session</h3><p>Cycles: {cycles}</p>
-          <input type="range" min={technique.minCycles} max={technique.maxCycles} value={cycles} onChange={(e) => setCycles(parseInt(e.target.value))} style={{ width: '100%' }} />
-          <div style={{ marginTop: '16px', textAlign: 'left' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <input type="checkbox" checked={useCustomTimes} onChange={(e) => setUseCustomTimes(e.target.checked)} /><span>Customize breathing times</span>
-            </label>
-            {useCustomTimes && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                {[{ label: 'Inhale', val: customInhale, set: setCustomInhale },{ label: 'Hold', val: customHold1, set: setCustomHold1 },{ label: 'Exhale', val: customExhale, set: setCustomExhale },{ label: 'Hold', val: customHold2, set: setCustomHold2 }].map(f => (
-                  <div key={f.label}><label style={{ fontSize: '0.8rem' }}>{f.label}: {f.val}s</label><input type="range" min={2} max={8} step={1} value={f.val} onChange={(e) => f.set(parseInt(e.target.value))} style={{ width: '100%' }} /></div>
-                ))}
-              </div>
-            )}
-          </div>
-          <button onClick={() => setSoundEnabled(!soundEnabled)} style={{ ...styles.button, marginTop: '12px', background: 'transparent', border: `1px solid ${technique.color}`, width: '100%' }}>{soundEnabled ? '🔊 Sound On' : '🔇 Sound Off'}</button>
-          {paused ? (
-            <button onClick={() => { setIsActive(true); setPaused(false); }} style={{ ...styles.button, marginTop: '16px', width: '100%' }}>Resume</button>
-          ) : (
-            <button onClick={() => { triggerHaptic('light'); handleStart(); }} style={{ ...styles.button, marginTop: '16px', width: '100%' }}>Begin</button>
-          )}
-        </div>
-      ) : (
-        <>
-          <div style={{ width: 'min(70vw, 320px)', height: 'min(70vw, 320px)', margin: '20px auto', background: `radial-gradient(circle at 30% 30%, ${technique.color}, ${technique.color}80)`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `scale(${phase === 'inhale' || phase === 'hold1' ? 1.3 : 1})`, transition: 'transform 1.2s cubic-bezier(0.34, 1.2, 0.64, 1)', boxShadow: `0 0 40px ${technique.color}, 0 0 20px ${technique.color}80 inset`, position: 'relative' }}>
-            <div style={{ zIndex: 2, textAlign: 'center' }}>
-              <h2 style={{ fontSize: 'clamp(1.2rem, 5vw, 1.8rem)', marginBottom: '8px' }}>{phase === 'inhale' ? '🌬️ Inhale' : phase === 'hold1' ? '⏸️ Hold' : phase === 'exhale' ? '💨 Exhale' : '⏸️ Hold'}</h2>
-              <p style={{ fontSize: 'clamp(2rem, 8vw, 3rem)', fontWeight: 'bold' }}>{count}s</p>
-            </div>
-          </div>
-          <p>Cycle {currentCycle} of {cycles}</p>
-          <div className="progress-bar" style={{ width: '200px', margin: '16px auto' }}><div className="progress-fill" style={{ width: `${(currentCycle / cycles) * 100}%` }} /></div>
-          <button onClick={() => { triggerHaptic('light'); setIsActive(false); setPaused(true); }} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '40px', cursor: 'pointer', marginTop: '16px' }}>Pause</button>
-        </>
-      )}
-    </div>
-  );
+  const [cycles, setCycles] = useState(technique.minCycles); const [isActive, setIsActive] = useState(false); const [paused, setPaused] = useState(false); const [phase, setPhase] = useState('inhale'); const [count, setCount] = useState(technique.inhale); const [currentCycle, setCurrentCycle] = useState(1); const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState(''); const [soundEnabled, setSoundEnabled] = useState(true); const [hapticEnabled, setHapticEnabled] = useState(true); const [ci, setCI] = useState(technique.inhale); const [ch1, setCH1] = useState(technique.hold1); const [ce, setCE] = useState(technique.exhale); const [ch2, setCH2] = useState(technique.hold2); const [uct, setUCT] = useState(false);
+  const it = uct ? ci : technique.inhale; const h1t = uct ? ch1 : technique.hold1; const et = uct ? ce : technique.exhale; const h2t = uct ? ch2 : technique.hold2;
+  useEffect(() => { let t; if (isActive && !completed && !paused) { t = setInterval(() => { setCount(p => { if (p <= 1) { if (phase === 'inhale') { setPhase('hold1'); return h1t; } if (phase === 'hold1') { setPhase('exhale'); return et; } if (phase === 'exhale') { setPhase('hold2'); return h2t; } if (phase === 'hold2') { if (currentCycle >= cycles) { setCompleted(true); setIsActive(false); return it; } setPhase('inhale'); setCurrentCycle(c => c + 1); return it; } } return p - 1; }); }, 1000); } return () => clearInterval(t); }, [isActive, completed, paused, phase, currentCycle, cycles, it, h1t, et, h2t]);
+  const hs = () => { setIsActive(true); setPaused(false); setCurrentCycle(1); setPhase('inhale'); setCount(it); setCompleted(false); };
+  if (completed) return (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '4rem' }}>✨</div><h2 style={styles.title}>Session Complete!</h2><p>You completed {cycles} cycles.</p><div style={styles.card}><h3>How do you feel?</h3><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Share your experience..." style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', marginTop: '10px' }}>Back</button></div></div>);
+  return (<div style={{ textAlign: 'center' }}><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><p style={{ color: technique.color }}>Pattern: {technique.pattern}</p>{!isActive && !paused ? (<div style={styles.card}><h3>Set Your Session</h3><p>Cycles: {cycles}</p><input type="range" min={technique.minCycles} max={technique.maxCycles} value={cycles} onChange={(e) => setCycles(parseInt(e.target.value))} style={{ width: '100%' }} /><div style={{ marginTop: '16px', textAlign: 'left' }}><label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}><input type="checkbox" checked={uct} onChange={(e) => setUCT(e.target.checked)} /><span>Customize breathing times</span></label>{uct && (<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}><div><label style={{ fontSize: '0.8rem' }}>Inhale: {ci}s</label><input type="range" min={2} max={8} step={1} value={ci} onChange={(e) => setCI(parseInt(e.target.value))} style={{ width: '100%' }} /></div><div><label style={{ fontSize: '0.8rem' }}>Hold: {ch1}s</label><input type="range" min={2} max={8} step={1} value={ch1} onChange={(e) => setCH1(parseInt(e.target.value))} style={{ width: '100%' }} /></div><div><label style={{ fontSize: '0.8rem' }}>Exhale: {ce}s</label><input type="range" min={2} max={8} step={1} value={ce} onChange={(e) => setCE(parseInt(e.target.value))} style={{ width: '100%' }} /></div><div><label style={{ fontSize: '0.8rem' }}>Hold: {ch2}s</label><input type="range" min={2} max={8} step={1} value={ch2} onChange={(e) => setCH2(parseInt(e.target.value))} style={{ width: '100%' }} /></div></div>)}</div><button onClick={() => setSoundEnabled(!soundEnabled)} style={{ ...styles.button, marginTop: '12px', background: 'transparent', border: `1px solid ${technique.color}`, width: '100%' }}>{soundEnabled ? '🔊 Sound On' : '🔇 Sound Off'}</button><button onClick={() => setHapticEnabled(!hapticEnabled)} style={{ ...styles.button, marginTop: '12px', background: 'transparent', border: `1px solid ${technique.color}`, width: '100%' }}>{hapticEnabled ? '📳 Haptic On' : '📴 Haptic Off'}</button><button onClick={() => { triggerHaptic('light'); hs(); }} style={{ ...styles.button, marginTop: '16px', width: '100%' }}>Begin</button></div>) : paused ? (<div style={styles.card}><h3>Session Paused</h3><p>Cycle {currentCycle} of {cycles}</p><p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{phase === 'inhale' ? '🌬️ Inhale' : phase === 'hold1' ? '⏸️ Hold' : phase === 'exhale' ? '💨 Exhale' : '⏸️ Hold'}</p><p style={{ fontSize: '1.5rem' }}>{count}s remaining</p><button onClick={() => { setIsActive(true); setPaused(false); }} style={{ ...styles.button, marginTop: '16px', width: '100%' }}>▶ Resume</button><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', marginTop: '10px', width: '100%' }}>End Session</button></div>) : (<><div style={{ width: 'min(70vw, 320px)', height: 'min(70vw, 320px)', margin: '20px auto', background: `radial-gradient(circle at 30% 30%, ${technique.color}, ${technique.color}80)`, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: `scale(${phase === 'inhale' || phase === 'hold1' ? 1.3 : 1})`, transition: 'transform 1.2s cubic-bezier(0.34, 1.2, 0.64, 1)', boxShadow: `0 0 40px ${technique.color}, 0 0 20px ${technique.color}80 inset`, position: 'relative' }}><div style={{ zIndex: 2, textAlign: 'center' }}><h2 style={{ fontSize: 'clamp(1.2rem, 5vw, 1.8rem)', marginBottom: '8px' }}>{phase === 'inhale' ? '🌬️ Inhale' : phase === 'hold1' ? '⏸️ Hold' : phase === 'exhale' ? '💨 Exhale' : '⏸️ Hold'}</h2><p style={{ fontSize: 'clamp(2rem, 8vw, 3rem)', fontWeight: 'bold' }}>{count}s</p></div></div><p>Cycle {currentCycle} of {cycles}</p><div className="progress-bar" style={{ width: '200px', margin: '16px auto' }}><div className="progress-fill" style={{ width: `${(currentCycle / cycles) * 100}%` }} /></div><button onClick={() => { setIsActive(false); setPaused(true); }} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '40px', cursor: 'pointer', marginTop: '16px' }}>⏸ Pause</button></>)}</div>);
 };
-
 const GroundingTechnique = ({ technique, onComplete, onBack }) => {
-  const [step, setStep] = useState(0); const [items, setItems] = useState([]); const [input, setInput] = useState('');
-  const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
-  const steps = ['5 things you see:', '4 things you feel:', '3 things you hear:', '2 things you smell:', '1 thing you taste:'];
-  const counts = [5,4,3,2,1];
-  const addItem = () => { if (input.trim()) { setItems([...items, ...input.split(',').map(i => i.trim())]); setInput(''); } };
-  const next = () => { if (items.length < counts[step]) return; setItems([]); if (step < steps.length - 1) setStep(step + 1); else setCompleted(true); };
-  if (completed) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h2 style={styles.title}>Grounding Complete!</h2><div style={styles.card}><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Complete</button></div></div>);
-  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><h3>{steps[step]} ({items.length}/{counts[step]})</h3><div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>{items.map((i, idx) => <span key={idx} style={{ background: '#FBCFE8', padding: '4px 12px', borderRadius: '20px' }}>{i}</span>)}</div><input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Enter items separated by commas" style={styles.input} /><button onClick={addItem} style={{ ...styles.button, marginRight: '10px' }}>Add</button><button onClick={next} disabled={items.length < counts[step]} style={styles.button}>Next</button></div></div>);
+  const [step, setStep] = useState(0); const [items, setItems] = useState({ see: [], feel: [], hear: [], smell: [], taste: [] }); const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
+  const steps = [{ key: 'see', count: 5, icon: '👁️', label: 'things you can SEE', hint: 'Look around. Colors, shapes, light, shadows. What catches your eye?', color: '#3B82F6', emoji: '🔍' },{ key: 'feel', count: 4, icon: '🤲', label: 'things you can FEEL', hint: 'The ground under your feet. The fabric on your skin. Temperature. Texture.', color: '#F59E0B', emoji: '🖐️' },{ key: 'hear', count: 3, icon: '👂', label: 'things you can HEAR', hint: 'Close your eyes. Distant sounds. Your own breathing. The hum of silence.', color: '#10B981', emoji: '🔊' },{ key: 'smell', count: 2, icon: '👃', label: 'things you can SMELL', hint: 'The air around you. Your clothes. The room. Take a deep breath in.', color: '#8B5CF6', emoji: '🌸' },{ key: 'taste', count: 1, icon: '👅', label: 'thing you can TASTE', hint: 'The last thing you ate. The air on your tongue. Just notice.', color: '#EF4444', emoji: '💧' }];
+  const cur = steps[step]; const ci = items[cur.key]; const canProceed = ci.length === cur.count;
+  const addItem = (item) => { if (item.trim() && ci.length < cur.count) { const ni = { ...items, [cur.key]: [...ci, item.trim()] }; setItems(ni); } };
+  const removeItem = (i) => { const ni = { ...items, [cur.key]: ci.filter((_, idx) => idx !== i) }; setItems(ni); };
+  const next = () => { if (step < steps.length - 1) setStep(step + 1); else setCompleted(true); };
+  if (completed) return (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '4rem' }}>🌱</div><h2 style={styles.title}>You're back. Right here. Right now.</h2><p style={{ color: '#6B7280', marginBottom: '24px' }}>Your senses brought you home.</p><div style={styles.card}>{steps.map((s) => (<div key={s.key} style={{ marginBottom: '16px', textAlign: 'left', padding: '12px', background: `${s.color}10`, borderRadius: '12px' }}><p style={{ fontWeight: 600, color: s.color, marginBottom: '4px' }}>{s.icon} {s.label}</p><p style={{ color: '#4B5563', fontSize: '0.9rem' }}>{items[s.key].join(', ')}</p></div>))}<h3 style={{ marginTop: '24px' }}>How do you feel?</h3><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', marginTop: '10px' }}>Back</button></div></div>);
+  return (<div style={{ textAlign: 'center' }}><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><div style={{ fontSize: '3rem', marginBottom: '8px' }}>{cur.emoji}</div><h2 style={{ fontSize: '1.3rem', color: cur.color, fontWeight: 700, marginBottom: '4px' }}>{cur.icon} Name {cur.count} {cur.label}</h2><p style={{ color: '#6B7280', fontSize: '0.9rem', marginBottom: '20px', fontStyle: 'italic' }}>{cur.hint}</p><div style={{ display: 'flex', justifyContent: 'center', gap: '6px', marginBottom: '20px' }}>{[...Array(cur.count)].map((_, i) => (<div key={i} style={{ width: '14px', height: '14px', borderRadius: '50%', background: i < ci.length ? cur.color : '#E5E7EB', transition: 'all 0.3s ease' }} />))}</div>{ci.length > 0 && (<div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center', marginBottom: '20px' }}>{ci.map((item, idx) => (<span key={idx} style={{ background: `${cur.color}15`, color: cur.color, fontWeight: 600, padding: '10px 18px', borderRadius: '25px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px', border: `1px solid ${cur.color}30` }}>{item}<button onClick={() => removeItem(idx)} style={{ background: 'none', border: 'none', color: cur.color, cursor: 'pointer', fontSize: '1.1rem', padding: '0' }}>✕</button></span>))}</div>)}{!canProceed && (<div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}><input placeholder={`Thing ${ci.length + 1}...`} style={styles.input} onKeyPress={(e) => { if (e.key === 'Enter') { addItem(e.target.value); e.target.value = ''; } }} id={`gi-${step}`} /><button onClick={() => { const inp = document.getElementById(`gi-${step}`); if (inp) { addItem(inp.value); inp.value = ''; inp.focus(); } }} style={{ ...styles.button, padding: '14px 20px', whiteSpace: 'nowrap' }}>Add</button></div>)}<div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>{step > 0 && (<button onClick={() => setStep(step - 1)} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button>)}<button onClick={next} disabled={!canProceed} style={{ ...styles.button, background: canProceed ? cur.color : '#E5E7EB', color: canProceed ? 'white' : '#9CA3AF', cursor: canProceed ? 'pointer' : 'not-allowed', flex: 1 }}>{step === steps.length - 1 ? 'Complete ✨' : 'Next →'}</button></div><p style={{ color: '#9CA3AF', fontSize: '0.75rem', marginTop: '12px' }}>Step {step + 1} of {steps.length}</p></div></div>);
 };
 
 const PomodoroTechnique = ({ technique, onComplete, onBack }) => {
-  const [task, setTask] = useState(''); const [cycle, setCycle] = useState(1); const [phase, setPhase] = useState('work');
-  const [time, setTime] = useState(25 * 60); const [isActive, setIsActive] = useState(false);
-  const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
-  useEffect(() => { let timer; if (isActive && !completed) { timer = setInterval(() => { setTime(prev => { if (prev <= 1) { if (phase === 'work') { setPhase('break'); return 5 * 60; } else if (cycle >= 4) { setPhase('longBreak'); return 15 * 60; } else { setCycle(c => c + 1); setPhase('work'); return 25 * 60; } } return prev - 1; }); }, 1000); } return () => clearInterval(timer); }, [isActive, phase, cycle, completed]);
-  const formatTime = (sec) => `${Math.floor(sec / 60)}:${(sec % 60).toString().padStart(2, '0')}`;
-  const handleStart = () => { if (!task) { alert('Describe your task first'); return; } setIsActive(true); };
+  const [task, setTask] = useState(''); const [cycle, setCycle] = useState(1); const [phase, setPhase] = useState('work'); const [time, setTime] = useState(25 * 60); const [isActive, setIsActive] = useState(false); const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
+  useEffect(() => { let t; if (isActive && !completed) { t = setInterval(() => { setTime(p => { if (p <= 1) { if (phase === 'work') { setPhase('break'); return 5 * 60; } else if (cycle >= 4) { setPhase('longBreak'); return 15 * 60; } else { setCycle(c => c + 1); setPhase('work'); return 25 * 60; } } return p - 1; }); }, 1000); } return () => clearInterval(t); }, [isActive, phase, cycle, completed]);
+  const fmt = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
   if (completed) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h2 style={styles.title}>Great Work!</h2><p>You completed 4 cycles on: {task}</p><div style={styles.card}><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How productive were you?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Complete</button></div></div>);
-  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1>{!isActive ? (<div style={styles.card}><h3>What are you working on?</h3><input value={task} onChange={(e) => setTask(e.target.value)} placeholder="Enter your task" style={styles.input} /><button onClick={() => { triggerHaptic('light'); handleStart(); }} style={styles.button}>Start Timer</button></div>) : (<div style={styles.card}><div style={{ fontSize: '4rem', textAlign: 'center' }}>{formatTime(time)}</div><p style={{ textAlign: 'center' }}>{phase === 'work' ? 'Focus Time' : phase === 'break' ? 'Short Break' : 'Long Break'} • Cycle {cycle} of 4</p><button onClick={() => { triggerHaptic('light'); setIsActive(false); }} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '40px', margin: '20px auto', display: 'block', cursor: 'pointer' }}>Pause</button></div>)}</div>);
+  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1>{!isActive ? (<div style={styles.card}><h3>What are you working on?</h3><input value={task} onChange={(e) => setTask(e.target.value)} placeholder="Enter your task" style={styles.input} /><button onClick={() => { if (!task) { alert('Describe your task first'); return; } setIsActive(true); }} style={styles.button}>Start Timer</button></div>) : (<div style={styles.card}><div style={{ fontSize: '4rem', textAlign: 'center' }}>{fmt(time)}</div><p style={{ textAlign: 'center' }}>{phase === 'work' ? 'Focus Time' : phase === 'break' ? 'Short Break' : 'Long Break'} • Cycle {cycle} of 4</p><button onClick={() => setIsActive(false)} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '40px', margin: '20px auto', display: 'block', cursor: 'pointer' }}>Pause</button></div>)}</div>);
 };
 
 const CognitiveChatbot = ({ onComplete, onBack }) => {
-  const [step, setStep] = useState(0);
-  const [messages, setMessages] = useState([{ role: 'assistant', content: "What's on your mind? What thought is bothering you?" }]);
-  const [input, setInput] = useState(''); const [isProcessing, setIsProcessing] = useState(false);
-  const [thought, setThought] = useState(''); const [evidenceFor, setEvidenceFor] = useState([]);
-  const [evidenceAgainst, setEvidenceAgainst] = useState([]); const [alternatives, setAlternatives] = useState([]);
-  const [balancedThought, setBalancedThought] = useState(''); const [completed, setCompleted] = useState(false);
-  const questions = ["What's on your mind?", "What evidence supports this?", "What evidence challenges it?", "What would you tell a friend?", "What's a more balanced way to think?"];
-  const handleSend = () => { if (!input.trim() || isProcessing) return; const u = input.trim(); setMessages(p => [...p, { role: 'user', content: u }]); setInput(''); setIsProcessing(true); if (step === 0) setThought(u); else if (step === 1) setEvidenceFor([...evidenceFor, u]); else if (step === 2) setEvidenceAgainst([...evidenceAgainst, u]); else if (step === 3) setAlternatives([...alternatives, u]); else if (step === 4) { setBalancedThought(u); setCompleted(true); setIsProcessing(false); return; } setTimeout(() => { setMessages(p => [...p, { role: 'assistant', content: questions[step + 1] || "Let's wrap this up." }]); setStep(step + 1); setIsProcessing(false); }, 500); };
-  if (completed) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h2 style={styles.title}>Your Session Summary</h2><div style={styles.card}><p><strong>Thought:</strong> {thought}</p><p><strong>Evidence For:</strong> {evidenceFor.join(', ')}</p><p><strong>Evidence Against:</strong> {evidenceAgainst.join(', ')}</p><p><strong>Alternatives:</strong> {alternatives.join(', ')}</p><p><strong>Balanced Thought:</strong> {balancedThought}</p></div><button onClick={() => onComplete('cognitive', 5, JSON.stringify({ thought, evidenceFor, evidenceAgainst, alternatives, balancedThought }))} style={styles.button}>Save</button></div>);
-  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>Cognitive Restructuring</h1><div style={styles.card}>{messages.map((m, i) => <div key={i} style={{ textAlign: m.role === 'user' ? 'right' : 'left', margin: '10px 0' }}><span style={{ background: m.role === 'user' ? '#D1FAE5' : '#FBCFE8', padding: '8px 16px', borderRadius: '20px', display: 'inline-block' }}>{m.content}</span></div>)}{isProcessing && <div>...</div>}<input value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSend()} placeholder="Type your response..." style={styles.input} /><button onClick={() => { triggerHaptic('light'); handleSend(); }} style={styles.button}>Send</button></div></div>);
+  const [step, setStep] = useState(0); const [messages, setMessages] = useState([{ role: 'assistant', content: "Hey. Let's work through this together. What negative thought is stuck in your head right now? Just type it exactly as it sounds in your mind." }]); const [input, setInput] = useState(''); const [isProcessing, setIsProcessing] = useState(false); const [thought, setThought] = useState(''); const [evidenceFor, setEvidenceFor] = useState([]); const [evidenceAgainst, setEvidenceAgainst] = useState([]); const [alternatives, setAlternatives] = useState([]); const [balancedThought, setBalancedThought] = useState(''); const [completed, setCompleted] = useState(false);
+  const questions = [{ prompt: "Let's start with the thought itself. What's the exact sentence running through your head? Don't clean it up. Just type it raw.", hint: "Example: 'I'm going to mess up this presentation and everyone will think I'm stupid.'" },{ prompt: "Okay, I hear you. Now let's look at the evidence. What facts actually SUPPORT this thought? Not feelings — real proof. Take your time.", hint: "Example: 'I did stumble during my last presentation.'" },{ prompt: "Good. Now flip it. What evidence goes AGAINST this thought? What have you done well? What would someone who believes in you say?", hint: "Example: 'I've presented many times before and it went fine. My boss said I did well last month.'" },{ prompt: "Step back. If your best friend had this thought, what would you tell them? Be as kind to yourself as you'd be to them.", hint: "Example: 'One presentation doesn't define you. You're prepared and you know your stuff.'" },{ prompt: "Last step. After looking at all of this, what's a more balanced way to see it? Not overly positive — just fair and realistic.", hint: "Example: 'I'm nervous because I care, and that's okay. I've prepared and I'll do my best.'" }];
+  const hs = () => { if (!input.trim() || isProcessing) return; const u = input.trim(); setMessages(p => [...p, { role: 'user', content: u }]); setInput(''); if (step === 0) setThought(u); else if (step === 1) setEvidenceFor([...evidenceFor, u]); else if (step === 2) setEvidenceAgainst([...evidenceAgainst, u]); else if (step === 3) setAlternatives([...alternatives, u]); else if (step === 4) { setBalancedThought(u); setCompleted(true); return; } setIsProcessing(true); setTimeout(() => { setMessages(p => [...p, { role: 'assistant', content: questions[step + 1]?.prompt || "Let's wrap this up." }]); if (questions[step + 1]?.hint) { setTimeout(() => { setMessages(p => [...p, { role: 'assistant-hint', content: `💡 ${questions[step + 1].hint}` }]); }, 800); } setStep(step + 1); setIsProcessing(false); }, 1200); };
+  if (completed) return (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '4rem' }}>🧠</div><h2 style={styles.title}>You challenged that thought.</h2><div style={styles.card}><div style={{ textAlign: 'left', marginBottom: '20px' }}><div style={{ padding: '16px', background: '#FEF2F2', borderRadius: '16px', marginBottom: '12px' }}><p style={{ fontWeight: 700, color: '#EF4444', marginBottom: '4px', fontSize: '0.8rem' }}>THE THOUGHT</p><p style={{ color: '#4B5563', fontSize: '0.95rem' }}>{thought}</p></div><div style={{ padding: '16px', background: '#ECFDF5', borderRadius: '16px' }}><p style={{ fontWeight: 700, color: '#10B981', marginBottom: '4px', fontSize: '0.8rem' }}>THE BALANCED VIEW</p><p style={{ color: '#4B5563', fontSize: '0.95rem' }}>{balancedThought}</p></div></div><button onClick={() => onComplete('cognitive', 5, JSON.stringify({ thought, evidenceFor, evidenceAgainst, alternatives, balancedThought }))} style={styles.button}>Save Session</button><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', marginTop: '10px' }}>Back</button></div></div>);
+  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>Cognitive Restructuring</h1><p style={{ color: '#6B7280', marginBottom: '20px', fontSize: '0.9rem' }}>We'll work through your thought together. Step by step.</p><div style={styles.card}><div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '20px' }}>{questions.map((_, i) => (<div key={i} style={{ width: i === step ? '28px' : '10px', height: '10px', borderRadius: '10px', background: i === step ? '#8B5CF6' : i < step ? '#C4B5FD' : '#E5E7EB', transition: 'all 0.3s ease' }} />))}</div><div style={{ maxHeight: '300px', overflowY: 'auto', marginBottom: '16px', padding: '10px' }}>{messages.map((m, i) => (<div key={i} style={{ textAlign: m.role === 'user' ? 'right' : 'left', margin: m.role === 'assistant-hint' ? '8px 20px' : '12px 0' }}><span style={{ background: m.role === 'user' ? '#8B5CF6' : m.role === 'assistant-hint' ? '#FFF9F0' : '#FDE4D6', color: m.role === 'user' ? 'white' : m.role === 'assistant-hint' ? '#92400E' : '#4B5563', padding: m.role === 'assistant-hint' ? '8px 14px' : '10px 18px', borderRadius: '20px', display: 'inline-block', maxWidth: '85%', fontSize: m.role === 'assistant-hint' ? '0.8rem' : '0.9rem', lineHeight: '1.5', border: m.role === 'assistant-hint' ? '1px solid #FDE68A' : 'none' }}>{m.content}</span></div>))}{isProcessing && (<div style={{ textAlign: 'left', margin: '12px 0' }}><span style={{ background: '#FDE4D6', padding: '10px 18px', borderRadius: '20px', display: 'inline-block' }}><LoadingSpinner size="small" color="#8B5CF6" /></span></div>)}</div>{!completed && (<div style={{ display: 'flex', gap: '8px' }}><input value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && hs()} placeholder="Type your response..." disabled={isProcessing} style={styles.input} /><button onClick={hs} disabled={!input.trim() || isProcessing} style={{ ...styles.button, padding: '14px 20px', whiteSpace: 'nowrap', background: input.trim() && !isProcessing ? '#8B5CF6' : '#E5E7EB', color: input.trim() && !isProcessing ? 'white' : '#9CA3AF' }}>Send</button></div>)}</div></div>);
 };
 
 const ProgressiveMuscleRelaxation = ({ technique, onComplete, onBack }) => {
-  const [step, setStep] = useState(0); const [isActive, setIsActive] = useState(false); const [timer, setTimer] = useState(5);
-  const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
+  const [step, setStep] = useState(0); const [isActive, setIsActive] = useState(false); const [paused, setPaused] = useState(false); const [timer, setTimer] = useState(5); const [phase, setPhase] = useState('tense'); const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState(''); const [soundEnabled, setSoundEnabled] = useState(true);
   const muscles = ['Feet', 'Legs', 'Stomach', 'Hands', 'Arms', 'Shoulders', 'Neck', 'Face'];
-  useEffect(() => { let i; if (isActive && timer > 0) i = setInterval(() => setTimer(t => t - 1), 1000); else if (isActive && timer === 0) { if (step < muscles.length - 1) { setStep(s => s + 1); setTimer(5); } else { setIsActive(false); setCompleted(true); } } return () => clearInterval(i); }, [isActive, timer, step]);
-  if (completed) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h2 style={styles.title}>Session Complete!</h2><div style={styles.card}><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button></div></div>);
-  if (!isActive) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><button onClick={() => { triggerHaptic('light'); setIsActive(true); setTimer(5); setStep(0); }} style={styles.button}>Start Session</button></div></div>);
-  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><h3>{muscles[step]}</h3><p>{timer === 5 ? 'Tense...' : 'Release...'}</p><div style={{ fontSize: '3rem', textAlign: 'center' }}>{timer}s</div></div></div>);
+  useEffect(() => { let i; if (isActive && !paused && timer > 0) i = setInterval(() => setTimer(t => t - 1), 1000); else if (isActive && !paused && timer === 0) { if (phase === 'tense') { setPhase('release'); setTimer(5); } else { if (step < muscles.length - 1) { setStep(s => s + 1); setPhase('tense'); setTimer(5); } else { setIsActive(false); setCompleted(true); } } } return () => clearInterval(i); }, [isActive, paused, timer, step, phase]);
+  const ss = () => { setIsActive(true); setPaused(false); setTimer(5); setStep(0); setPhase('tense'); setCompleted(false); };
+  if (completed) return (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '4rem' }}>✨</div><h2 style={styles.title}>Session Complete!</h2><p>You've relaxed all {muscles.length} muscle groups.</p><div style={styles.card}><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', marginTop: '10px' }}>Back</button></div></div>);
+  if (!isActive) return (<div style={{ textAlign: 'center' }}><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><p style={{ color: '#6B7280', marginBottom: '24px' }}>{technique.description}</p><div style={styles.card}><p style={{ color: '#6B7280', marginBottom: '20px' }}>We'll tense and release 8 muscle groups.</p><button onClick={() => setSoundEnabled(!soundEnabled)} style={{ ...styles.button, marginBottom: '16px', background: 'transparent', border: `1px solid ${technique.color}`, width: '100%' }}>{soundEnabled ? '🔊 Sound On' : '🔇 Sound Off'}</button><button onClick={() => { triggerHaptic('light'); ss(); }} style={styles.button}>Start Session</button></div></div>);
+  return (<div style={{ textAlign: 'center' }}><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><div style={{ fontSize: '4rem', marginBottom: '16px' }}>{phase === 'tense' ? '💪' : '😌'}</div><h3 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>{muscles[step]}</h3><p style={{ fontSize: '1.2rem', color: phase === 'tense' ? '#EF4444' : '#10B981', fontWeight: 600, marginBottom: '20px' }}>{phase === 'tense' ? 'TENSE' : 'RELEASE'}</p><div style={{ fontSize: '3rem', fontWeight: 500, marginBottom: '16px' }}>{timer}s</div><div className="progress-bar" style={{ width: '200px', margin: '0 auto 20px' }}><div className="progress-fill" style={{ width: `${((step + 1) / muscles.length) * 100}%` }} /></div><p style={{ color: '#9CA3AF', fontSize: '0.8rem' }}>Muscle {step + 1} of {muscles.length}</p>{paused ? (<button onClick={() => setPaused(false)} style={{ ...styles.button, marginTop: '20px' }}>▶ Resume</button>) : (<button onClick={() => setPaused(true)} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '40px', cursor: 'pointer', marginTop: '16px' }}>⏸ Pause</button>)}</div></div>);
 };
 
 const RainMethod = ({ technique, onComplete, onBack }) => {
-  const [step, setStep] = useState(0); const [responses, setResponses] = useState(['', '', '', '']);
-  const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
-  const steps = ['R - Recognize', 'A - Allow', 'I - Investigate', 'N - Nurture'];
-  const prompts = ['What is happening?', 'Can you let it be?', 'What does it feel like?', 'What would you tell a friend?'];
-  if (completed) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h2 style={styles.title}>RAIN Method Complete!</h2><div style={styles.card}>{steps.map((s, i) => <div key={i}><strong>{s}:</strong> {responses[i]}</div>)}<div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Share your experience..." style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button></div></div>);
-  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><h3>{steps[step]}</h3><p>{prompts[step]}</p><textarea value={responses[step]} onChange={(e) => { const n = [...responses]; n[step] = e.target.value; setResponses(n); }} placeholder="Write your response..." style={styles.input} rows="3" /><button onClick={() => { if (step < steps.length - 1) setStep(step + 1); else setCompleted(true); }} disabled={!responses[step].trim()} style={styles.button}>{step === steps.length - 1 ? 'Complete' : 'Next'}</button></div></div>);
+  const [step, setStep] = useState(0); const [responses, setResponses] = useState({ recognize: '', allow: '', investigate: '', nurture: '' }); const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
+  const steps = [{ key: 'recognize', letter: 'R', title: 'RECOGNIZE', subtitle: "Name what's happening. No judgment.", description: "What emotion is here right now? Anxiety? Sadness? Anger? Just name it. You don't have to fix it yet. Just notice it.", placeholder: "I'm feeling...", color: '#EF4444', emoji: '🔍', bgColor: '#FEF2F2' },{ key: 'allow', letter: 'A', title: 'ALLOW', subtitle: "Let it be here. Don't push it away.", description: "Can you let this feeling just... be? Without fighting it. Without running from it. It's already here. Fighting it only makes it stronger.", placeholder: 'I can let this be here because...', color: '#F59E0B', emoji: '🤲', bgColor: '#FFFBEB' },{ key: 'investigate', letter: 'I', title: 'INVESTIGATE', subtitle: "Get curious. What's really going on?", description: 'Where do you feel this in your body? What thoughts come with it? Approach it with kindness, like a friend.', placeholder: 'When I pay attention, I notice...', color: '#3B82F6', emoji: '🧐', bgColor: '#EFF6FF' },{ key: 'nurture', letter: 'N', title: 'NURTURE', subtitle: 'What do you need right now?', description: 'If a friend felt this way, what would you say to them? Say that to yourself. You deserve the same kindness you give others.', placeholder: 'What I need right now is...', color: '#10B981', emoji: '💚', bgColor: '#ECFDF5' }];
+  const cur = steps[step];
+  if (completed) return (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '4rem' }}>🌧️</div><h2 style={styles.title}>You moved through it. Not around it.</h2><p style={{ color: '#6B7280', marginBottom: '24px' }}>That's what RAIN is.</p><div style={styles.card}>{steps.map((s) => (<div key={s.key} style={{ marginBottom: '16px', textAlign: 'left', padding: '16px', background: `${s.color}10`, borderRadius: '16px', border: `1px solid ${s.color}20` }}><p style={{ fontWeight: 700, color: s.color, fontSize: '1rem', marginBottom: '4px' }}>{s.letter} — {s.title}</p><p style={{ color: '#4B5563', fontSize: '0.9rem', lineHeight: '1.5' }}>{responses[s.key]}</p></div>))}<h3 style={{ marginTop: '24px' }}>How do you feel?</h3><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', marginTop: '10px' }}>Back</button></div></div>);
+  return (<div style={{ textAlign: 'center' }}><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={{ ...styles.card, background: cur.bgColor, border: `2px solid ${cur.color}30`, padding: '32px 24px', marginBottom: '20px' }}><div style={{ fontSize: '4rem', fontWeight: 800, color: cur.color, marginBottom: '4px', letterSpacing: '4px' }}>{cur.letter}</div><div style={{ fontSize: '2.5rem', marginBottom: '12px' }}>{cur.emoji}</div><h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: cur.color, marginBottom: '4px' }}>{cur.title}</h2><p style={{ fontSize: '1rem', color: '#6B7280', marginBottom: '20px', fontStyle: 'italic' }}>{cur.subtitle}</p><div style={{ background: 'white', borderRadius: '16px', padding: '20px', marginBottom: '20px' }}><p style={{ fontSize: '0.95rem', color: '#4B5563', lineHeight: '1.7', textAlign: 'left' }}>{cur.description}</p></div><textarea value={responses[cur.key]} onChange={(e) => setResponses({ ...responses, [cur.key]: e.target.value })} placeholder={cur.placeholder} style={{ ...styles.input, minHeight: '100px', background: 'white' }} /></div><div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '20px' }}>{steps.map((s, i) => (<div key={i} style={{ width: i === step ? '32px' : '10px', height: '10px', borderRadius: '10px', background: i === step ? s.color : i < step ? s.color + '80' : '#E5E7EB', transition: 'all 0.3s ease' }} />))}</div><div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>{step > 0 && (<button onClick={() => setStep(step - 1)} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button>)}<button onClick={() => { if (step < steps.length - 1) setStep(step + 1); else setCompleted(true); }} disabled={!responses[cur.key].trim()} style={{ ...styles.button, background: responses[cur.key].trim() ? cur.color : '#E5E7EB', color: responses[cur.key].trim() ? 'white' : '#9CA3AF', cursor: responses[cur.key].trim() ? 'pointer' : 'not-allowed', fontSize: '1.1rem', padding: '16px 32px', flex: 1 }}>{step === steps.length - 1 ? 'Complete ✨' : 'Next →'}</button></div></div>);
 };
 
 const BodyScan = ({ technique, onComplete, onBack }) => {
-  const [step, setStep] = useState(0); const [isActive, setIsActive] = useState(false); const [timer, setTimer] = useState(15);
-  const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
+  const [step, setStep] = useState(0); const [isActive, setIsActive] = useState(false); const [paused, setPaused] = useState(false); const [timer, setTimer] = useState(15); const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState(''); const [soundEnabled, setSoundEnabled] = useState(true);
   const parts = ['Feet', 'Legs', 'Hips', 'Stomach', 'Chest', 'Back', 'Hands', 'Arms', 'Shoulders', 'Neck', 'Face', 'Whole Body'];
-  useEffect(() => { let i; if (isActive && timer > 0) i = setInterval(() => setTimer(t => t - 1), 1000); else if (isActive && timer === 0) { if (step < parts.length - 1) { setStep(s => s + 1); setTimer(15); } else { setIsActive(false); setCompleted(true); } } return () => clearInterval(i); }, [isActive, timer, step]);
-  if (completed) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h2 style={styles.title}>Body Scan Complete!</h2><div style={styles.card}><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button></div></div>);
-  if (!isActive) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><button onClick={() => { triggerHaptic('light'); setIsActive(true); setTimer(15); setStep(0); }} style={styles.button}>Start Body Scan</button></div></div>);
-  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><h3>{parts[step]}</h3><p>Bring attention to your {parts[step].toLowerCase()}...</p><div style={{ fontSize: '3rem', textAlign: 'center' }}>{timer}s</div></div></div>);
+  useEffect(() => { let i; if (isActive && !paused && timer > 0) i = setInterval(() => setTimer(t => t - 1), 1000); else if (isActive && !paused && timer === 0) { if (step < parts.length - 1) { setStep(s => s + 1); setTimer(15); } else { setIsActive(false); setCompleted(true); } } return () => clearInterval(i); }, [isActive, paused, timer, step]);
+  const ss = () => { setIsActive(true); setPaused(false); setTimer(15); setStep(0); setCompleted(false); };
+  if (completed) return (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '4rem' }}>✨</div><h2 style={styles.title}>Body Scan Complete!</h2><div style={styles.card}><h3>How do you feel?</h3><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', marginTop: '10px' }}>Back</button></div></div>);
+  if (!isActive) return (<div style={{ textAlign: 'center' }}><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><p style={{ color: '#6B7280', marginBottom: '24px' }}>{technique.description}</p><div style={styles.card}><p style={{ color: '#6B7280', marginBottom: '20px' }}>We'll guide you through 12 areas of your body.</p><button onClick={() => setSoundEnabled(!soundEnabled)} style={{ ...styles.button, marginBottom: '16px', background: 'transparent', border: `1px solid ${technique.color}`, width: '100%' }}>{soundEnabled ? '🔊 Sound On' : '🔇 Sound Off'}</button><button onClick={() => { triggerHaptic('light'); ss(); }} style={styles.button}>Start Body Scan</button></div></div>);
+  return (<div style={{ textAlign: 'center' }}><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><div style={{ fontSize: '4rem', marginBottom: '16px' }}>{step === 0 ? '🦶' : step === 1 ? '🦵' : step === 2 ? '🦴' : step === 3 ? '🤰' : step === 4 ? '💪' : step === 5 ? '🔙' : step === 6 ? '🤲' : step === 7 ? '💪' : step === 8 ? '🤷' : step === 9 ? '🗣️' : step === 10 ? '😊' : '🧘'}</div><h3 style={{ fontSize: '1.8rem', marginBottom: '8px' }}>{parts[step]}</h3><p style={{ color: '#6B7280', marginBottom: '20px' }}>Bring attention to your {parts[step].toLowerCase()}. Notice any sensations.</p><div style={{ fontSize: '3rem', fontWeight: 500, marginBottom: '16px' }}>{timer}s</div><div className="progress-bar" style={{ width: '200px', margin: '0 auto 20px' }}><div className="progress-fill" style={{ width: `${((step + 1) / parts.length) * 100}%` }} /></div><p style={{ color: '#9CA3AF', fontSize: '0.8rem' }}>Part {step + 1} of {parts.length}</p>{paused ? (<button onClick={() => setPaused(false)} style={{ ...styles.button, marginTop: '20px' }}>▶ Resume</button>) : (<button onClick={() => setPaused(true)} style={{ background: '#EF4444', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '40px', cursor: 'pointer', marginTop: '16px' }}>⏸ Pause</button>)}</div></div>);
 };
 
 const NotingPractice = ({ technique, onComplete, onBack }) => {
-  const [isActive, setIsActive] = useState(false); const [timer, setTimer] = useState(180); const [notes, setNotes] = useState([]);
-  const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
+  const [isActive, setIsActive] = useState(false); const [timer, setTimer] = useState(180); const [notes, setNotes] = useState([]); const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
   useEffect(() => { let i; if (isActive && timer > 0) i = setInterval(() => setTimer(t => t - 1), 1000); else if (isActive && timer === 0) { setIsActive(false); setCompleted(true); } return () => clearInterval(i); }, [isActive, timer]);
-  const formatTime = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
+  const fmt = (s) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
   if (completed) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h2 style={styles.title}>Noting Practice Complete!</h2><div style={styles.card}><h3>Your Notes:</h3>{notes.map((n, i) => <div key={i}>• {n.type} at {n.time}s</div>)}<div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How did this help?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button></div></div>);
   if (!isActive) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><button onClick={() => { triggerHaptic('light'); setIsActive(true); setTimer(180); setNotes([]); }} style={styles.button}>Start 3-Minute Session</button></div></div>);
-  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><div style={{ fontSize: '2rem', textAlign: 'center' }}>{formatTime(timer)}</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', margin: '20px 0' }}>{['thinking','feeling','planning','remembering'].map(t => <button key={t} onClick={() => setNotes([...notes, { type: t, time: 180 - timer }])} style={styles.button}>{t === 'thinking' ? '💭' : t === 'feeling' ? '❤️' : t === 'planning' ? '📋' : '📖'} {t.charAt(0).toUpperCase() + t.slice(1)}</button>)}</div>{notes.slice(-5).map((n, i) => <div key={i}>• {n.type}</div>)}</div></div>);
+  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><div style={{ fontSize: '2rem', textAlign: 'center' }}>{fmt(timer)}</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', margin: '20px 0' }}>{['thinking','feeling','planning','remembering'].map(t => <button key={t} onClick={() => setNotes([...notes, { type: t, time: 180 - timer }])} style={styles.button}>{t === 'thinking' ? '💭' : t === 'feeling' ? '❤️' : t === 'planning' ? '📋' : '📖'} {t.charAt(0).toUpperCase() + t.slice(1)}</button>)}</div>{notes.slice(-5).map((n, i) => <div key={i}>• {n.type}</div>)}</div></div>);
 };
 
 const SelfCompassionBreak = ({ technique, onComplete, onBack }) => {
-  const [step, setStep] = useState(0); const [completed, setCompleted] = useState(false);
-  const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
-  const phrases = ["This is hard right now. Place your hand on your heart.", "Many people feel this way. You're not alone.", "May I be kind to myself in this moment."];
-  if (completed) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h2 style={styles.title}>Self-Compassion Complete!</h2><div style={styles.card}><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button></div></div>);
-  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><p>{phrases[step]}</p><button onClick={() => { if (step < phrases.length - 1) setStep(step + 1); else setCompleted(true); }} style={styles.button}>{step === phrases.length - 1 ? 'Complete' : 'Next'}</button></div></div>);
+  const [step, setStep] = useState(0); const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
+  const steps = [{ title: "This is a moment of suffering", subtitle: "That's what mindfulness is. Not pushing it away. Just noticing.", phrase: "Place your hand on your heart. Feel the warmth. You're here. You're human.", color: '#8B5CF6', emoji: '🤲' },{ title: "Suffering is part of being human", subtitle: "You are not alone in this. Not broken. Not failing.", phrase: "Every single person on this earth knows what pain feels like. You're in good company.", color: '#C4B5FD', emoji: '🌍' },{ title: "May I be kind to myself", subtitle: "Not fix yourself. Not be better. Just be kind. Right now.", phrase: "May I give myself the compassion I freely give to others.", color: '#FBCFE8', emoji: '💜' }];
+  const cur = steps[step];
+  if (completed) return (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '4rem' }}>🤍</div><h2 style={styles.title}>You showed up for yourself today.</h2><p style={{ color: '#6B7280', marginBottom: '24px' }}>That takes strength. Come back anytime.</p><div style={styles.card}><h3>How do you feel?</h3><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', marginTop: '10px' }}>Back</button></div></div>);
+  return (<div style={{ textAlign: 'center' }}><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={{ ...styles.card, background: `${cur.color}15`, border: `2px solid ${cur.color}40`, padding: '40px 28px', marginBottom: '20px' }}><div style={{ fontSize: '5rem', marginBottom: '20px' }}>{cur.emoji}</div><h2 style={{ fontSize: '2rem', fontWeight: 700, color: cur.color, marginBottom: '12px', lineHeight: '1.2' }}>{cur.title}</h2><p style={{ fontSize: '1.1rem', color: '#6B7280', marginBottom: '24px', fontStyle: 'italic' }}>{cur.subtitle}</p><div style={{ background: 'white', borderRadius: '20px', padding: '24px', marginTop: '20px' }}><p style={{ fontSize: '1.2rem', color: '#4B5563', fontWeight: 500, lineHeight: '1.6' }}>"{cur.phrase}"</p></div></div><div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '20px' }}>{steps.map((_, i) => (<div key={i} style={{ width: i === step ? '24px' : '8px', height: '8px', borderRadius: '10px', background: i === step ? cur.color : '#E5E7EB', transition: 'all 0.3s ease' }} />))}</div><button onClick={() => { if (step < steps.length - 1) setStep(step + 1); else setCompleted(true); }} style={{ ...styles.button, background: cur.color, color: 'white', fontSize: '1.1rem', padding: '16px 32px' }}>{step === steps.length - 1 ? 'Complete ✨' : 'Continue →'}</button></div>);
 };
 
 const StopTechnique = ({ technique, onComplete, onBack }) => {
-  const [step, setStep] = useState(0); const [completed, setCompleted] = useState(false);
-  const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
-  const steps = ['S - Stop', 'T - Take a breath', 'O - Observe', 'P - Proceed'];
-  const instructions = ['Stop what you are doing.', 'Take a deep breath in, and out.', 'Observe what is happening inside and around you.', 'Proceed with awareness.'];
-  if (completed) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h2 style={styles.title}>STOP Complete!</h2><div style={styles.card}><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button></div></div>);
-  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><h3>{steps[step]}</h3><p>{instructions[step]}</p><button onClick={() => { if (step < steps.length - 1) setStep(step + 1); else setCompleted(true); }} style={styles.button}>{step === steps.length - 1 ? 'Complete' : 'Next'}</button></div></div>);
+  const [step, setStep] = useState(0); const [completed, setCompleted] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
+  const steps = [{ letter: 'S', title: 'STOP', subtitle: "Whatever you're doing. Just pause.", instruction: "Freeze. Right now. Don't do anything. Don't fix anything. Just stop.", color: '#EF4444', emoji: '🛑', bgColor: '#FEF2F2' },{ letter: 'T', title: 'TAKE A BREATH', subtitle: "One breath. That's all you need.", instruction: "Breathe in slowly through your nose. Hold it. Now let it go. You're still here.", color: '#3B82F6', emoji: '🌬️', bgColor: '#EFF6FF' },{ letter: 'O', title: 'OBSERVE', subtitle: 'Not judge. Not react. Just notice.', instruction: "What's happening in your body? Tight shoulders? Racing heart? Just watch. You are not your thoughts.", color: '#8B5CF6', emoji: '👁️', bgColor: '#F5F3FF' },{ letter: 'P', title: 'PROCEED', subtitle: "Move forward with awareness.", instruction: "What matters most right now? What's one small thing I can do? Take that step.", color: '#10B981', emoji: '🚶', bgColor: '#ECFDF5' }];
+  const cur = steps[step];
+  if (completed) return (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '4rem' }}>🧘</div><h2 style={styles.title}>You pressed pause. That's powerful.</h2><p style={{ color: '#6B7280', marginBottom: '24px' }}>Come back anytime you need to STOP.</p><div style={styles.card}><h3>How do you feel?</h3><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button><button onClick={onBack} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', marginTop: '10px' }}>Back</button></div></div>);
+  return (<div style={{ textAlign: 'center' }}><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={{ ...styles.card, background: cur.bgColor, border: `2px solid ${cur.color}30`, padding: '40px 28px', marginBottom: '20px', minHeight: '300px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}><div style={{ fontSize: '4rem', fontWeight: 800, color: cur.color, marginBottom: '8px' }}>{cur.letter}</div><div style={{ fontSize: '3rem', marginBottom: '16px' }}>{cur.emoji}</div><h2 style={{ fontSize: '1.8rem', fontWeight: 700, color: cur.color, marginBottom: '8px', lineHeight: '1.2' }}>{cur.title}</h2><p style={{ fontSize: '1rem', color: '#6B7280', marginBottom: '20px', fontStyle: 'italic' }}>{cur.subtitle}</p><div style={{ background: 'white', borderRadius: '20px', padding: '24px', marginTop: '10px' }}><p style={{ fontSize: '1.1rem', color: '#4B5563', fontWeight: 400, lineHeight: '1.7' }}>{cur.instruction}</p></div></div><div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '20px' }}>{steps.map((s, i) => (<div key={i} style={{ width: i === step ? '36px' : '12px', height: '12px', borderRadius: '10px', background: i === step ? s.color : i < step ? s.color + '60' : '#E5E7EB', transition: 'all 0.3s ease' }} />))}</div><div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>{step > 0 && (<button onClick={() => setStep(step - 1)} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button>)}<button onClick={() => { if (step < steps.length - 1) setStep(step + 1); else setCompleted(true); }} style={{ ...styles.button, background: cur.color, color: 'white', fontSize: '1.1rem', padding: '16px 32px', flex: step > 0 ? 1 : 'none' }}>{step === steps.length - 1 ? 'Complete ✨' : 'Next →'}</button></div></div>);
 };
 
 const GratitudeLog = ({ technique, onComplete, onBack }) => {
-  const [entries, setEntries] = useState(['', '', '']); const [saved, setSaved] = useState(false);
-  const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
-  const saveEntries = () => { const e = localStorage.getItem('gratitude_entries'); const a = e ? JSON.parse(e) : []; a.push({ date: new Date().toISOString(), entries }); localStorage.setItem('gratitude_entries', JSON.stringify(a)); setSaved(true); };
+  const [entries, setEntries] = useState(['', '', '']); const [saved, setSaved] = useState(false); const [rating, setRating] = useState(0); const [feedback, setFeedback] = useState('');
+  const se = () => { const e = localStorage.getItem('gratitude_entries'); const a = e ? JSON.parse(e) : []; a.push({ date: new Date().toISOString(), entries }); localStorage.setItem('gratitude_entries', JSON.stringify(a)); setSaved(true); };
   if (saved) return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h2 style={styles.title}>Gratitude Log Saved!</h2><div style={styles.card}><h3>Your entries:</h3>{entries.map((e, i) => <div key={i}>• {e}</div>)}<div style={{ display: 'flex', gap: '12px', justifyContent: 'center', margin: '20px 0' }}>{[1,2,3,4,5].map(n => <button key={n} onClick={() => setRating(n)} style={{ width: '48px', height: '48px', borderRadius: '50%', background: rating === n ? technique.color : '#FBCFE8', border: `2px solid ${technique.color}`, color: '#4B5563', cursor: 'pointer' }}>{n}</button>)}</div><textarea value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="How do you feel?" style={styles.input} /><button onClick={() => onComplete(technique.id, rating, feedback)} style={styles.button}>Save</button></div></div>);
-  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><p>Write 3 things you're grateful for today.</p>{entries.map((e, i) => <input key={i} value={e} onChange={(ev) => { const n = [...entries]; n[i] = ev.target.value; setEntries(n); }} placeholder={`Thing ${i+1}`} style={styles.input} />)}<button onClick={saveEntries} disabled={!entries[0] || !entries[1] || !entries[2]} style={styles.button}>Save</button></div></div>);
+  return (<div><button onClick={onBack} style={{ marginBottom: '20px', ...styles.button, background: 'transparent', border: '1px solid #e5e7eb' }}>← Back</button><h1 style={styles.title}>{technique.name}</h1><div style={styles.card}><p>Write 3 things you're grateful for today.</p>{entries.map((e, i) => <input key={i} value={e} onChange={(ev) => { const n = [...entries]; n[i] = ev.target.value; setEntries(n); }} placeholder={`Thing ${i+1}`} style={styles.input} />)}<button onClick={se} disabled={!entries[0] || !entries[1] || !entries[2]} style={styles.button}>Save</button></div></div>);
 };
 
 const PriorityMatrix = () => {
@@ -915,142 +256,110 @@ const PriorityMatrix = () => {
 
 const Techniques = ({ navigateTo, startTechnique }) => {
   const techniques = Object.values(techniquesData);
-  const techniqueImages = {
-    'priority-matrix': 'https://i.ibb.co/dsZmwMnR/Screenshot-2026-04-12-204912-removebg-preview.png',
-    'box-breathing': 'https://i.ibb.co/BKY43Ys9/Screenshot-2026-04-12-205821-removebg-preview.png',
-    '478-breathing': 'https://i.ibb.co/PZfysFkC/Screenshot-2026-04-19-135712.png',
-    'cognitive-restructuring': 'https://i.ibb.co/JwyFzkDW/6295904e-55fe-46d7-be40-c73d2224722d-removalai-preview.png',
-    'pomodoro': 'https://i.ibb.co/zdh4KHH/ca373229-9b47-4e66-88e2-f1d56f0d2f07-removalai-preview.png',
-    'grounding': 'https://i.ibb.co/nFhdxZf/Screenshot-2026-04-16-110429-removebg-preview.png',
-    'progressive-muscle-relaxation': 'https://i.ibb.co/fGyjyZPD/Screenshot-2026-04-22-160846.png',
-    'rain-method': 'https://i.ibb.co/3mt6YPDT/b74a0174-d6aa-43ee-87af-cd7b04bff2ef-removalai-preview.png',
-    'body-scan': 'https://i.ibb.co/ZRDg36GF/Screenshot-2026-04-22-160023.png',
-    'noting-practice': 'https://i.ibb.co/1YxwRypr/49db9465-5762-43d4-8a22-5852e3a1c7e9-removalai-preview.png',
-    'self-compassion-break': 'https://i.ibb.co/fRBQ6SF/Screenshot-2026-04-22-162112.png',
-    'stop-technique': 'https://i.ibb.co/bg41SwGb/Screenshot-2026-04-22-162155.png',
-    'gratitude-log': 'https://i.ibb.co/ZRDg36GF/Screenshot-2026-04-22-160023.png',
-  };
+  const ti = { 'priority-matrix': 'https://i.ibb.co/dsZmwMnR/Screenshot-2026-04-12-204912-removebg-preview.png', 'box-breathing': 'https://i.ibb.co/BKY43Ys9/Screenshot-2026-04-12-205821-removebg-preview.png', '478-breathing': 'https://i.ibb.co/PZfysFkC/Screenshot-2026-04-19-135712.png', 'cognitive-restructuring': 'https://i.ibb.co/JwyFzkDW/6295904e-55fe-46d7-be40-c73d2224722d-removalai-preview.png', 'pomodoro': 'https://i.ibb.co/zdh4KHH/ca373229-9b47-4e66-88e2-f1d56f0d2f07-removalai-preview.png', 'grounding': 'https://i.ibb.co/nFhdxZf/Screenshot-2026-04-16-110429-removebg-preview.png', 'progressive-muscle-relaxation': 'https://i.ibb.co/fGyjyZPD/Screenshot-2026-04-22-160846.png', 'rain-method': 'https://i.ibb.co/3mt6YPDT/b74a0174-d6aa-43ee-87af-cd7b04bff2ef-removalai-preview.png', 'body-scan': 'https://i.ibb.co/ZRDg36GF/Screenshot-2026-04-22-160023.png', 'noting-practice': 'https://i.ibb.co/1YxwRypr/49db9465-5762-43d4-8a22-5852e3a1c7e9-removalai-preview.png', 'self-compassion-break': 'https://i.ibb.co/fRBQ6SF/Screenshot-2026-04-22-162112.png', 'stop-technique': 'https://i.ibb.co/bg41SwGb/Screenshot-2026-04-22-162155.png', 'gratitude-log': 'https://i.ibb.co/ZRDg36GF/Screenshot-2026-04-22-160023.png' };
   const grouped = techniques.reduce((acc, tech) => { const cat = tech.category || '✨ Wellness'; if (!acc[cat]) acc[cat] = []; acc[cat].push(tech); return acc; }, {});
-  return (<div><h1 style={styles.title}>Techniques</h1><p style={styles.subtitle}>All techniques are free. Tap any card to start.</p>{Object.entries(grouped).map(([category, techs]) => (<div key={category} style={{ marginBottom: '40px' }}><h2 style={{ color: '#8B5CF6', marginBottom: '20px', fontSize: '1.2rem', fontWeight: 600 }}>{category}</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '20px' }}>{techs.map(tech => (<div key={tech.id} onClick={() => { triggerHaptic('light'); startTechnique(tech.id); }} style={{ background: 'white', borderRadius: '28px', padding: '24px 16px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: `1px solid ${tech.color}30` }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-6px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}><img src={techniqueImages[tech.id]} alt={tech.name} style={{ width: '70px', height: '70px', objectFit: 'contain', marginBottom: '12px' }} /><h3 style={{ fontSize: '0.9rem', marginBottom: '6px', fontWeight: 600, color: '#4B5563' }}>{tech.name}</h3><p style={{ fontSize: '0.7rem', color: '#9CA3AF' }}>{tech.type}</p></div>))}</div></div>))}</div>);
+  return (<div><h1 style={styles.title}>Techniques</h1><p style={styles.subtitle}>All techniques are free. Tap any card to start.</p>{Object.entries(grouped).map(([category, techs]) => (<div key={category} style={{ marginBottom: '40px' }}><h2 style={{ color: '#8B5CF6', marginBottom: '20px', fontSize: '1.2rem', fontWeight: 600 }}>{category}</h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '20px' }}>{techs.map(tech => (<div key={tech.id} onClick={() => { triggerHaptic('light'); startTechnique(tech.id); }} style={{ background: 'white', borderRadius: '28px', padding: '24px 16px', textAlign: 'center', cursor: 'pointer', transition: 'all 0.25s ease', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: `1px solid ${tech.color}30` }} onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-6px)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}><img src={ti[tech.id]} alt={tech.name} style={{ width: '70px', height: '70px', objectFit: 'contain', marginBottom: '12px' }} /><h3 style={{ fontSize: '0.9rem', marginBottom: '6px', fontWeight: 600, color: '#4B5563' }}>{tech.name}</h3><p style={{ fontSize: '0.7rem', color: '#9CA3AF' }}>{tech.type}</p></div>))}</div></div>))}</div>);
 };
 
 const BreatheTab = ({ technique, onComplete, onBack }) => {
-  const [showInstructions, setShowInstructions] = useState(true); const [sessionStarted, setSessionStarted] = useState(false);
-  const ScrollableContainer = ({ children }) => (<div style={{ height: 'calc(100vh - 140px)', overflowY: 'auto', padding: '20px', scrollBehavior: 'smooth' }}>{children}</div>);
+  const [si, setSI] = useState(true); const [ss, setSS] = useState(false);
+  const SC = ({ children }) => (<div style={{ height: 'calc(100vh - 140px)', overflowY: 'auto', padding: '20px', scrollBehavior: 'smooth' }}>{children}</div>);
   if (!technique) return (<div style={{ textAlign: 'center', padding: '60px' }}><div style={{ fontSize: '4rem', marginBottom: '20px' }}>🌬️</div><h2 style={styles.title}>Select a technique first</h2><p style={{ color: '#6B7280', marginBottom: '30px' }}>Choose a technique from the list below</p><button onClick={onBack} style={{ ...styles.button, margin: '0 auto', display: 'inline-block' }}>Browse Techniques</button></div>);
-  if (showInstructions && !sessionStarted) return <TechniqueInstructions technique={technique} onStart={() => { setShowInstructions(false); setSessionStarted(true); }} onBack={onBack} />;
+  if (si && !ss) return <TechniqueInstructions technique={technique} onStart={() => { setSI(false); setSS(true); }} onBack={onBack} />;
   switch (technique.id) {
-    case 'box-breathing': case '478-breathing': return <ScrollableContainer><BreathingTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    case 'grounding': return <ScrollableContainer><GroundingTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    case 'pomodoro': return <ScrollableContainer><PomodoroTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    case 'cognitive-restructuring': return <ScrollableContainer><CognitiveChatbot onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    case 'progressive-muscle-relaxation': return <ScrollableContainer><ProgressiveMuscleRelaxation technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    case 'rain-method': return <ScrollableContainer><RainMethod technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    case 'body-scan': return <ScrollableContainer><BodyScan technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    case 'noting-practice': return <ScrollableContainer><NotingPractice technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    case 'self-compassion-break': return <ScrollableContainer><SelfCompassionBreak technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    case 'stop-technique': return <ScrollableContainer><StopTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    case 'gratitude-log': return <ScrollableContainer><GratitudeLog technique={technique} onComplete={onComplete} onBack={onBack} /></ScrollableContainer>;
-    default: return (<ScrollableContainer><div style={{ textAlign: 'center' }}><h2 style={styles.title}>Coming soon</h2><button onClick={onBack} style={styles.button}>Back</button></div></ScrollableContainer>);
+    case 'box-breathing': case '478-breathing': return <SC><BreathingTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></SC>;
+    case 'grounding': return <SC><GroundingTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></SC>;
+    case 'pomodoro': return <SC><PomodoroTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></SC>;
+    case 'cognitive-restructuring': return <SC><CognitiveChatbot onComplete={onComplete} onBack={onBack} /></SC>;
+    case 'progressive-muscle-relaxation': return <SC><ProgressiveMuscleRelaxation technique={technique} onComplete={onComplete} onBack={onBack} /></SC>;
+    case 'rain-method': return <SC><RainMethod technique={technique} onComplete={onComplete} onBack={onBack} /></SC>;
+    case 'body-scan': return <SC><BodyScan technique={technique} onComplete={onComplete} onBack={onBack} /></SC>;
+    case 'noting-practice': return <SC><NotingPractice technique={technique} onComplete={onComplete} onBack={onBack} /></SC>;
+    case 'self-compassion-break': return <SC><SelfCompassionBreak technique={technique} onComplete={onComplete} onBack={onBack} /></SC>;
+    case 'stop-technique': return <SC><StopTechnique technique={technique} onComplete={onComplete} onBack={onBack} /></SC>;
+    case 'gratitude-log': return <SC><GratitudeLog technique={technique} onComplete={onComplete} onBack={onBack} /></SC>;
+    default: return (<SC><div style={{ textAlign: 'center' }}><h2 style={styles.title}>Coming soon</h2><button onClick={onBack} style={styles.button}>Back</button></div></SC>);
   }
 };
 
-const Settings = ({ logout, user }) => {
+const Settings = ({ logout, user, darkMode, setDarkMode }) => {
   const [name, setName] = useState(user?.name || '');
-  return (<div><h1 style={styles.title}>Settings</h1><div style={styles.card}><h3 style={{ color: '#8B5CF6' }}>Profile</h3><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" style={styles.input} /><button onClick={() => { const u = { ...user, name }; localStorage.setItem('lumacare_user', JSON.stringify(u)); window.location.reload(); }} style={styles.button}>Save Name</button><h3 style={{ color: '#8B5CF6', marginTop: '24px' }}>Subscription</h3>{user?.isPremium ? (<div style={{ padding: '16px', background: 'rgba(139,92,246,0.1)', borderRadius: '16px', marginBottom: '16px' }}><p style={{ color: '#8B5CF6', fontWeight: 600 }}>💫 Pro Member</p><p style={{ fontSize: '0.85rem', color: '#6B7280' }}>Plan: {user.premiumPlan === 'yearly' ? 'Yearly ($39/year)' : 'Monthly ($4.99/mo)'}</p></div>) : (<div style={{ padding: '16px', background: 'rgba(251,207,232,0.3)', borderRadius: '16px', marginBottom: '16px' }}><p style={{ color: '#6B7280' }}>Free Plan — All techniques included</p></div>)}<h3 style={{ color: '#8B5CF6', marginTop: '24px' }}>Data</h3><div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}><button onClick={() => { const d = { user: localStorage.getItem('lumacare_user'), checkins: localStorage.getItem('lumacare_checkins'), gratitude: localStorage.getItem('gratitude_entries'), streak: localStorage.getItem('lumacare_streak') }; const b = new Blob([JSON.stringify(d)], { type: 'application/json' }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `lumacare_backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(u); }} style={{ ...styles.button, background: '#D1FAE5' }}>📥 Export Data</button><button onClick={() => { const i = document.createElement('input'); i.type = 'file'; i.accept = 'application/json'; i.onchange = (e) => { const f = e.target.files[0]; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); if (d.user) localStorage.setItem('lumacare_user', d.user); if (d.checkins) localStorage.setItem('lumacare_checkins', d.checkins); if (d.gratitude) localStorage.setItem('gratitude_entries', d.gratitude); if (d.streak) localStorage.setItem('lumacare_streak', d.streak); alert('Imported! Reloading...'); window.location.reload(); } catch { alert('Invalid file'); } }; r.readAsText(f); }; i.click(); }} style={{ ...styles.button, background: '#FBCFE8' }}>📤 Import Data</button></div><h3 style={{ color: '#8B5CF6', marginTop: '24px' }}>Account</h3><button onClick={() => { triggerHaptic('medium'); logout(); }} style={{ ...styles.button, background: '#EF4444', width: '100%' }}>Sign Out</button></div></div>);
+  const [rt, setRT] = useState(() => localStorage.getItem('lumacare_reminder') || '');
+  const [re, setRE] = useState(() => localStorage.getItem('lumacare_reminder_enabled') === 'true');
+  const [src, setSRC] = useState(false);
+  const cs = darkMode ? { ...styles.card, background: 'rgba(30,41,59,0.9)', border: '1px solid rgba(100,116,139,0.3)' } : styles.card;
+  const tc = darkMode ? '#e2e8f0' : '#4B5563';
+  const sc = darkMode ? '#94a3b8' : '#6B7280';
+  const is = darkMode ? { ...styles.input, background: '#1e293b', border: '1px solid #475569', color: '#e2e8f0' } : styles.input;
+  const st = { color: darkMode ? '#a78bfa' : '#8B5CF6', fontWeight: 600, marginBottom: '12px', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' };
+  const tt = { width: '48px', height: '26px', borderRadius: '13px', background: darkMode ? '#475569' : '#cbd5e0', position: 'relative', cursor: 'pointer', transition: 'all 0.2s ease', display: 'inline-block' };
+  const tth = (a) => ({ width: '22px', height: '22px', borderRadius: '50%', background: a ? '#8B5CF6' : 'white', position: 'absolute', top: '2px', left: a ? '24px' : '2px', transition: 'all 0.2s ease' });
+  return (<div><h1 style={{ ...styles.title, color: tc }}>Settings</h1><div style={cs}><h3 style={st}>Profile</h3><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" style={is} /><button onClick={() => { const u = { ...user, name }; localStorage.setItem('lumacare_user', JSON.stringify(u)); window.location.reload(); }} style={styles.button}>Save Name</button></div><div style={cs}><h3 style={st}>Appearance</h3><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}><div><p style={{ fontWeight: 600, color: tc }}>🌙 Dark Mode</p><p style={{ fontSize: '0.8rem', color: sc }}>Easier on the eyes at night</p></div><div style={tt} onClick={() => setDarkMode(!darkMode)}><div style={tth(darkMode)} /></div></div></div><div style={cs}><h3 style={st}>🔔 Daily Reminder</h3><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: re ? '16px' : '0' }}><div><p style={{ fontWeight: 600, color: tc }}>Check-in Reminder</p><p style={{ fontSize: '0.8rem', color: sc }}>How are you showing up today?</p></div><div style={tt} onClick={() => { setRE(!re); localStorage.setItem('lumacare_reminder_enabled', !re); if (re) { localStorage.removeItem('lumacare_reminder'); setRT(''); } }}><div style={tth(re)} /></div></div>{re && (<div><label style={{ fontSize: '0.85rem', color: sc, marginBottom: '8px', display: 'block' }}>Remind me at</label><input type="time" value={rt} onChange={(e) => { setRT(e.target.value); localStorage.setItem('lumacare_reminder', e.target.value); }} style={{ ...is, width: 'auto' }} /></div>)}</div><div style={cs}><h3 style={st}>Subscription</h3>{user?.isPremium ? (<div style={{ padding: '16px', background: darkMode ? 'rgba(139,92,246,0.2)' : 'rgba(139,92,246,0.1)', borderRadius: '16px' }}><p style={{ color: '#8B5CF6', fontWeight: 600, marginBottom: '4px' }}>💫 Pro Member</p><p style={{ fontSize: '0.85rem', color: sc }}>Plan: {user.premiumPlan === 'yearly' ? 'Yearly ($39/year)' : 'Monthly ($4.99/mo)'}</p></div>) : (<div style={{ padding: '16px', background: darkMode ? 'rgba(251,207,232,0.15)' : 'rgba(251,207,232,0.3)', borderRadius: '16px' }}><p style={{ color: tc, fontWeight: 500 }}>Free Plan — All techniques included</p></div>)}</div><div style={cs}><h3 style={st}>Data</h3><div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}><button onClick={() => { const d = { user: localStorage.getItem('lumacare_user'), checkins: localStorage.getItem('lumacare_checkins'), gratitude: localStorage.getItem('gratitude_entries'), streak: localStorage.getItem('lumacare_streak') }; const b = new Blob([JSON.stringify(d)], { type: 'application/json' }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `lumacare_backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(u); }} style={{ ...styles.button, background: darkMode ? '#065f46' : '#D1FAE5', color: darkMode ? '#d1fae5' : '#4B5563' }}>📥 Export Data</button><button onClick={() => { const i = document.createElement('input'); i.type = 'file'; i.accept = 'application/json'; i.onchange = (e) => { const f = e.target.files[0]; const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); if (d.user) localStorage.setItem('lumacare_user', d.user); if (d.checkins) localStorage.setItem('lumacare_checkins', d.checkins); if (d.gratitude) localStorage.setItem('gratitude_entries', d.gratitude); if (d.streak) localStorage.setItem('lumacare_streak', d.streak); alert('Imported!'); window.location.reload(); } catch { alert('Invalid file'); } }; r.readAsText(f); }; i.click(); }} style={{ ...styles.button, background: darkMode ? '#7c3aed' : '#FBCFE8', color: darkMode ? '#e2e8f0' : '#4B5563' }}>📤 Import Data</button></div>{!src ? (<button onClick={() => setSRC(true)} style={{ ...styles.button, background: 'transparent', border: '1px solid #EF4444', color: '#EF4444', width: '100%' }}>🗑️ Reset Progress</button>) : (<div style={{ padding: '16px', background: darkMode ? 'rgba(239,68,68,0.15)' : '#FEF2F2', borderRadius: '16px', border: '1px solid #FECACA' }}><p style={{ color: '#EF4444', fontWeight: 600, marginBottom: '8px' }}>Are you sure?</p><div style={{ display: 'flex', gap: '8px' }}><button onClick={() => setSRC(false)} style={{ ...styles.button, background: 'transparent', border: '1px solid #e5e7eb', flex: 1 }}>Cancel</button><button onClick={() => { const kk = ['lumacare_user', 'lumacare_onboarding_complete', 'lumacare_darkmode']; Object.keys(localStorage).forEach(k => { if (!kk.includes(k)) localStorage.removeItem(k); }); alert('Reset!'); window.location.reload(); }} style={{ ...styles.button, background: '#EF4444', color: 'white', flex: 1 }}>Yes, Reset</button></div></div>)}</div><div style={cs}><h3 style={st}>About</h3><div style={{ textAlign: 'center', padding: '16px 0' }}><p style={{ fontWeight: 600, color: tc }}>LumaCare v1.0</p><p style={{ fontSize: '0.85rem', color: sc }}>Built for your mind. Not for profit.</p></div></div><div style={cs}><button onClick={() => { triggerHaptic('medium'); logout(); }} style={{ ...styles.button, background: '#EF4444', color: 'white', width: '100%' }}>🚪 Sign Out</button></div><div style={{ height: '40px' }} /></div>);
 };
 
 function App() {
   const [scrolled, setScrolled] = useState(false);
   const { user, login, logout } = useAuth();
-  const [currentTechnique, setCurrentTechnique] = useState(null);
+  const [ct, setCT] = useState(null);
   const { userData, trackSession, upgradeUser } = useSessionTracking();
-  const [showPremium, setShowPremium] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const isMobile = windowWidth <= 768;
+  const [sp, setSP] = useState(false);
+  const [ww, setWW] = useState(window.innerWidth);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('lumacare_darkmode') === 'true');
+  const isMobile = ww <= 768;
 
-  useEffect(() => {
-    const hr = () => setWindowWidth(window.innerWidth);
-    const hs = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('resize', hr);
-    window.addEventListener('scroll', hs);
-    return () => { window.removeEventListener('resize', hr); window.removeEventListener('scroll', hs); };
-  }, []);
+  useEffect(() => { if (darkMode) { document.body.style.background = '#0f172a'; document.body.style.color = '#e2e8f0'; } else { document.body.style.background = ''; document.body.style.color = ''; } localStorage.setItem('lumacare_darkmode', darkMode); }, [darkMode]);
+  useEffect(() => { const hr = () => setWW(window.innerWidth); const hs = () => setScrolled(window.scrollY > 20); window.addEventListener('resize', hr); window.addEventListener('scroll', hs); return () => { window.removeEventListener('resize', hr); window.removeEventListener('scroll', hs); }; }, []);
 
-  const navigateTo = (path) => { window.history.pushState({}, '', path); window.dispatchEvent(new PopStateEvent('popstate')); };
-  const startTechnique = (techniqueId) => { const t = techniquesData[techniqueId]; setCurrentTechnique(t); localStorage.setItem('lumacare_current_technique', JSON.stringify(t)); navigateTo(t.location === 'matrix' ? '/matrix' : '/breathe'); };
-
-  const handleTechniqueComplete = (techniqueId, rating, feedback) => {
-    const t = techniquesData[techniqueId];
-    if (t) trackSession(t.type, rating, feedback);
-    window.dispatchEvent(new CustomEvent('techniqueCompleted', { detail: { type: t?.type } }));
-    setCurrentTechnique(null);
-    localStorage.removeItem('lumacare_current_technique');
-    navigateTo('/techniques');
-  };
-
-  const handleBack = () => { setCurrentTechnique(null); localStorage.removeItem('lumacare_current_technique'); navigateTo('/techniques'); };
-
-  useEffect(() => { const s = localStorage.getItem('lumacare_current_technique'); if (s && window.location.pathname === '/breathe') setCurrentTechnique(JSON.parse(s)); }, []);
-  useEffect(() => { window.startTechniqueFromOnboarding = startTechnique; return () => { delete window.startTechniqueFromOnboarding; }; }, []);
+  const nav = (p) => { window.history.pushState({}, '', p); window.dispatchEvent(new PopStateEvent('popstate')); };
+  const st = (tid) => { const t = techniquesData[tid]; setCT(t); localStorage.setItem('lumacare_current_technique', JSON.stringify(t)); nav(t.location === 'matrix' ? '/matrix' : '/breathe'); };
+  const htc = (tid, r, fb) => { const t = techniquesData[tid]; if (t) trackSession(t.type, r, fb); window.dispatchEvent(new CustomEvent('techniqueCompleted', { detail: { type: t?.type } })); setCT(null); localStorage.removeItem('lumacare_current_technique'); nav('/techniques'); };
+  const hb = () => { setCT(null); localStorage.removeItem('lumacare_current_technique'); nav('/techniques'); };
+  useEffect(() => { const s = localStorage.getItem('lumacare_current_technique'); if (s && window.location.pathname === '/breathe') setCT(JSON.parse(s)); }, []);
+  useEffect(() => { window.startTechniqueFromOnboarding = st; return () => { delete window.startTechniqueFromOnboarding; }; }, []);
 
   if (!user) return <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}><LoginPage onLogin={login} /></GoogleOAuthProvider>;
 
-  const navItems = [
-    { path: '/', label: 'Dashboard', imgSrc: 'https://i.ibb.co/ZRwCb097/9e8aaca4-dfc7-4dfc-b946-403717d7d89e-removalai-preview.png' },
-    { path: '/matrix', label: 'Matrix', imgSrc: 'https://i.ibb.co/CKW9R4wd/Screenshot-2026-04-20-121359-removebg-preview.png' },
-    { path: '/techniques', label: 'Techniques', imgSrc: 'https://i.ibb.co/5h96fjgs/Screenshot-2026-04-22-163313-removebg-preview.png' },
-    { path: '/breathe', label: 'Breathe', imgSrc: 'https://i.ibb.co/YF1vHDf4/Screenshot-2026-04-20-123012-removebg-preview.png' },
-    { path: '/settings', label: 'Settings', imgSrc: 'https://i.ibb.co/SDzfwCLG/1a564dfb-e23f-43e9-be68-779c2b3441bf-removalai-preview.png' },
-  ];
+  const ni = [{ path: '/', label: 'Dashboard', imgSrc: 'https://i.ibb.co/ZRwCb097/9e8aaca4-dfc7-4dfc-b946-403717d7d89e-removalai-preview.png' },{ path: '/matrix', label: 'Matrix', imgSrc: 'https://i.ibb.co/CKW9R4wd/Screenshot-2026-04-20-121359-removebg-preview.png' },{ path: '/techniques', label: 'Techniques', imgSrc: 'https://i.ibb.co/5h96fjgs/Screenshot-2026-04-22-163313-removebg-preview.png' },{ path: '/breathe', label: 'Breathe', imgSrc: 'https://i.ibb.co/YF1vHDf4/Screenshot-2026-04-20-123012-removebg-preview.png' },{ path: '/settings', label: 'Settings', imgSrc: 'https://i.ibb.co/SDzfwCLG/1a564dfb-e23f-43e9-be68-779c2b3441bf-removalai-preview.png' }];
 
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Router>
-        <div style={styles.container}>
-          <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -2, background: 'linear-gradient(135deg, #FFF9F0 0%, #FDE4D6 50%, #E9D8FD 100%)', backgroundSize: '200% 200%', animation: isMobile ? 'none' : 'softFlow 20s ease infinite' }} />
-          {!isMobile && <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, pointerEvents: 'none', background: 'radial-gradient(circle at 30% 40%, rgba(251,207,232,0.3) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(209,250,229,0.2) 0%, transparent 50%)' }} />}
+        <div style={{ ...styles.container, background: darkMode ? '#0f172a' : 'transparent' }}>
+          {!darkMode && (<><div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -2, background: 'linear-gradient(135deg, #FFF9F0 0%, #FDE4D6 50%, #E9D8FD 100%)', backgroundSize: '200% 200%', animation: isMobile ? 'none' : 'softFlow 20s ease infinite' }} />{!isMobile && <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, pointerEvents: 'none', background: 'radial-gradient(circle at 30% 40%, rgba(251,207,232,0.3) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(209,250,229,0.2) 0%, transparent 50%)' }} />}</>)}
+          {darkMode && <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1, background: '#0f172a' }} />}
 
           {!isMobile && (
-            <nav style={{ ...styles.nav, ...(scrolled ? { background: 'rgba(255,255,255,0.9)' } : {}) }}>
+            <nav style={{ ...styles.nav, background: darkMode ? 'rgba(30,41,59,0.9)' : (scrolled ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.8)'), border: darkMode ? '1px solid rgba(100,116,139,0.4)' : '1px solid rgba(251,207,232,0.6)' }}>
               <div style={styles.navContent}>
-                <div style={styles.logo} onClick={() => navigateTo('/')}>
-                  <img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="LumaCare Logo" style={{ height: '32px', width: 'auto', borderRadius: '8px' }} />
-                  <span style={styles.logoText}>LumaCare</span>
-                </div>
-                <div style={styles.navLinks}>
-                  {navItems.map(item => (<NavLink key={item.path} to={item.path} style={({ isActive }) => ({ ...styles.navItem, ...(isActive && styles.navItemActive) })}><img src={item.imgSrc} alt={item.label} style={{ width: '32px', height: '32px', objectFit: 'contain' }} /><span>{item.label}</span></NavLink>))}
-                </div>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  {!userData?.isPremium && (<button onClick={() => { triggerHaptic('light'); setShowPremium(true); }} style={styles.premiumButton}><img src="https://i.ibb.co/Fb7zk3zC/12589570-6cba-463e-af2f-dd5ee100a546-removalai-preview.png" alt="premium" style={{ width: '20px', height: '20px' }} />Pro</button>)}
-                  <div onClick={() => navigateTo('/settings')} style={{ cursor: 'pointer' }}>{user.picture ? <img src={user.picture} alt="profile" style={styles.profileImage} /> : <div style={styles.profilePlaceholder}>{user.name?.charAt(0).toUpperCase()}</div>}</div>
-                </div>
+                <div style={styles.logo} onClick={() => nav('/')}><img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="LumaCare Logo" style={{ height: '32px', width: 'auto', borderRadius: '8px' }} /><span style={styles.logoText}>LumaCare</span></div>
+                <div style={styles.navLinks}>{ni.map(item => (<NavLink key={item.path} to={item.path} style={({ isActive }) => ({ ...styles.navItem, ...(isActive && styles.navItemActive) })}><img src={item.imgSrc} alt={item.label} style={{ width: '32px', height: '32px', objectFit: 'contain' }} /><span>{item.label}</span></NavLink>))}</div>
+                <div style={{ display: 'flex', gap: '12px' }}>{!userData?.isPremium && (<button onClick={() => { triggerHaptic('light'); setSP(true); }} style={styles.premiumButton}><img src="https://i.ibb.co/Fb7zk3zC/12589570-6cba-463e-af2f-dd5ee100a546-removalai-preview.png" alt="premium" style={{ width: '20px', height: '20px' }} />Pro</button>)}<div onClick={() => nav('/settings')} style={{ cursor: 'pointer' }}>{user.picture ? <img src={user.picture} alt="profile" style={styles.profileImage} /> : <div style={styles.profilePlaceholder}>{user.name?.charAt(0).toUpperCase()}</div>}</div></div>
               </div>
             </nav>
           )}
 
           {isMobile && (
-            <header style={{ position: 'sticky', top: 0, zIndex: 100, padding: '12px 16px', background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #fbcfe8', display: 'flex', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => navigateTo('/')}><img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="LumaCare Logo" style={{ height: '28px', width: 'auto', borderRadius: '6px' }} /><span>LumaCare</span></div>
-              <div style={{ display: 'flex', gap: '8px' }}>{!userData?.isPremium && <button onClick={() => { triggerHaptic('light'); setShowPremium(true); }} style={styles.premiumButton}><img src="https://i.ibb.co/Fb7zk3zC/12589570-6cba-463e-af2f-dd5ee100a546-removalai-preview.png" alt="premium" style={{ width: '18px', height: '18px' }} /></button>}<div onClick={() => navigateTo('/settings')}>{user.picture ? <img src={user.picture} alt="profile" style={{ width: '36px', height: '36px', borderRadius: '50%' }} /> : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #FBCFE8, #D1FAE5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4B5563' }}>{user.name?.charAt(0).toUpperCase()}</div>}</div></div>
+            <header style={{ position: 'sticky', top: 0, zIndex: 100, padding: '12px 16px', background: darkMode ? 'rgba(30,41,59,0.95)' : 'rgba(255,255,255,0.9)', backdropFilter: 'blur(20px)', borderBottom: darkMode ? '1px solid #334155' : '1px solid #fbcfe8', display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => nav('/')}><img src="https://i.ibb.co/XxH73YFf/launchericon-512x512-Photoroom.png" alt="LumaCare Logo" style={{ height: '28px', width: 'auto', borderRadius: '6px' }} /><span>LumaCare</span></div>
+              <div style={{ display: 'flex', gap: '8px' }}>{!userData?.isPremium && <button onClick={() => { triggerHaptic('light'); setSP(true); }} style={styles.premiumButton}><img src="https://i.ibb.co/Fb7zk3zC/12589570-6cba-463e-af2f-dd5ee100a546-removalai-preview.png" alt="premium" style={{ width: '18px', height: '18px' }} /></button>}<div onClick={() => nav('/settings')}>{user.picture ? <img src={user.picture} alt="profile" style={{ width: '36px', height: '36px', borderRadius: '50%' }} /> : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, #FBCFE8, #D1FAE5)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4B5563' }}>{user.name?.charAt(0).toUpperCase()}</div>}</div></div>
             </header>
           )}
 
-          {showPremium && <PremiumModal onClose={() => setShowPremium(false)} onUpgrade={(plan) => upgradeUser(plan)} />}
+          {sp && <PremiumModal onClose={() => setSP(false)} onUpgrade={(plan) => upgradeUser(plan)} />}
 
           <main style={{ ...styles.main, paddingBottom: isMobile ? '80px' : '40px' }}>
             <Routes>
-              <Route path="/" element={<Dashboard navigateTo={navigateTo} userData={userData} startTechnique={startTechnique} setShowPremium={setShowPremium} />} />
+              <Route path="/" element={<Dashboard navigateTo={nav} userData={userData} startTechnique={st} setShowPremium={setSP} darkMode={darkMode} />} />
               <Route path="/matrix" element={<PriorityMatrix />} />
-              <Route path="/techniques" element={<Techniques navigateTo={navigateTo} startTechnique={startTechnique} />} />
-              <Route path="/breathe" element={<BreatheTab technique={currentTechnique} onComplete={handleTechniqueComplete} onBack={handleBack} />} />
-              <Route path="/settings" element={<Settings logout={logout} user={userData} />} />
+              <Route path="/techniques" element={<Techniques navigateTo={nav} startTechnique={st} />} />
+              <Route path="/breathe" element={<BreatheTab technique={ct} onComplete={htc} onBack={hb} />} />
+              <Route path="/settings" element={<Settings logout={logout} user={userData} darkMode={darkMode} setDarkMode={setDarkMode} />} />
             </Routes>
           </main>
 
           {isMobile && (
-            <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, display: 'flex', justifyContent: 'space-around', background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', borderTop: '1px solid #FBCFE8', padding: '8px 4px', zIndex: 100 }}>
-              {navItems.map(item => (<NavLink key={item.path} to={item.path} style={({ isActive }) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 0', flex: 1, color: isActive ? '#8B5CF6' : '#6B7280', textDecoration: 'none', fontSize: '0.7rem' })}><img src={item.imgSrc} alt={item.label} style={{ width: '28px', height: '28px', objectFit: 'contain', marginBottom: '4px' }} /><span>{item.label}</span></NavLink>))}
+            <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, display: 'flex', justifyContent: 'space-around', background: darkMode ? 'rgba(30,41,59,0.98)' : 'rgba(255,255,255,0.95)', backdropFilter: 'blur(20px)', borderTop: darkMode ? '1px solid #334155' : '1px solid #FBCFE8', padding: '8px 4px', zIndex: 100 }}>
+              {ni.map(item => (<NavLink key={item.path} to={item.path} style={({ isActive }) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 0', flex: 1, color: isActive ? '#8B5CF6' : '#6B7280', textDecoration: 'none', fontSize: '0.7rem' })}><img src={item.imgSrc} alt={item.label} style={{ width: '28px', height: '28px', objectFit: 'contain', marginBottom: '4px' }} /><span>{item.label}</span></NavLink>))}
             </nav>
           )}
         </div>
