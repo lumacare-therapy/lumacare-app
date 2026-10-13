@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
+import { Analytics } from '@vercel/analytics/react';
 import './styles/globals.css';
 
 const GOOGLE_CLIENT_ID = "253002272888-cg3k451mqesnerv21056utk8u1lk22f6.apps.googleusercontent.com";
@@ -369,5 +370,10 @@ function App() {
 }
 
 export default function AppWithProvider() {
-  return (<AuthProvider><App /></AuthProvider>);
+  return (
+    <AuthProvider>
+      <App />
+      <Analytics />
+    </AuthProvider>
+  );
 }
