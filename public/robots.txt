@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://lumacare-app.vercel.app/sitemap.xml
+Sitemap: https://www.lumacare.care/sitemap.xml
